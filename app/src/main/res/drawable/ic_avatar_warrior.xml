@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art warrior avatar - green helmet, skin face -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Helmet -->
+    <path android:fillColor="#4CAF50" android:pathData="M5,3h6v1h1v2h-8V4h1z"/>
+    <path android:fillColor="#388E3C" android:pathData="M6,2h4v1h-4z"/>
+    <!-- Helmet visor -->
+    <path android:fillColor="#2E7D32" android:pathData="M5,4h6v1h-6z"/>
+    <!-- Face -->
+    <path android:fillColor="#FFCC80" android:pathData="M6,5h4v3h-4z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#212121" android:pathData="M7,6h1v1h-1z M9,6h1v1h-1z"/>
+    <!-- Mouth -->
+    <path android:fillColor="#BF360C" android:pathData="M7,7h2v0.5h-2z"/>
+    <!-- Body/armor -->
+    <path android:fillColor="#607D8B" android:pathData="M5,8h6v4h-6z"/>
+    <path android:fillColor="#78909C" android:pathData="M6,8h4v1h-4z"/>
+    <!-- Belt -->
+    <path android:fillColor="#795548" android:pathData="M5,10h6v1h-6z"/>
+    <!-- Sword -->
+    <path android:fillColor="#B0BEC5" android:pathData="M11,6h1v5h-1z"/>
+    <path android:fillColor="#FFC107" android:pathData="M10,6h3v1h-3z"/>
+    <!-- Legs -->
+    <path android:fillColor="#455A64" android:pathData="M6,12h2v2h-2z M9,12h2v2h-2z"/>
+</vector>

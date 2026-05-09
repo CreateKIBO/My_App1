@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art mage avatar - purple hat, blue robe -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Hat -->
+    <path android:fillColor="#7C4DFF" android:pathData="M7,1h2v1h1v1h1v1h-1V3H8V2H7V1z"/>
+    <path android:fillColor="#7C4DFF" android:pathData="M6,3h4v1h-4z"/>
+    <path android:fillColor="#651FFF" android:pathData="M5,4h6v1h-6z"/>
+    <!-- Hat star -->
+    <path android:fillColor="#FFD740" android:pathData="M7,2h1v1h-1z"/>
+    <!-- Face -->
+    <path android:fillColor="#FFCC80" android:pathData="M6,5h4v3h-4z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#212121" android:pathData="M7,6h1v1h-1z M9,6h1v1h-1z"/>
+    <!-- Beard -->
+    <path android:fillColor="#5D4037" android:pathData="M7,7h2v1h1v1h-4V8h1z"/>
+    <!-- Robe -->
+    <path android:fillColor="#1565C0" android:pathData="M5,8h6v5h-6z"/>
+    <path android:fillColor="#1976D2" android:pathData="M6,8h4v1h-4z"/>
+    <!-- Robe belt -->
+    <path android:fillColor="#FFD740" android:pathData="M6,9h4v1h-4z"/>
+    <!-- Staff -->
+    <path android:fillColor="#795548" android:pathData="M11,4h1v8h-1z"/>
+    <path android:fillColor="#E040FB" android:pathData="M10,3h3v1h-3z M11,2h1v1h-1z"/>
+    <!-- Legs -->
+    <path android:fillColor="#0D47A1" android:pathData="M6,13h2v2h-2z M9,13h2v2h-2z"/>
+</vector>

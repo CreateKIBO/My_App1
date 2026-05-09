@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art cat avatar - orange tabby -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Ears -->
+    <path android:fillColor="#FF9800" android:pathData="M4,1h2v3h-2z M10,1h2v3h-2z"/>
+    <path android:fillColor="#FFB74D" android:pathData="M5,2h1v1h-1z M11,2h1v1h-1z"/>
+    <!-- Head -->
+    <path android:fillColor="#FF9800" android:pathData="M4,4h8v5h-8z"/>
+    <!-- Face lighter -->
+    <path android:fillColor="#FFB74D" android:pathData="M5,5h6v3h-6z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#212121" android:pathData="M6,5h1v2h-1z M9,5h1v2h-1z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M6,5h0.5v1h-0.5z M9,5h0.5v1h-0.5z"/>
+    <!-- Nose -->
+    <path android:fillColor="#F48FB1" android:pathData="M7,7h2v0.5h-2z"/>
+    <!-- Whiskers -->
+    <path android:fillColor="#795548" android:pathData="M3,6h2v0.5h-2z M3,7h2v0.5h-2z M11,6h2v0.5h-2z M11,7h2v0.5h-2z"/>
+    <!-- Body -->
+    <path android:fillColor="#FF9800" android:pathData="M5,9h6v4h-6z"/>
+    <!-- Belly -->
+    <path android:fillColor="#FFE0B2" android:pathData="M6,10h4v2h-4z"/>
+    <!-- Stripes -->
+    <path android:fillColor="#E65100" android:pathData="M5,9h6v0.5h-6z M5,11h6v0.5h-6z"/>
+    <!-- Tail -->
+    <path android:fillColor="#FF9800" android:pathData="M11,9h2v1h-2z M12,8h1v1h-1z M13,7h1v1h-1z"/>
+    <!-- Paws -->
+    <path android:fillColor="#FFE0B2" android:pathData="M5,13h2v1h-2z M9,13h2v1h-2z"/>
+</vector>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art ghost avatar - translucent purple -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Body -->
+    <path android:fillColor="#9C27B0" android:pathData="M5,3h6v9h-6z"/>
+    <path android:fillColor="#9C27B0" android:pathData="M4,4h1v7h-1z M11,4h1v7h-1z"/>
+    <!-- Top dome -->
+    <path android:fillColor="#9C27B0" android:pathData="M6,2h4v1h-4z M5,3h6v1h-6z"/>
+    <!-- Highlight -->
+    <path android:fillColor="#BA68C8" android:pathData="M6,3h4v1h-4z M5,4h1v3h-1z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#FFFFFF" android:pathData="M6,5h2v2h-2z M9,5h2v2h-2z"/>
+    <path android:fillColor="#212121" android:pathData="M7,5h1v2h-1z M10,5h1v2h-1z"/>
+    <!-- Mouth -->
+    <path android:fillColor="#7B1FA2" android:pathData="M7,8h2v1h-2z"/>
+    <!-- Wavy bottom -->
+    <path android:fillColor="#9C27B0" android:pathData="M5,12h2v1h-2z M7,11h2v1h-2z M9,12h2v1h-2z"/>
+    <path android:fillColor="#7B1FA2" android:pathData="M5,13h2v1h-2z M9,13h2v1h-2z"/>
+    <!-- Glow effect -->
+    <path android:fillColor="#CE93D8" android:pathData="M6,4h1v1h-1z"/>
+</vector>

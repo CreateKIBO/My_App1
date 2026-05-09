@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art ninja avatar - dark mask, red scarf -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Hair -->
+    <path android:fillColor="#212121" android:pathData="M6,2h4v1h-4z M5,3h6v1h-6z"/>
+    <!-- Mask -->
+    <path android:fillColor="#37474F" android:pathData="M5,4h6v3h-6z"/>
+    <!-- Eyes through mask -->
+    <path android:fillColor="#FFFFFF" android:pathData="M7,5h1v1h-1z M9,5h1v1h-1z"/>
+    <!-- Red scarf -->
+    <path android:fillColor="#F44336" android:pathData="M4,7h3v1h-3z M3,8h2v2h-2z"/>
+    <!-- Body -->
+    <path android:fillColor="#263238" android:pathData="M5,7h6v4h-6z"/>
+    <!-- Katana -->
+    <path android:fillColor="#E0E0E0" android:pathData="M12,4h1v7h-1z"/>
+    <path android:fillColor="#795548" android:pathData="M11,10h3v1h-3z"/>
+    <path android:fillColor="#F44336" android:pathData="M11,11h3v0.5h-3z"/>
+    <!-- Legs -->
+    <path android:fillColor="#263238" android:pathData="M6,11h2v3h-2z M9,11h2v3h-2z"/>
+    <!-- Feet -->
+    <path android:fillColor="#37474F" android:pathData="M5,14h3v1h-3z M8,14h3v1h-3z"/>
+</vector>

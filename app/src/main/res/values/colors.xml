@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- M3 Blue-Indigo Primary Palette -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="md_primary">#3F51B5</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#DBE1FF</color>
+    <color name="md_on_primary_container">#00105C</color>
+
+    <color name="md_secondary">#5B5F71</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#E0E1F6</color>
+    <color name="md_on_secondary_container">#171B2C</color>
+
+    <color name="md_tertiary">#77546E</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#FFD7F2</color>
+    <color name="md_on_tertiary_container">#2D1228</color>
+
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
+
+    <color name="md_background">#FEFBFF</color>
+    <color name="md_on_background">#1B1B1F</color>
+    <color name="md_surface">#FEFBFF</color>
+    <color name="md_on_surface">#1B1B1F</color>
+    <color name="md_surface_variant">#E2E1EC</color>
+    <color name="md_on_surface_variant">#45464F</color>
+    <color name="md_outline">#767680</color>
+    <color name="md_outline_variant">#C6C5D0</color>
+
+    <!-- App-specific -->
+    <color name="background_light">#F5F5FA</color>
+    <color name="card_background">#FFFFFF</color>
+
+    <!-- Category colors -->
+    <color name="category_work">#3F51B5</color>
+    <color name="category_study">#009688</color>
+    <color name="category_exercise">#FF6D00</color>
+    <color name="category_personal">#E91E63</color>
+    <color name="category_other">#607D8B</color>
+
+    <!-- Reward colors -->
+    <color name="coin_gold">#FFD700</color>
+    <color name="coin_gold_dark">#FFA000</color>
+    <color name="xp_green">#00C853</color>
+    <color name="xp_green_dark">#009624</color>
+    <color name="streak_orange">#FF6D00</color>
+
+    <!-- Gradient -->
+    <color name="gradient_start">#3F51B5</color>
+    <color name="gradient_end">#1A237E</color>
+
+    <!-- XP Progress -->
+    <color name="xp_progress_bg">#E0E1F6</color>
+    <color name="xp_progress_fg">#3F51B5</color>
+</resources>

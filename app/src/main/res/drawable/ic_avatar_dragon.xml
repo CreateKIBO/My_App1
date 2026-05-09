@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art dragon avatar - orange scales, horns -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Horns -->
+    <path android:fillColor="#BF360C" android:pathData="M5,1h1v2h-1z M10,1h1v2h-1z"/>
+    <!-- Head -->
+    <path android:fillColor="#FF6F00" android:pathData="M5,3h6v4h-6z"/>
+    <path android:fillColor="#E65100" android:pathData="M4,4h1v2h-1z M11,4h1v2h-1z"/>
+    <!-- Eyes -->
+    <path android:fillColor="#FFEB3B" android:pathData="M6,4h2v1h-2z M9,4h2v1h-2z"/>
+    <path android:fillColor="#212121" android:pathData="M7,4h1v1h-1z M9,4h1v1h-1z"/>
+    <!-- Snout -->
+    <path android:fillColor="#FF8F00" android:pathData="M6,6h4v1h-4z"/>
+    <!-- Nostrils -->
+    <path android:fillColor="#BF360C" android:pathData="M7,6h1v0.5h-1z M9,6h1v0.5h-1z"/>
+    <!-- Body -->
+    <path android:fillColor="#FF6F00" android:pathData="M5,7h6v4h-6z"/>
+    <!-- Belly scales -->
+    <path android:fillColor="#FFB300" android:pathData="M6,8h4v2h-4z"/>
+    <!-- Wings -->
+    <path android:fillColor="#E65100" android:pathData="M2,5h3v4h-3z M11,5h3v4h-3z"/>
+    <path android:fillColor="#FF8F00" android:pathData="M3,6h1v2h-1z M12,6h1v2h-1z"/>
+    <!-- Tail -->
+    <path android:fillColor="#FF6F00" android:pathData="M7,11h2v1h-2z M8,12h2v1h-2z M9,13h2v1h-2z"/>
+    <!-- Legs -->
+    <path android:fillColor="#E65100" android:pathData="M6,11h1v3h-1z M10,11h1v3h-1z"/>
+    <!-- Claws -->
+    <path android:fillColor="#FFB300" android:pathData="M5,14h2v1h-2z M9,14h2v1h-2z"/>
+</vector>

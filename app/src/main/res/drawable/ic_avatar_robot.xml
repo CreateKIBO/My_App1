@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixel art robot avatar - cyan body, screen face -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="16"
+    android:viewportHeight="16">
+    <!-- Antenna -->
+    <path android:fillColor="#607D8B" android:pathData="M7,0h2v1h-2z M8,1h1v1h-1z"/>
+    <path android:fillColor="#FF1744" android:pathData="M7,0h1v0.5h-1z"/>
+    <!-- Head -->
+    <path android:fillColor="#00BCD4" android:pathData="M5,2h6v5h-6z"/>
+    <path android:fillColor="#0097A7" android:pathData="M5,2h6v1h-6z"/>
+    <!-- Screen face -->
+    <path android:fillColor="#263238" android:pathData="M6,3h4v3h-4z"/>
+    <!-- Eyes (LED) -->
+    <path android:fillColor="#76FF03" android:pathData="M7,4h1v1h-1z M9,4h1v1h-1z"/>
+    <!-- Mouth (LED) -->
+    <path android:fillColor="#76FF03" android:pathData="M7,5h2v0.5h-2z"/>
+    <!-- Ears/sensors -->
+    <path android:fillColor="#607D8B" android:pathData="M4,3h1v2h-1z M11,3h1v2h-1z"/>
+    <!-- Body -->
+    <path android:fillColor="#00BCD4" android:pathData="M5,7h6v4h-6z"/>
+    <!-- Chest panel -->
+    <path android:fillColor="#0097A7" android:pathData="M6,8h4v2h-4z"/>
+    <path android:fillColor="#76FF03" android:pathData="M7,8h1v1h-1z M9,8h1v1h-1z"/>
+    <!-- Arms -->
+    <path android:fillColor="#607D8B" android:pathData="M3,7h2v3h-2z M11,7h2v3h-2z"/>
+    <!-- Hands -->
+    <path android:fillColor="#78909C" android:pathData="M3,10h2v1h-2z M11,10h2v1h-2z"/>
+    <!-- Legs -->
+    <path android:fillColor="#607D8B" android:pathData="M6,11h2v3h-2z M9,11h2v3h-2z"/>
+    <!-- Feet -->
+    <path android:fillColor="#78909C" android:pathData="M5,14h3v1h-3z M8,14h3v1h-3z"/>
+</vector>

@@ -1,0 +1,106 @@
+<resources>
+    <string name="app_name">日程规划</string>
+
+    <!-- Home -->
+    <string name="home_title">日程</string>
+    <string name="home_empty_title">今天还没有任务</string>
+    <string name="home_empty_subtitle">点击 + 添加你的第一个任务</string>
+    <string name="home_progress">已完成 %d/%d</string>
+    <string name="home_day_complete">今日任务全部完成！</string>
+
+    <!-- Add/Edit Task -->
+    <string name="add_task_title">添加任务</string>
+    <string name="edit_task_title">编辑任务</string>
+    <string name="hint_task_title">任务标题</string>
+    <string name="hint_task_description">描述（可选）</string>
+    <string name="label_date">日期</string>
+    <string name="label_start_time">开始时间</string>
+    <string name="label_end_time">结束时间</string>
+    <string name="label_category">分类</string>
+    <string name="btn_save">保存</string>
+    <string name="error_title_required">请输入任务标题</string>
+    <string name="error_time_invalid">结束时间必须晚于开始时间</string>
+
+    <!-- Categories -->
+    <string name="category_work">工作</string>
+    <string name="category_study">学习</string>
+    <string name="category_exercise">运动</string>
+    <string name="category_personal">个人</string>
+    <string name="category_other">其他</string>
+
+    <string-array name="task_categories">
+        <item>工作</item>
+        <item>学习</item>
+        <item>运动</item>
+        <item>个人</item>
+        <item>其他</item>
+    </string-array>
+    <string-array name="task_categories_keys">
+        <item>Work</item>
+        <item>Study</item>
+        <item>Exercise</item>
+        <item>Personal</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Profile -->
+    <string name="profile_title">我的</string>
+    <string name="profile_level">Lv.%d</string>
+    <string name="profile_coins">金币</string>
+    <string name="profile_xp">经验</string>
+    <string name="profile_streak">连续天数</string>
+    <string name="profile_xp_progress">%d/%d XP</string>
+    <string name="profile_recent_rewards">最近奖励</string>
+    <string name="profile_no_rewards">暂无奖励记录</string>
+
+    <!-- Shop -->
+    <string name="shop_title">商店</string>
+    <string name="shop_tab_avatars">头像</string>
+    <string name="shop_tab_themes">主题</string>
+    <string name="shop_price">%d 金币</string>
+    <string name="shop_owned">装备</string>
+    <string name="shop_equip">使用中</string>
+    <string name="shop_coins_label">金币余额</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">日历</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_version">版本 %s</string>
+
+    <!-- Reward -->
+    <string name="reward_task_complete">完成任务</string>
+    <string name="reward_day_complete">今日全部完成</string>
+    <string name="reward_streak">连续打卡</string>
+    <string name="reward_category_bonus">分类加成</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">日程</string>
+    <string name="nav_calendar">日历</string>
+    <string name="nav_shop">商店</string>
+    <string name="nav_profile">我的</string>
+
+    <!-- General -->
+    <string name="content_description_add_task">添加任务</string>
+    <string name="content_description_empty_state">空状态</string>
+
+    <!-- Aliases for layout references -->
+    <string name="hint_task_date">日期</string>
+    <string name="hint_start_time">开始时间</string>
+    <string name="hint_end_time">结束时间</string>
+    <string name="hint_category">分类</string>
+    <string name="btn_save_task">保存任务</string>
+    <string name="calendar_today">今天</string>
+    <string name="home_empty">还没有任务，点击 + 添加一个吧！</string>
+    <string name="fab_add_task">添加任务</string>
+    <string name="profile_total_xp">总经验</string>
+    <string name="shop_avatars">头像</string>
+    <string name="shop_themes">主题</string>
+    <string name="nav_schedule">日程</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="error_empty_title">请输入任务标题</string>
+    <string name="error_invalid_time">结束时间必须晚于开始时间</string>
+</resources>
