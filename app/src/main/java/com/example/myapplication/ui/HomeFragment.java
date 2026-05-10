@@ -19,6 +19,7 @@ import com.example.myapplication.data.local.TaskEntity;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.databinding.FragmentHomeBinding;
 import com.example.myapplication.ui.adapter.TaskAdapter;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.AvatarHelper;
 import com.example.myapplication.util.DateUtils;
 import com.example.myapplication.util.NotificationHelper;
@@ -50,6 +51,13 @@ public class HomeFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         setupRecyclerView();
+                // Entrance animations
+        AnimUtils.slideUpFadeIn(binding.layoutLevelCard, 40f);
+
+        // Button animations
+        AnimUtils.scaleOnClick(binding.fabAdd);
+        AnimUtils.scaleOnClick(binding.btnNotification);
+
         setupObservers();
         setupClickListeners();
         setupCategoryFilter();

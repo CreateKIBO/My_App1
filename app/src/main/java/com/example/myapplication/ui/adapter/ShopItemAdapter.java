@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
 import com.example.myapplication.data.local.ShopItemEntity;
 import com.example.myapplication.databinding.ItemShopBinding;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.RewardCalculator;
 
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ViewHo
         ViewHolder(ItemShopBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+            AnimUtils.scaleOnClick(itemView);
         }
 
         void bind(ShopItemEntity item) {

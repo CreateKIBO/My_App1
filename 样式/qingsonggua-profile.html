@@ -1,0 +1,687 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>轻松挂 — 个人资料</title>
+<style>
+  :root {
+    --bg:      oklch(97.5% 0.008 250);
+    --surface: oklch(100% 0 0);
+    --fg:      oklch(18% 0.012 250);
+    --muted:   oklch(52% 0.012 250);
+    --border:  oklch(92% 0.005 250);
+    --accent:  oklch(52% 0.18 255);
+    --accent-light: oklch(95% 0.04 255);
+    --accent-dark: oklch(42% 0.18 255);
+    --success: oklch(55% 0.14 155);
+    --success-light: oklch(95% 0.04 155);
+    --warning: oklch(68% 0.14 75);
+    --warning-light: oklch(96% 0.04 75);
+    --danger:  oklch(55% 0.18 25);
+    --danger-light: oklch(95% 0.04 25);
+    --card-shadow: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+
+    --radius-sm: 8px;
+    --radius:    12px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    box-shadow: 0 0 40px oklch(0% 0 0 / 0.05);
+  }
+
+  /* ── Header ── */
+  .page-header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--accent);
+    display: flex; align-items: center;
+    padding: 0 16px; height: 56px; gap: 12px;
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    border: none; border-radius: 10px;
+    background: oklch(100% 0 0 / 0.15);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .back-btn svg { width: 20px; height: 20px; color: #fff; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 600;
+    color: #fff; letter-spacing: -0.01em;
+    flex: 1;
+  }
+  .header-btn {
+    width: 36px; height: 36px;
+    border: none; border-radius: 10px;
+    background: oklch(100% 0 0 / 0.15);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .header-btn svg { width: 18px; height: 18px; color: #fff; }
+
+  /* ── Profile hero ── */
+  .profile-hero {
+    background: var(--accent);
+    padding: 0 20px 44px;
+    border-radius: 0 0 28px 28px;
+    position: relative;
+  }
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -16px; left: 0; right: 0;
+    height: 32px;
+    background: var(--bg);
+    border-radius: 28px 28px 0 0;
+    z-index: 1;
+  }
+  .profile-main {
+    display: flex; align-items: center; gap: 16px;
+    position: relative; z-index: 2;
+  }
+  .avatar-wrap { position: relative; flex-shrink: 0; cursor: pointer; }
+  .avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, oklch(100% 0 0 / 0.3), oklch(100% 0 0 / 0.1));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: #fff;
+    border: 3px solid oklch(100% 0 0 / 0.25);
+    transition: transform var(--transition);
+  }
+  .avatar-wrap:hover .avatar { transform: scale(1.05); }
+  .avatar-edit-badge {
+    position: absolute; bottom: 0; right: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar-edit-badge svg { width: 12px; height: 12px; color: var(--accent); }
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-name {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 700;
+    color: #fff; letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+  .profile-phone {
+    font-size: 13px;
+    color: oklch(100% 0 0 / 0.65);
+    font-variant-numeric: tabular-nums;
+  }
+  .profile-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .profile-tag {
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: oklch(100% 0 0 / 0.18); color: #fff;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .profile-tag svg { width: 12px; height: 12px; }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: flex;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    margin: 0 16px 20px;
+    padding: 18px 0;
+    position: relative; z-index: 2;
+  }
+  .stat-item {
+    flex: 1; text-align: center;
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item:active { background: var(--bg); }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Content ── */
+  .content-area {
+    padding: 0 16px 100px;
+    position: relative; z-index: 2;
+  }
+  .section { margin-bottom: 20px; }
+  .section-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 4px;
+    margin-bottom: 10px;
+  }
+
+  /* ── Menu card ── */
+  .menu-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+  .menu-item {
+    display: flex; align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:active { background: oklch(95% 0.005 250); }
+  .menu-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 12px; flex-shrink: 0;
+  }
+  .menu-icon svg { width: 18px; height: 18px; }
+  .menu-icon.blue   { background: var(--accent-light); }
+  .menu-icon.blue svg { color: var(--accent); }
+  .menu-icon.green  { background: var(--success-light); }
+  .menu-icon.green svg { color: var(--success); }
+  .menu-icon.amber  { background: var(--warning-light); }
+  .menu-icon.amber svg { color: var(--warning); }
+  .menu-icon.violet { background: oklch(94% 0.04 300); }
+  .menu-icon.violet svg { color: oklch(50% 0.18 300); }
+  .menu-icon.rose   { background: var(--danger-light); }
+  .menu-icon.rose svg { color: var(--danger); }
+  .menu-icon.teal   { background: oklch(95% 0.03 185); }
+  .menu-icon.teal svg { color: oklch(50% 0.12 185); }
+  .menu-icon.gray   { background: oklch(95% 0.005 250); }
+  .menu-icon.gray svg { color: var(--muted); }
+
+  .menu-text { flex: 1; min-width: 0; }
+  .menu-label { font-size: 15px; font-weight: 500; }
+  .menu-desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .menu-value {
+    font-size: 13px; color: var(--muted);
+    margin-right: 8px;
+    max-width: 160px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    text-align: right;
+  }
+  .menu-arrow { flex-shrink: 0; }
+  .menu-arrow svg { width: 16px; height: 16px; color: oklch(78% 0.005 250); }
+  .menu-badge {
+    padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600;
+    margin-right: 8px;
+  }
+  .menu-badge.verified { background: var(--success-light); color: var(--success); }
+  .menu-badge.pending  { background: var(--warning-light); color: var(--warning); }
+  .menu-badge.new { background: var(--danger-light); color: var(--danger); }
+
+  /* ── Logout ── */
+  .logout-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 50px;
+    border: 1.5px solid var(--danger);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--danger);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    margin-top: 8px;
+  }
+  .logout-btn:hover { background: var(--danger-light); }
+  .logout-btn:active { transform: scale(0.98); }
+
+  /* ── Sub-screen overlay ── */
+  .sub-screen {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sub-screen.show { transform: translateX(0); }
+
+  .sub-header {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--surface);
+    display: flex; align-items: center;
+    padding: 0 16px; height: 56px; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sub-back {
+    width: 36px; height: 36px;
+    border: none; border-radius: 10px;
+    background: var(--bg);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sub-back:hover { background: var(--border); }
+  .sub-back svg { width: 20px; height: 20px; color: var(--fg); }
+  .sub-title {
+    font-family: var(--font-display);
+    font-size: 17px; font-weight: 600; flex: 1;
+  }
+  .sub-action {
+    padding: 8px 16px;
+    border: none; border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sub-action:hover { background: var(--accent-dark); }
+
+  .sub-body { padding: 20px 16px 40px; }
+
+  /* ── Form ── */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 13px; font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .form-label .required { color: var(--danger); font-size: 14px; }
+  .form-input {
+    width: 100%; height: 48px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: var(--font-body);
+    font-size: 15px; color: var(--fg);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(52% 0.18 255 / 0.1);
+  }
+  .form-input::placeholder { color: oklch(68% 0.01 250); }
+  .form-input.readonly {
+    background: var(--bg);
+    color: var(--muted);
+    cursor: default;
+  }
+  .form-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .form-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 50px;
+    border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff;
+    font-family: var(--font-body);
+    font-size: 16px; font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .form-btn:hover { background: var(--accent-dark); }
+  .form-btn:active { transform: scale(0.98); }
+
+  /* ── Patient card ── */
+  .patient-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color var(--transition);
+  }
+  .patient-card.default { border-color: var(--accent); }
+  .patient-card-top {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .patient-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600; color: #fff;
+    flex-shrink: 0;
+  }
+  .patient-name { font-size: 16px; font-weight: 600; }
+  .patient-relation {
+    font-size: 12px; color: var(--muted); margin-top: 1px;
+  }
+  .patient-default-tag {
+    margin-left: auto;
+    padding: 3px 10px; border-radius: 10px;
+    font-size: 11px; font-weight: 600;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .patient-details {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  .patient-detail-label { color: var(--muted); }
+  .patient-detail-value { font-weight: 500; text-align: right; }
+  .patient-actions {
+    display: flex; gap: 8px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .patient-action-btn {
+    flex: 1; height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 13px; font-weight: 500;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .patient-action-btn:hover { background: var(--bg); }
+  .patient-action-btn svg { width: 14px; height: 14px; }
+  .patient-action-btn.danger { color: var(--danger); border-color: oklch(92% 0.02 25); }
+
+  .add-patient-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; height: 52px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    font-size: 14px; font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .add-patient-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .add-patient-btn svg { width: 18px; height: 18px; }
+
+  /* ── Confirm dialog ── */
+  .dialog-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: oklch(0% 0 0 / 0.45);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 250ms;
+  }
+  .dialog-overlay.show { opacity: 1; pointer-events: auto; }
+  .dialog-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 28px 24px 20px;
+    width: 300px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .dialog-overlay.show .dialog-card { transform: scale(1); }
+  .dialog-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dialog-icon.danger { background: var(--danger-light); }
+  .dialog-icon.danger svg { width: 26px; height: 26px; color: var(--danger); }
+  .dialog-title {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .dialog-desc {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.5; margin-bottom: 20px;
+  }
+  .dialog-btns { display: flex; gap: 10px; }
+  .dialog-btn {
+    flex: 1; height: 44px;
+    border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dialog-btn:active { transform: scale(0.96); }
+  .dialog-btn.cancel {
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--border);
+  }
+  .dialog-btn.cancel:hover { background: var(--border); }
+  .dialog-btn.confirm-danger {
+    background: var(--danger); color: #fff;
+  }
+  .dialog-btn.confirm-danger:hover { background: oklch(48% 0.18 25); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; top: 70px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--fg); color: var(--surface);
+    padding: 10px 24px; border-radius: 24px;
+    font-size: 14px; font-weight: 500;
+    z-index: 300; opacity: 0;
+    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) { .app-shell { box-shadow: none; } }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" onclick="showToast('返回首页')" aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="page-title">个人资料</span>
+    <button class="header-btn" onclick="openSub('editInfo')" aria-label="编辑">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+  </div>
+
+  <!-- Profile hero -->
+  <div class="profile-hero">
+    <div class="profile-main">
+      <div class="avatar-wrap" onclick="showToast('更换头像功能开发中')">
+        <div class="avatar">张</div>
+        <div class="avatar-edit-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">张三</div>
+        <div class="profile-phone">138****6789</div>
+        <div class="profile-tags">
+          <span class="profile-tag verified">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            已实名
+          </span>
+          <span class="profile-tag">医保绑定</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item" onclick="showToast('挂号记录页面开发中')">
+      <div class="stat-num">12</div>
+      <div class="stat-label">挂号记录</div>
+    </div>
+    <div class="stat-item" onclick="showToast('就诊记录页面开发中')">
+      <div class="stat-num">8</div>
+      <div class="stat-label">就诊次数</div>
+    </div>
+    <div class="stat-item" onclick="showToast('收藏医生页面开发中')">
+      <div class="stat-num">5</div>
+      <div class="stat-label">收藏医生</div>
+    </div>
+    <div class="stat-item" onclick="showToast('优惠券页面开发中')">
+      <div class="stat-num">3</div>
+      <div class="stat-label">优惠券</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- Personal info -->
+    <div class="section">
+      <div class="section-title">个人信息</div>
+      <div class="menu-card">
+        <div class="menu-item" onclick="openSub('editInfo')">
+          <div class="menu-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="menu-text">
+            <div class="menu-label">基本信息</div>
+            <div class="menu-desc">姓名、身份证、手机号</div>
+          </div>
+          <span class="menu-badge verified">已完善</span>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="menu-item" onclick="openSub('patients')">
+          <div class="menu-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="menu-text">
+            <div class="menu-label">就诊人管理</div>
+            <div class="menu-desc">管理常用就诊人信息</div>
+          </div>
+          <span class="menu-value">3人</span>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="menu-item" onclick="showToast('医保管理页面开发中')">
+          <div class="menu-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div class="menu-text">
+            <div class="menu-label">医保管理</div>
+            <div class="menu-desc">绑定医保卡、电子医保凭证</div>
+          </div>
+          <span class="menu-badge verified">已绑定</span>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical records -->
+    <div class="section">
+      <div class="section-title">就医记录</div>
+      <div class="menu-card">
+        <div class="menu-item" onclick="showToast('挂号记录页面开发中')">
+          <div class="menu-icon violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="menu-text"><div class="menu-label">挂号记录</div></div>
+          <span class="menu-badge new">2新</span>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="menu-item" onclick="showToast('报告查询页面开发中')">
+          <div class="menu-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+          </div>
+          <div class="menu-text"><div class="menu-label">报告查询</div></div>
+          <span class="menu-value">1份新报告</span>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="menu-item" onclick="showToast('处方记录页面开发中')">
+          <div class="menu-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="menu-text"><div class="menu-label">处方记录</div></div>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="menu-item" onclick="showToast('缴费记录页面开发中')">
+          <div class="menu-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="menu-text"><div class="menu-label">缴费记录</div></div>
+          <div class="menu-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="section">
+      <div class="section-title">系统设置</div>
+      <div class="menu-card">
+        <div class="menu-item" onclick="showToast('消息通知设置开发中')">
+          <div class="menu-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="menu-text"><div class="menu-label">消息通知</div></div

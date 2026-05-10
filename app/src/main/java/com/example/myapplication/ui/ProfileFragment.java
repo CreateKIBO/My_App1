@@ -28,6 +28,7 @@ import com.example.myapplication.databinding.FragmentProfileBinding;
 import com.example.myapplication.ui.adapter.RewardAdapter;
 import com.example.myapplication.util.AvatarHelper;
 import com.example.myapplication.util.NotificationHelper;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.RewardCalculator;
 import com.example.myapplication.util.ThemeManager;
 
@@ -125,6 +126,12 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupClickListeners() {
+        // Button animations
+        AnimUtils.scaleOnClick(binding.btnChangeEquipped);
+        AnimUtils.scaleOnClick(binding.itemSettingsNotifications);
+        AnimUtils.scaleOnClick(binding.itemSettingsExport);
+        AnimUtils.scaleOnClick(binding.itemSettingsAbout);
+
         // Equipped change button -> navigate to shop
         binding.btnChangeEquipped.setOnClickListener(v -> {
             try {

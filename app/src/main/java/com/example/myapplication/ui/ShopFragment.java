@@ -18,6 +18,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.data.local.ShopItemEntity;
 import com.example.myapplication.databinding.FragmentShopBinding;
 import com.example.myapplication.ui.adapter.ShopItemAdapter;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.RewardCalculator;
 
 import java.text.NumberFormat;
@@ -63,6 +64,12 @@ public class ShopFragment extends Fragment {
         binding.rvShopItems.setLayoutManager(gridLayoutManager);
         binding.rvShopItems.setAdapter(adapter);
         binding.rvShopItems.addItemDecoration(new GridSpacingItemDecoration(2, 12, false));
+
+        // Button animations
+        AnimUtils.scaleOnClick(binding.btnTabAvatar);
+        AnimUtils.scaleOnClick(binding.btnTabTheme);
+        AnimUtils.scaleOnClick(binding.btnTabProp);
+        AnimUtils.scaleOnClick(binding.btnRecharge);
 
         // Tab switching
         updateTabStyle(0);

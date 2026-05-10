@@ -3,6 +3,8 @@ package com.example.myapplication;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,11 +29,11 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private SessionManager sessionManager;
 
-    // Tab views
     private LinearLayout[] tabs;
     private ImageView[] tabIcons;
     private TextView[] tabLabels;
     private int[] tabDestIds;
+    private int currentTabIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment))
                 .getNavController();
 
-        // Setup 6 tabs
         tabs = new LinearLayout[]{
                 findViewById(R.id.tab_home),
                 findViewById(R.id.tab_calendar),
@@ -88,11 +89,18 @@ public class MainActivity extends AppCompatActivity {
         };
 
         for (int i = 0; i < tabs.length; i++) {
+            final int index = i;
             final int destId = tabDestIds[i];
             tabs[i].setOnClickListener(v -> {
+                if (index == currentTabIndex) return;
+                animateTabClick(v);
                 NavOptions options = new NavOptions.Builder()
                         .setPopUpTo(R.id.homeFragment, false)
                         .setLaunchSingleTop(true)
+                        .setEnterAnim(R.anim.tab_enter)
+                        .setExitAnim(R.anim.tab_exit)
+                        .setPopEnterAnim(R.anim.tab_enter)
+                        .setPopExitAnim(R.anim.tab_exit)
                         .build();
                 navController.navigate(destId, null, options);
             });
@@ -114,6 +122,21 @@ public class MainActivity extends AppCompatActivity {
         observeTheme();
     }
 
+    private void animateTabClick(View tab) {
+        tab.animate()
+                .scaleX(0.85f)
+                .scaleY(0.85f)
+                .setDuration(100)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> tab.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(150)
+                        .setInterpolator(new AccelerateDecelerateInterpolator())
+                        .start())
+                .start();
+    }
+
     private void updateTabSelection(int destId) {
         int accentColor = ThemeManager.getThemePrimaryInt(this);
         int mutedColor = getResources().getColor(R.color.md_on_surface_variant, null);
@@ -122,9 +145,25 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < tabDestIds.length; i++) {
             boolean selected = tabDestIds[i] == destId;
+            if (selected) currentTabIndex = i;
+
             tabIcons[i].setImageTintList(selected ? accentTint : mutedTint);
             tabLabels[i].setTextColor(selected ? accentColor : mutedColor);
             tabLabels[i].setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+
+            // Animate icon scale on selection change
+            if (selected) {
+                tabIcons[i].animate()
+                        .scaleX(1.15f).scaleY(1.15f)
+                        .setDuration(150)
+                        .setInterpolator(new DecelerateInterpolator())
+                        .withEndAction(() -> tabIcons[i].animate()
+                                .scaleX(1f).scaleY(1f)
+                                .setDuration(100)
+                                .setInterpolator(new AccelerateDecelerateInterpolator())
+                                .start())
+                        .start();
+            }
         }
     }
 
@@ -135,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
         db.userDao().observeUser(userId).observe(this, user -> {
             if (user != null) {
                 ThemeManager.applyTheme(this, user.getThemeId());
-                // Re-apply tab colors when theme changes
                 int currentDest = navController.getCurrentDestination() != null ? navController.getCurrentDestination().getId() : -1;
                 updateTabSelection(currentDest);
             }

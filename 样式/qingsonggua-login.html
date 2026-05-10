@@ -1,0 +1,749 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>轻松挂 — 用户登录</title>
+<style>
+  :root {
+    --bg:      oklch(97.5% 0.008 250);
+    --surface: oklch(100% 0 0);
+    --fg:      oklch(18% 0.012 250);
+    --muted:   oklch(52% 0.012 250);
+    --border:  oklch(92% 0.005 250);
+    --accent:  oklch(52% 0.18 255);
+    --accent-light: oklch(95% 0.04 255);
+    --accent-dark: oklch(42% 0.18 255);
+    --success: oklch(55% 0.14 155);
+    --success-light: oklch(95% 0.04 155);
+    --warning: oklch(68% 0.14 75);
+    --danger:  oklch(55% 0.18 25);
+    --danger-light: oklch(95% 0.04 25);
+    --card-shadow: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+
+    --radius-sm: 8px;
+    --radius:    12px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    box-shadow: 0 0 40px oklch(0% 0 0 / 0.05);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 56px;
+    gap: 12px;
+  }
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: oklch(100% 0 0 / 0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .back-btn svg { width: 20px; height: 20px; color: #fff; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Brand section ── */
+  .brand-section {
+    background: var(--accent);
+    padding: 0 24px 36px;
+    border-radius: 0 0 28px 28px;
+    position: relative;
+  }
+  .brand-section::after {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 0; right: 0;
+    height: 32px;
+    background: var(--bg);
+    border-radius: 28px 28px 0 0;
+    z-index: 1;
+  }
+  .brand-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: oklch(100% 0 0 / 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    backdrop-filter: blur(8px);
+  }
+  .brand-logo svg { width: 36px; height: 36px; color: #fff; }
+  .brand-heading {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .brand-sub {
+    font-size: 14px;
+    color: oklch(100% 0 0 / 0.7);
+  }
+
+  /* ── Content ── */
+  .content-area {
+    flex: 1;
+    padding: 8px 24px 40px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── Tab switcher ── */
+  .tab-switcher {
+    display: flex;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    height: 40px;
+    border: none;
+    border-radius: calc(var(--radius) - 2px);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px oklch(52% 0.18 255 / 0.3);
+  }
+
+  /* ── Form ── */
+  .login-form {
+    display: none;
+    animation: fadeSlideIn 280ms ease;
+  }
+  .login-form.active { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .form-label .required {
+    color: var(--danger);
+    font-size: 14px;
+  }
+  .input-wrap {
+    position: relative;
+  }
+  .input-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg);
+    z-index: 1;
+  }
+  .input-prefix svg { width: 18px; height: 18px; color: var(--muted); }
+  .input-prefix::after {
+    content: '';
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin-left: 4px;
+  }
+  .form-input {
+    width: 100%;
+    height: 50px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--fg);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(52% 0.18 255 / 0.1);
+  }
+  .form-input::placeholder { color: oklch(68% 0.01 250); }
+  .form-input.has-prefix { padding-left: 110px; }
+  .form-input.has-suffix { padding-right: 110px; }
+  .form-input.has-toggle { padding-right: 48px; }
+  .form-input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px oklch(55% 0.18 25 / 0.1);
+  }
+
+  .input-suffix {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .sms-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sms-btn:hover { background: oklch(92% 0.05 255); }
+  .sms-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle-pwd svg { width: 20px; height: 20px; color: var(--muted); }
+
+  .form-error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 6px;
+    display: none;
+    align-items: center;
+    gap: 4px;
+  }
+  .form-error.show { display: flex; }
+  .form-error svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* ── Form extras ── */
+  .form-extras {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    margin-top: -4px;
+  }
+  .remember-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .remember-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .remember-check.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .remember-check svg { width: 11px; height: 11px; color: #fff; opacity: 0; transition: opacity var(--transition); }
+  .remember-check.checked svg { opacity: 1; }
+  .remember-label { font-size: 13px; color: var(--muted); }
+  .forgot-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .forgot-link:hover { text-decoration: underline; }
+
+  /* ── Submit button ── */
+  .submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn:hover { background: var(--accent-dark); }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled {
+    background: oklch(80% 0.02 250);
+    color: oklch(60% 0.01 250);
+    cursor: not-allowed;
+    transform: none;
+  }
+  .submit-btn .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid oklch(100% 0 0 / 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .submit-btn.loading .spinner { display: block; }
+  .submit-btn.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider span {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── Social login ── */
+  .social-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .social-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+  .social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.08);
+  }
+  .social-btn:active { transform: translateY(0); }
+  .social-btn svg { width: 22px; height: 22px; }
+  .social-btn.wechat svg { color: #07C160; }
+  .social-btn.alipay svg { color: #1677FF; }
+  .social-btn.apple svg { color: var(--fg); }
+
+  .social-label {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ── Register link ── */
+  .register-link {
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+    padding-bottom: 20px;
+  }
+  .register-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .register-link a:hover { text-decoration: underline; }
+
+  /* ── Success overlay ── */
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: oklch(0% 0 0 / 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms;
+  }
+  .success-overlay.show { opacity: 1; pointer-events: auto; }
+
+  .success-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 36px 28px 28px;
+    width: 320px;
+    text-align: center;
+    transform: scale(0.85) translateY(20px);
+    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .success-overlay.show .success-card { transform: scale(1) translateY(0); }
+
+  .success-icon-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: var(--success-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    position: relative;
+  }
+  .success-icon-wrap svg { width: 34px; height: 34px; color: var(--success); }
+  .success-icon-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--success);
+    opacity: 0;
+    animation: ring 600ms 300ms ease-out forwards;
+  }
+  @keyframes ring {
+    0% { opacity: 0.6; transform: scale(0.8); }
+    100% { opacity: 0; transform: scale(1.3); }
+  }
+
+  .success-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .success-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .success-info {
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .success-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 5px 0;
+  }
+  .success-info-label { color: var(--muted); }
+  .success-info-value { font-weight: 500; }
+
+  .success-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .success-btn:hover { background: var(--accent-dark); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--fg);
+    color: var(--surface);
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .app-shell { box-shadow: none; }
+    .brand-section { padding: 0 20px 32px; }
+    .content-area { padding: 8px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" onclick="showToast('返回首页')" aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="page-title">用户登录</span>
+  </div>
+
+  <!-- Brand -->
+  <div class="brand-section">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    <h1 class="brand-heading">欢迎回来</h1>
+    <p class="brand-sub">登录后即可预约挂号、查询报告</p>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- Tab switcher -->
+    <div class="tab-switcher">
+      <button class="tab-btn active" onclick="switchTab('password')">密码登录</button>
+      <button class="tab-btn" onclick="switchTab('sms')">验证码登录</button>
+    </div>
+
+    <!-- Password login form -->
+    <div class="login-form active" id="passwordForm">
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 手机号</label>
+        <div class="input-wrap">
+          <div class="input-prefix">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +86
+          </div>
+          <input class="form-input has-prefix" type="tel" id="pwdPhone" placeholder="请输入手机号" maxlength="11" oninput="validatePwdForm()">
+        </div>
+        <div class="form-error" id="pwdPhoneError">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>请输入正确的11位手机号</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 密码</label>
+        <div class="input-wrap">
+          <input class="form-input has-toggle" type="password" id="pwdInput" placeholder="请输入密码" oninput="validatePwdForm()">
+          <button class="toggle-pwd" onclick="togglePwd('pwdInput', this)" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="form-error" id="pwdError">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>请输入密码</span>
+        </div>
+      </div>
+
+      <div class="form-extras">
+        <div class="remember-wrap" onclick="toggleRemember()">
+          <div class="remember-check" id="rememberCheck">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="remember-label">记住手机号</span>
+        </div>
+        <a class="forgot-link" onclick="showToast('跳转找回密码页面')">忘记密码？</a>
+      </div>
+
+      <button class="submit-btn" id="pwdSubmitBtn" onclick="loginWithPassword()" disabled>
+        <span class="btn-text">登 录</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <!-- SMS login form -->
+    <div class="login-form" id="smsForm">
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 手机号</label>
+        <div class="input-wrap">
+          <div class="input-prefix">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +86
+          </div>
+          <input class="form-input has-prefix has-suffix" type="tel" id="smsPhone" placeholder="请输入手机号" maxlength="11" oninput="validateSmsForm()">
+          <div class="input-suffix">
+            <button class="sms-btn" id="smsBtn" onclick="sendSmsCode()" disabled>获取验证码</button>
+          </div>
+        </div>
+        <div class="form-error" id="smsPhoneError">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>请输入正确的11位手机号</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><span class="required">*</span> 验证码</label>
+        <div class="input-wrap">
+          <input class="form-input" type="text" id="smsCode" placeholder="请输入6位验证码" maxlength="6" oninput="validateSmsForm()">
+        </div>
+        <div class="form-error" id="smsCodeError">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span>请输入6位数字验证码</span>
+        </div>
+      </div>
+
+      <div style="height:28px"></div>
+
+      <button class="submit-btn" id="smsSubmitBtn" onclick="loginWithSms()" disabled>
+        <span class="btn-text">登 录</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"><span>其他登录方式</span></div>
+
+    <!-- Social login -->
+    <div class="social-row">
+      <div style="text-align:center">
+        <button class="social-btn wechat" onclick="showToast('微信登录开发中')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-7.062-6.122zM14.033 13.3c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982z"/></svg>
+        </button>
+        <div class="social-label">微信</div>
+      </div>
+      <div style="text-align:center">
+        <button class="social-btn alipay" onclick="showToast('支付宝登录开发中')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.422 15.358c-1.585-.697-5.834-2.377-6.457-2.67a18.5 18.5 0 0 0 1.985-4.59H13.2V6.6h4.8V5.4h-4.8V2.4h-2.4v3H6v1.2h4.8V8.1H6v1.2h8.13a16.2 16.2 0 0 1-1.374 3.396c-2.28-.78-4.8-1.296-6.156-.324-1.896 1.356-1.848 3.924-.228 5.328 1.62 1.404 4.284 1.404 6.096-.012a16.8 16.8 0 0 0 2.544-3.348c1.8.852 6.036 2.628 6.036 2.628L21.422 15.358zM8.4 18c-1.44 0-2.4-1.08-2.4-2.28s.84-2.28 2.4-2.28c1.44 0 2.88.72 3.84 1.8C11.28 17.28 9.84 18 8.4 18z"/></svg>
+        </button>
+        <div class="social-label">支付宝</div>
+      </div>
+      <div

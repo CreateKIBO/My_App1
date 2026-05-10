@@ -19,6 +19,7 @@ import androidx.navigation.Navigation;
 
 import com.example.myapplication.R;
 import com.example.myapplication.databinding.FragmentAddEditTaskBinding;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.DateUtils;
 import com.example.myapplication.util.RewardCalculator;
 
@@ -244,6 +245,7 @@ public class AddEditTaskFragment extends Fragment {
         binding.tvSuccessXp.setText("⚡ +" + reward.xp + " XP");
         binding.tvSuccessCoins.setText("¢ +" + reward.coins);
         binding.layoutSuccessOverlay.setVisibility(View.VISIBLE);
+        AnimUtils.bounceIn(binding.layoutSuccessOverlay);
     }
 
     private void resetForm() {

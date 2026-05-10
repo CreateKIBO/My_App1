@@ -1,84 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.myapplication.ui.HomeFragment"
-        android:label="日程">
+        android:label="首页"
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_addEditTaskFragment"
-            app:destination="@id/addEditTaskFragment" />
-        <argument
-            android:name="selectedDate"
-            app:argType="string"
-            app:nullable="true" />
+            app:destination="@id/addEditTaskFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
+        <action
+            android:id="@+id/action_homeFragment_to_streakFragment"
+            app:destination="@id/streakFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
     </fragment>
 
     <fragment
         android:id="@+id/calendarFragment"
         android:name="com.example.myapplication.ui.CalendarFragment"
-        android:label="日历">
-        <action
-            android:id="@+id/action_calendarFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+        android:label="日历"
+        tools:layout="@layout/fragment_calendar">
         <action
             android:id="@+id/action_calendarFragment_to_addEditTaskFragment"
-            app:destination="@id/addEditTaskFragment" />
+            app:destination="@id/addEditTaskFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
     </fragment>
 
     <fragment
-        android:id="@+id/streakFragment"
-        android:name="com.example.myapplication.ui.StreakFragment"
-        android:label="连续" />
-
-    <fragment
-        android:id="@+id/rewardFragment"
-        android:name="com.example.myapplication.ui.RewardFragment"
-        android:label="奖励" />
-
-    <fragment
-        android:id="@+id/avatarEditFragment"
-        android:name="com.example.myapplication.ui.AvatarEditFragment"
-        android:label="更换头像" />
-    <fragment
         android:id="@+id/shopFragment"
         android:name="com.example.myapplication.ui.ShopFragment"
-        android:label="商店" />
+        android:label="商店"
+        tools:layout="@layout/fragment_shop" />
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.myapplication.ui.ProfileFragment"
-        android:label="我的">
+        android:label="我的"
+        tools:layout="@layout/fragment_profile">
         <action
-            android:id="@+id/action_profileFragment_to_avatarEditFragment"
-            app:destination="@id/avatarEditFragment" />
+            android:id="@+id/action_profileFragment_to_rewardFragment"
+            app:destination="@id/rewardFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
         <action
-            android:id="@+id/action_profileFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_profileFragment_to_streakFragment"
+            app:destination="@id/streakFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
     </fragment>
 
     <fragment
         android:id="@+id/addEditTaskFragment"
         android:name="com.example.myapplication.ui.AddEditTaskFragment"
-        android:label="添加日程">
-        <argument
-            android:name="taskId"
-            app:argType="long"
-            android:defaultValue="-1L" />
-        <argument
-            android:name="selectedDate"
-            app:argType="string"
-            app:nullable="true" />
-    </fragment>
+        android:label="添加任务"
+        tools:layout="@layout/fragment_add_edit_task" />
 
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.myapplication.ui.SettingsFragment"
-        android:label="设置" />
+        android:id="@+id/streakFragment"
+        android:name="com.example.myapplication.ui.StreakFragment"
+        android:label="连续打卡"
+        tools:layout="@layout/fragment_streak" />
+
+    <fragment
+        android:id="@+id/rewardFragment"
+        android:name="com.example.myapplication.ui.RewardFragment"
+        android:label="奖励"
+        tools:layout="@layout/fragment_reward" />
 
 </navigation>

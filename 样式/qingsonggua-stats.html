@@ -1,0 +1,779 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>轻松挂 — 科室统计</title>
+<style>
+  :root {
+    --bg:      oklch(97.5% 0.008 250);
+    --surface: oklch(100% 0 0);
+    --fg:      oklch(18% 0.012 250);
+    --muted:   oklch(52% 0.012 250);
+    --border:  oklch(92% 0.005 250);
+    --accent:  oklch(52% 0.18 255);
+    --accent-light: oklch(95% 0.04 255);
+    --accent-dark: oklch(42% 0.18 255);
+    --success: oklch(55% 0.14 155);
+    --success-light: oklch(95% 0.04 155);
+    --warning: oklch(68% 0.14 75);
+    --warning-light: oklch(96% 0.04 75);
+    --danger:  oklch(55% 0.18 25);
+    --danger-light: oklch(95% 0.04 25);
+    --card-shadow: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    --font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+    --radius-sm: 8px;
+    --radius:    12px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    box-shadow: 0 0 40px oklch(0% 0 0 / 0.05);
+  }
+
+  /* ── Header ── */
+  .page-header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--accent);
+    display: flex; align-items: center;
+    padding: 0 16px; height: 56px; gap: 12px;
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    border: none; border-radius: 10px;
+    background: oklch(100% 0 0 / 0.15);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .back-btn svg { width: 20px; height: 20px; color: #fff; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 600;
+    color: #fff; letter-spacing: -0.01em;
+    flex: 1;
+  }
+  .header-btn {
+    padding: 6px 14px;
+    border: none; border-radius: 8px;
+    background: oklch(100% 0 0 / 0.15);
+    color: #fff;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .header-btn svg { width: 14px; height: 14px; }
+
+  /* ── Date selector ── */
+  .date-bar {
+    background: var(--surface);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .date-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px; font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .date-chip:hover { border-color: oklch(80% 0.01 250); color: var(--fg); }
+  .date-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .date-chip-wrap {
+    display: flex; gap: 6px; overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .date-chip-wrap::-webkit-scrollbar { display: none; }
+  .date-custom {
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: all var(--transition);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .date-custom:hover { border-color: var(--accent); }
+  .date-custom svg { width: 14px; height: 14px; color: var(--muted); }
+
+  /* ── Content ── */
+  .content-area {
+    padding: 16px 16px 40px;
+  }
+
+  /* ── Overview cards ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .overview-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .overview-card.blue::before { background: var(--accent); }
+  .overview-card.green::before { background: var(--success); }
+  .overview-card.amber::before { background: var(--warning); }
+  .overview-card.rose::before { background: var(--danger); }
+
+  .ov-label {
+    font-size: 12px; font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .ov-value {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .ov-change {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 12px; font-weight: 600;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .ov-change.up { background: var(--success-light); color: var(--success); }
+  .ov-change.down { background: var(--danger-light); color: var(--danger); }
+  .ov-change svg { width: 12px; height: 12px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 20px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .section-action {
+    font-size: 13px; font-weight: 500;
+    color: var(--accent);
+    cursor: pointer;
+    border: none; background: none;
+    padding: 4px 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Card wrapper ── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+
+  /* ── Department ranking ── */
+  .dept-rank-item {
+    display: flex; align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dept-rank-item:last-child { border-bottom: none; }
+  .dept-rank-item:active { background: oklch(95% 0.005 250); }
+
+  .rank-num {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    margin-right: 12px; flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .rank-num.top1 { background: var(--accent-light); color: var(--accent); }
+  .rank-num.top2 { background: var(--success-light); color: var(--success); }
+  .rank-num.top3 { background: var(--warning-light); color: var(--warning); }
+  .rank-num.normal { background: oklch(95% 0.005 250); color: var(--muted); }
+
+  .dept-rank-info { flex: 1; min-width: 0; }
+  .dept-rank-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .dept-rank-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .dept-rank-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 800ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dept-rank-fill.blue { background: var(--accent); }
+  .dept-rank-fill.green { background: var(--success); }
+  .dept-rank-fill.amber { background: var(--warning); }
+  .dept-rank-fill.rose { background: var(--danger); }
+
+  .dept-rank-value {
+    text-align: right; margin-left: 12px; flex-shrink: 0;
+  }
+  .dept-rank-count {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .dept-rank-pct {
+    font-size: 11px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Time distribution ── */
+  .time-chart {
+    padding: 20px 16px;
+  }
+  .time-bars {
+    display: flex; align-items: flex-end;
+    gap: 6px;
+    height: 120px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+  .time-bar-col {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    height: 100%;
+  }
+  .time-bar-value {
+    font-size: 10px; font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .time-bar-track {
+    flex: 1; width: 100%;
+    display: flex; align-items: flex-end;
+  }
+  .time-bar-fill {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 800ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .time-bar-fill.blue { background: var(--accent); }
+  .time-bar-fill.green { background: var(--success); }
+  .time-bar-fill.amber { background: var(--warning); }
+  .time-bar-fill.muted { background: oklch(75% 0.01 250); }
+
+  .time-bar-label {
+    font-size: 10px; color: var(--muted);
+    text-align: center; flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .time-legend {
+    display: flex; gap: 16px; justify-content: center;
+    margin-top: 12px;
+  }
+  .time-legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+  .time-legend-dot {
+    width: 8px; height: 8px; border-radius: 2px;
+  }
+  .time-legend-dot.blue { background: var(--accent); }
+  .time-legend-dot.green { background: var(--success); }
+  .time-legend-dot.amber { background: var(--warning); }
+
+  /* ── Trend chart (CSS sparkline) ── */
+  .trend-section { padding: 20px 16px; }
+  .trend-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .trend-title {
+    font-size: 15px; font-weight: 600;
+  }
+  .trend-total {
+    font-size: 13px; color: var(--muted);
+  }
+  .trend-total strong {
+    color: var(--fg); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .sparkline {
+    display: flex; align-items: flex-end;
+    gap: 3px; height: 80px;
+    margin-bottom: 8px;
+  }
+  .spark-bar {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    transition: height 600ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    opacity: 0.7;
+    min-height: 2px;
+  }
+  .spark-bar.today {
+    opacity: 1;
+    background: var(--accent);
+  }
+  .spark-bar:hover { opacity: 1; }
+  .spark-labels {
+    display: flex; gap: 3px;
+  }
+  .spark-label {
+    flex: 1; text-align: center;
+    font-size: 9px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .spark-label.today { color: var(--accent); font-weight: 700; }
+
+  /* ── Doctor ranking ── */
+  .doc-rank-item {
+    display: flex; align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .doc-rank-item:last-child { border-bottom: none; }
+  .doc-rank-item:active { background: oklch(95% 0.005 250); }
+
+  .doc-rank-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: #fff;
+    margin-right: 12px; flex-shrink: 0;
+  }
+  .doc-rank-info { flex: 1; min-width: 0; }
+  .doc-rank-name {
+    font-size: 15px; font-weight: 500;
+  }
+  .doc-rank-dept {
+    font-size: 12px; color: var(--muted);
+  }
+  .doc-rank-stat {
+    text-align: right; flex-shrink: 0;
+  }
+  .doc-rank-num {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .doc-rank-label {
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* ── Utilization ring ── */
+  .ring-section {
+    padding: 20px 16px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .ring-wrap {
+    position: relative;
+    width: 100px; height: 100px;
+    flex-shrink: 0;
+  }
+  .ring-svg { width: 100px; height: 100px; transform: rotate(-90deg); }
+  .ring-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 8;
+  }
+  .ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1000ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .ring-value {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .ring-label {
+    font-size: 10px; color: var(--muted);
+  }
+  .ring-details { flex: 1; }
+  .ring-detail-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .ring-dot {
+    width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+  }
+  .ring-dot.blue { background: var(--accent); }
+  .ring-dot.green { background: var(--success); }
+  .ring-dot.amber { background: var(--warning); }
+  .ring-dot.gray { background: oklch(75% 0.01 250); }
+  .ring-detail-label { flex: 1; color: var(--muted); }
+  .ring-detail-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; top: 70px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--fg); color: var(--surface);
+    padding: 10px 24px; border-radius: 24px;
+    font-size: 14px; font-weight: 500;
+    z-index: 300; opacity: 0;
+    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) { .app-shell { box-shadow: none; } }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Header -->
+  <div class="page-header">
+    <button class="back-btn" onclick="showToast('返回首页')" aria-label="返回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="page-title">科室统计</span>
+    <button class="header-btn" onclick="showToast('导出报表功能开发中')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      导出
+    </button>
+  </div>
+
+  <!-- Date selector -->
+  <div class="date-bar">
+    <div class="date-chip-wrap">
+      <button class="date-chip" onclick="selectDate(this)">昨日</button>
+      <button class="date-chip active" onclick="selectDate(this)">今日</button>
+      <button class="date-chip" onclick="selectDate(this)">本周</button>
+      <button class="date-chip" onclick="selectDate(this)">本月</button>
+      <button class="date-chip" onclick="selectDate(this)">近3月</button>
+    </div>
+    <button class="date-custom" onclick="showToast('自定义日期选择开发中')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- Overview -->
+    <div class="overview-grid">
+      <div class="overview-card blue">
+        <div class="ov-label">今日挂号</div>
+        <div class="ov-value">847</div>
+        <div class="ov-change up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+          +12.3%
+        </div>
+      </div>
+      <div class="overview-card green">
+        <div class="ov-label">就诊率</div>
+        <div class="ov-value">96%</div>
+        <div class="ov-change up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+          +2.1%
+        </div>
+      </div>
+      <div class="overview-card amber">
+        <div class="ov-label">平均等待</div>
+        <div class="ov-value">23<span style="font-size:16px;font-weight:400;color:var(--muted)">分</span></div>
+        <div class="ov-change down">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          -5.2%
+        </div>
+      </div>
+      <div class="overview-card rose">
+        <div class="ov-label">退号率</div>
+        <div class="ov-value">3.2%</div>
+        <div class="ov-change down">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          -1.8%
+        </div>
+      </div>
+    </div>
+
+    <!-- Department ranking -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">科室挂号排行</h2>
+        <button class="section-action" onclick="showToast('查看全部科室')">查看全部</button>
+      </div>
+      <div class="card">
+        <div class="dept-rank-item" onclick="showToast('内科详情')">
+          <div class="rank-num top1">1</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">内科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill blue" style="width:100%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">186</div>
+            <div class="dept-rank-pct">21.9%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('外科详情')">
+          <div class="rank-num top2">2</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">外科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill green" style="width:84%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">157</div>
+            <div class="dept-rank-pct">18.5%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('儿科详情')">
+          <div class="rank-num top3">3</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">儿科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill amber" style="width:71%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">132</div>
+            <div class="dept-rank-pct">15.6%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('妇产科详情')">
+          <div class="rank-num normal">4</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">妇产科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill blue" style="width:56%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">105</div>
+            <div class="dept-rank-pct">12.4%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('骨科详情')">
+          <div class="rank-num normal">5</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">骨科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill green" style="width:45%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">83</div>
+            <div class="dept-rank-pct">9.8%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('眼科详情')">
+          <div class="rank-num normal">6</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">眼科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill blue" style="width:35%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">66</div>
+            <div class="dept-rank-pct">7.8%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('皮肤科详情')">
+          <div class="rank-num normal">7</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">皮肤科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill amber" style="width:26%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">48</div>
+            <div class="dept-rank-pct">5.7%</div>
+          </div>
+        </div>
+        <div class="dept-rank-item" onclick="showToast('口腔科详情')">
+          <div class="rank-num normal">8</div>
+          <div class="dept-rank-info">
+            <div class="dept-rank-name">口腔科</div>
+            <div class="dept-rank-bar"><div class="dept-rank-fill rose" style="width:19%"></div></div>
+          </div>
+          <div class="dept-rank-value">
+            <div class="dept-rank-count">35</div>
+            <div class="dept-rank-pct">4.1%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time distribution -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">时段分布</h2>
+      </div>
+      <div class="card">
+        <div class="time-chart">
+          <div class="time-bars">
+            <div class="time-bar-col">
+              <div class="time-bar-value">18</div>
+              <div class="time-bar-track"><div class="time-bar-fill muted" style="height:14%"></div></div>
+              <div class="time-bar-label">7:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">86</div>
+              <div class="time-bar-track"><div class="time-bar-fill blue" style="height:68%"></div></div>
+              <div class="time-bar-label">8:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">126</div>
+              <div class="time-bar-track"><div class="time-bar-fill blue" style="height:100%"></div></div>
+              <div class="time-bar-label">9:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">98</div>
+              <div class="time-bar-track"><div class="time-bar-fill blue" style="height:78%"></div></div>
+              <div class="time-bar-label">10:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">52</div>
+              <div class="time-bar-track"><div class="time-bar-fill green" style="height:41%"></div></div>
+              <div class="time-bar-label">11:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">12</div>
+              <div class="time-bar-track"><div class="time-bar-fill muted" style="height:10%"></div></div>
+              <div class="time-bar-label">12:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">45</div>
+              <div class="time-bar-track"><div class="time-bar-fill green" style="height:36%"></div></div>
+              <div class="time-bar-label">13:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">112</div>
+              <div class="time-bar-track"><div class="time-bar-fill amber" style="height:89%"></div></div>
+              <div class="time-bar-label">14:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">108</div>
+              <div class="time-bar-track"><div class="time-bar-fill amber" style="height:86%"></div></div>
+              <div class="time-bar-label">15:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">76</div>
+              <div class="time-bar-track"><div class="time-bar-fill green" style="height:60%"></div></div>
+              <div class="time-bar-label">16:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">38</div>
+              <div class="time-bar-track"><div class="time-bar-fill muted" style="height:30%"></div></div>
+              <div class="time-bar-label">17:00</div>
+            </div>
+            <div class="time-bar-col">
+              <div class="time-bar-value">8</div>
+              <div class="time-bar-track"><div class="time-bar-fill muted" style="height:6%"></div></div>
+              <div class="time-bar-label">18:00</div>
+            </div>
+          </div>
+          <div class="time-legend">
+            <div class="time-legend-item"><div class="time-legend-dot blue"></div>上午高峰</div>
+            <div class="time-legend-item"><div class="time-legend-dot amber"></div>下午高峰</div>
+            <div class="time-legend-item"><div class="time-legend-dot green"></div>平峰</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-day trend -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">近7日趋势</h2>
+      </div>
+      <div class="card">
+        <div class="trend-section">
+          <div class="trend-header">
+            <div class="trend-title">每日挂号量</div>
+            <div class="trend-total">7日合计 <strong>5,426</strong></div>
+          </div>
+          <div class="sparkline" id="sparkline">
+            <div class="spark-bar" style="height:72%" title="3/9 周日：723"></div>
+            <div class="spark-bar" style="height:65%" title="3/10 周一：654"></div>
+            <div class="spark-bar" style="height:88%" title="3/11 周二：882"></div>
+            <div class="spark-bar" style="height:80%"
