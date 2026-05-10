@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="100dp">
+
+            <!-- Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="奖励"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="查看你的成就和使用记录"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <!-- ═══ Level hero card ═══ -->
+            <LinearLayout
+                android:id="@+id/hero_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_reward_hero"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="24dp"
+                android:layout_marginBottom="16dp">
+
+                <!-- Hero top: badge + info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <!-- Level badge circle 52dp -->
+                    <TextView
+                        android:id="@+id/tv_hero_level"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_level_badge"
+                        android:text="12"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginEnd="14dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_hero_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="专注行者"
+                            android:textColor="@color/white"
+                            android:textSize="22sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="-0.02"
+                            android:layout_marginBottom="2dp" />
+
+                        <TextView
+                            android:id="@+id/tv_hero_sub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lv.12 · 累计 1,840 XP"
+                            android:textColor="@color/white"
+                            android:alpha="0.6"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- XP progress -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="6dp">
+
+                        <TextView
+                            android:id="@+id/tv_xp_range"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="1,840 / 2,200 XP"
+                            android:textColor="@color/white"
+                            android:alpha="0.6"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_xp_percent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="84%"
+                            android:textColor="@color/white"
+                            android:alpha="0.6"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- XP progress bar: track + fill using weight -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_xp_progress_track">
+
+                        <View
+                            android:id="@+id/view_xp_fill"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="84"
+                            android:background="@drawable/bg_xp_progress_fill" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="16" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_xp_next"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="距离「专注大师」还需 360 XP"
+                        android:textColor="@color/white"
+                        android:alpha="0.5"
+                        android:textSize="11sp"
+                        android:gravity="center" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ═══ Stats row ═══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Gold stat card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="16dp">
+
+                        <!-- Top 3dp color bar -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="3dp"
+                            android:background="@color/coin_gold"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="¢"
+                            android:textColor="@color/coin_gold"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_coins"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/coin_gold_dark"
+                            android:textSize="24sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="-0.02"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="金币余额"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="11sp"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_coins_change"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="↑ +0 本周"
+                            android:textColor="@color/stat_change_up"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- XP stat card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="16dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="3dp"
+                            android:background="@color/xp_green"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⚡"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_xp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/xp_green"
+                            android:textSize="24sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="-0.02"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="总 XP"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="11sp"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_xp_change"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="↑ +0 今日"
+                            android:textColor="@color/stat_change_up"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Streak stat card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="1dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="16dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="3dp"
+                            android:background="@color/streak_orange"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔥"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_streak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/streak_orange"
+                            android:textSize="24sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="-0.02"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="连续天数"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="11sp"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:id="@+id/tv_stat_streak_change"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="最长 0 天"
+                            android:textColor="@color/stat_change_flat"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ═══ Category tabs (pill TextViews, NOT Chips) ═══ -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="14dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chip_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="全部"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/chip_xp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="XP"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/chip_coin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="金币"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/chip_level"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="升级"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <TextView
+                        android:id="@+id/chip_bonus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="额外"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- ═══ Section head: reward list ═══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="奖励记录"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="-0.01" />
+            </LinearLayout>
+
+            <!-- Reward list container (LinearLayout, not RecyclerView) -->
+            <LinearLayout
+                android:id="@+id/rv_rewards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tv_no_rewards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingVertical="24dp"
+                android:text="暂无奖励记录"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone" />
+
+            <!-- ═══ Level milestones section ═══ -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="14dp"
+                android:text="等级里程碑"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.01" />
+
+            <GridLayout
+                android:id="@+id/grid_milestones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="4"
+                android:useDefaultMargins="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

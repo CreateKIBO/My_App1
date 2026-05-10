@@ -46,6 +46,12 @@ public class UserEntity {
     @ColumnInfo(name = "unlockedThemes", defaultValue = "0")
     private String unlockedThemes;
 
+    @ColumnInfo(name = "freezeCount", defaultValue = "0")
+    private int freezeCount;
+
+    @ColumnInfo(name = "customAvatarPath", defaultValue = "NULL")
+    private String customAvatarPath;
+
     @ColumnInfo(name = "createdAt")
     private long createdAt;
 
@@ -89,6 +95,12 @@ public class UserEntity {
 
     public String getUnlockedThemes() { return unlockedThemes; }
     public void setUnlockedThemes(String unlockedThemes) { this.unlockedThemes = unlockedThemes; }
+
+    public int getFreezeCount() { return freezeCount; }
+    public void setFreezeCount(int freezeCount) { this.freezeCount = freezeCount; }
+
+    public String getCustomAvatarPath() { return customAvatarPath; }
+    public void setCustomAvatarPath(String customAvatarPath) { this.customAvatarPath = customAvatarPath; }
 
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }

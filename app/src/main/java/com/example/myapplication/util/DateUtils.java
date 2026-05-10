@@ -13,13 +13,13 @@ public class DateUtils {
     private static final SimpleDateFormat DATE_DISPLAY_FORMAT = new SimpleDateFormat("M月d日 EEEE", Locale.CHINESE);
 
     public static String getTodayString() {
-        return DATE_FORMAT.format(new Date());
+        return new SimpleDateFormat(DATE_FORMAT_STR, Locale.getDefault()).format(new Date());
     }
 
     public static String getYesterdayString() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -1);
-        return DATE_FORMAT.format(cal.getTime());
+        return new SimpleDateFormat(DATE_FORMAT_STR, Locale.getDefault()).format(cal.getTime());
     }
 
     public static String formatDate(Date date) {

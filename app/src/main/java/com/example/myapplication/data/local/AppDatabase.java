@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
         RewardTransactionEntity.class,
         ShopItemEntity.class
     },
-    version = 4,
+    version = 8,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -105,6 +105,22 @@ public abstract class AppDatabase extends RoomDatabase {
             user.setCreatedAt(System.currentTimeMillis());
             long userId = db.userDao().insert(user);
             new SessionManager(context).setLocalUserId(userId);
+
+            // Insert prop items (freeze card etc.)
+            addPropItems(db);
         });
+    }
+
+    private static void addPropItems(AppDatabase db) {
+        ShopItemEntity freezeCard = new ShopItemEntity();
+        freezeCard.setType("PROP");
+        freezeCard.setName("冻结卡");
+        freezeCard.setDescription("保持连续打卡不被中断，隔天未完成时自动使用");
+        freezeCard.setPrice(50);
+        freezeCard.setIconResName("ic_freeze_card");
+        freezeCard.setColorHex("#3B82F6");
+        freezeCard.setColorHexDark("#2563EB");
+        freezeCard.setEmoji("❄️");
+        db.shopItemDao().insert(freezeCard);
     }
 }

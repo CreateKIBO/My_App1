@@ -1,0 +1,457 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuestPlan 主页</title>
+<style>
+:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --font-d: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --gold: oklch(78% 0.15 85);
+  --gold-dark: oklch(55% 0.12 80);
+  --xp: oklch(65% 0.18 155);
+  --streak: oklch(62% 0.20 30);
+  --cw: oklch(58% 0.14 260);
+  --cs: oklch(55% 0.16 290);
+  --cp: oklch(62% 0.18 155);
+  --ca: oklch(68% 0.12 55);
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-x: 20px; --r-p: 9999px;
+  --sh: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px;
+  --sh-lg: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.06) 0 8px 24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:oklch(94% 0.005 250);color:var(--fg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:rgba(0,0,0,0.12) 0 0 0 1px,rgba(0,0,0,0.08) 0 24px 48px;display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:oklch(10% 0.02 250);border-radius:20px;z-index:100}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 100px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+/* ── Top bar ── */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:4px 0 16px}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-avatar{width:36px;height:36px;border-radius:50%;background:oklch(88% 0.06 50);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--accent)}
+.top-greet{font-size:13px;color:var(--muted);font-weight:500}
+.top-name{font-family:var(--font-d);font-size:17px;font-weight:700;letter-spacing:-0.01em}
+.top-right{display:flex;align-items:center;gap:6px}
+.coin-pill{display:flex;align-items:center;gap:4px;padding:6px 12px 6px 8px;border-radius:var(--r-p);background:oklch(96% 0.04 85);font-size:13px;font-weight:700;color:var(--gold-dark)}
+.coin-pill .mc{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:oklch(30% 0.06 80)}
+.notif-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.notif-btn svg{width:18px;height:18px;stroke:var(--fg);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--streak);border:1.5px solid var(--surface)}
+
+/* ── Level + XP card ── */
+.level-card{background:linear-gradient(135deg,oklch(25% 0.04 260),oklch(20% 0.06 280));border-radius:var(--r-x);padding:20px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden}
+.level-card::before{content:'';position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.03)}
+.level-card::after{content:'';position:absolute;bottom:-20px;left:40%;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.02)}
+
+.level-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative;z-index:1}
+.level-badge{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:20px;font-weight:800;flex-shrink:0}
+.level-info{flex:1}
+.level-title{font-family:var(--font-d);font-size:18px;font-weight:700;letter-spacing:-0.01em;margin-bottom:2px}
+.level-sub{font-size:12px;opacity:0.55;font-weight:500}
+.level-streak{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-p);background:rgba(255,255,255,0.1);font-size:13px;font-weight:700;flex-shrink:0}
+.level-streak span{font-size:16px}
+
+.xp-row{display:flex;justify-content:space-between;font-size:11px;opacity:0.55;margin-bottom:5px;font-variant-numeric:tabular-nums;position:relative;z-index:1}
+.xp-bar{width:100%;height:6px;background:rgba(255,255,255,0.12);border-radius:var(--r-p);overflow:hidden;position:relative;z-index:1}
+.xp-fill{height:100%;border-radius:var(--r-p);background:linear-gradient(90deg,var(--xp),oklch(75% 0.20 170));transition:width 0.6s cubic-bezier(0.22,1,0.36,1)}
+
+/* ── Progress ring ── */
+.progress-section{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.ring-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.ring-wrap svg{width:80px;height:80px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+.ring-fg{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-family:var(--font-d);font-size:22px;font-weight:800;letter-spacing:-0.02em;color:var(--accent);line-height:1}
+.ring-label{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px}
+
+.progress-info{flex:1}
+.progress-title{font-family:var(--font-d);font-size:16px;font-weight:700;margin-bottom:4px;letter-spacing:-0.01em}
+.progress-desc{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:8px}
+.progress-chips{display:flex;gap:6px}
+.p-chip{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--r-p);font-size:11px;font-weight:600}
+.p-chip.xp-c{background:oklch(94% 0.06 155);color:var(--xp)}
+.p-chip.coin-c{background:oklch(95% 0.06 85);color:var(--gold-dark)}
+.p-chip .mc2{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:6px;font-weight:900;color:oklch(30% 0.06 80)}
+
+/* ── Category filter ── */
+.cat-filter{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.cat-filter::-webkit-scrollbar{display:none}
+.cat-btn{padding:7px 14px;border-radius:var(--r-p);border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-b);white-space:nowrap;flex-shrink:0}
+.cat-btn.on{border-color:var(--accent);background:oklch(96% 0.03 255);color:var(--accent)}
+.cat-btn .cat-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:1px}
+
+/* ── Task list ── */
+.task-section-title{font-family:var(--font-d);font-size:16px;font-weight:700;margin-bottom:12px;letter-spacing:-0.01em;display:flex;align-items:center;justify-content:space-between}
+.task-count{font-size:12px;color:var(--muted);font-weight:500}
+
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-card{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r-l);padding:14px 16px;box-shadow:var(--sh);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.task-card:hover{box-shadow:var(--sh-lg)}
+.task-card:active{transform:scale(0.98)}
+.task-card.done{opacity:0.45}
+.task-card.done .t-name{text-decoration:line-through;color:var(--muted)}
+
+.task-card .cat-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.cat-bar.bar-w{background:var(--cw)}.cat-bar.bar-s{background:var(--cs)}.cat-bar.bar-p{background:var(--cp)}.cat-bar.bar-a{background:var(--ca)}
+
+.t-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.task-card.done .t-check{background:var(--accent);border-color:var(--accent)}
+.t-check svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;opacity:0;transition:opacity 0.2s}
+.task-card.done .t-check svg{opacity:1}
+
+.t-body{flex:1;min-width:0}
+.t-name{font-size:15px;font-weight:600;margin-bottom:3px;letter-spacing:-0.01em}
+.t-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.t-badge{display:inline-flex;padding:2px 7px;border-radius:var(--r-p);font-size:10px;font-weight:700}
+.t-badge.bw{background:oklch(95% 0.04 260);color:var(--cw)}
+.t-badge.bs{background:oklch(94% 0.05 290);color:var(--cs)}
+.t-badge.bp{background:oklch(94% 0.06 155);color:var(--cp)}
+.t-badge.ba{background:oklch(95% 0.04 55);color:var(--ca)}
+
+.t-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.t-time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500}
+.t-reward{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--gold-dark)}
+.t-reward .mc3{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:6px;font-weight:900;color:oklch(30% 0.06 80)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:32px 0;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:8px}
+.empty-text{font-size:14px;font-weight:500}
+
+/* ── FAB ── */
+.fab{position:absolute;bottom:96px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(59,130,246,0.35);cursor:pointer;z-index:20;transition:transform 0.15s}
+.fab:hover{transform:scale(1.05)}
+.fab:active{transform:scale(0.95)}
+.fab svg{width:24px;height:24px;stroke:#fff;stroke-width:2;fill:none}
+
+/* ── Modal ── */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,0.4);z-index:50;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-bg.show{opacity:1;pointer-events:auto}
+.modal-sheet{width:100%;background:var(--surface);border-radius:var(--r-x) var(--r-x) 0 0;padding:24px 20px 40px;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.22,1,0.36,1)}
+.modal-bg.show .modal-sheet{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:var(--font-d);font-size:18px;font-weight:700;margin-bottom:20px}
+.fg{margin-bottom:14px}
+.fl{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+.fi{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r-m);font-size:15px;font-family:var(--font-b);background:var(--bg);color:var(--fg);outline:none;transition:border-color 0.15s}
+.fi:focus{border-color:var(--accent)}
+.cat-sel{display:flex;gap:8px;flex-wrap:wrap}
+.co{padding:7px 14px;border-radius:var(--r-p);border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--surface);font-family:var(--font-b)}
+.co.cow{border-color:var(--cw);background:oklch(95% 0.04 260);color:var(--cw)}
+.co.cos{border-color:var(--cs);background:oklch(94% 0.05 290);color:var(--cs)}
+.co.cop{border-color:var(--cp);background:oklch(94% 0.06 155);color:var(--cp)}
+.co.coa{border-color:var(--ca);background:oklch(95% 0.04 55);color:var(--ca)}
+.btn-p{width:100%;padding:14px;border:none;border-radius:var(--r-m);background:var(--accent);color:#fff;font-size:15px;font-weight:600;font-family:var(--font-b);cursor:pointer;transition:opacity 0.15s}
+.btn-p:hover{opacity:0.9}
+
+/* ── Bottom bar ── */
+.bottom-bar{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px;z-index:10}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px;border:none;background:none;font-family:var(--font-b)}
+.bb-item svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.bb-item span{font-size:10px;font-weight:500;color:var(--muted);transition:color 0.2s}
+.bb-item.on svg{stroke:var(--accent)}.bb-item.on span{color:var(--accent)}
+
+/* ── Toast ── */
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:var(--r-p);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.task-card{animation:fadeUp 0.25s ease both}
+.task-card:nth-child(2){animation-delay:0.04s}.task-card:nth-child(3){animation-delay:0.08s}.task-card:nth-child(4){animation-delay:0.12s}.task-card:nth-child(5){animation-delay:0.16s}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+
+  <div class="content">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="top-avatar">⚔️</div>
+        <div>
+          <div class="top-greet">下午好 ☀️</div>
+          <div class="top-name">冒险者小明</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="coin-pill"><span class="mc">¢</span>1,280</div>
+        <button class="notif-btn" onclick="showToast('暂无新通知')">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <div class="notif-dot"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Level card -->
+    <div class="level-card">
+      <div class="level-row">
+        <div class="level-badge">12</div>
+        <div class="level-info">
+          <div class="level-title">专注行者</div>
+          <div class="level-sub">距离下一等级还需 360 XP</div>
+        </div>
+        <div class="level-streak"><span>🔥</span>7</div>
+      </div>
+      <div class="xp-row"><span>1,840 / 2,200 XP</span><span>84%</span></div>
+      <div class="xp-bar"><div class="xp-fill" style="width:84%"></div></div>
+    </div>
+
+    <!-- Progress ring -->
+    <div class="progress-section">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 80 80">
+          <circle class="ring-bg" cx="40" cy="40" r="34"/>
+          <circle class="ring-fg" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="85.4" id="ring-fg"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-num">3/5</div>
+          <div class="ring-label">已完成</div>
+        </div>
+      </div>
+      <div class="progress-info">
+        <div class="progress-title">今日进度</div>
+        <div class="progress-desc">还剩 2 个任务，全部完成可获得额外奖励！</div>
+        <div class="progress-chips">
+          <div class="p-chip xp-c">⚡ +85 XP</div>
+          <div class="p-chip coin-c"><span class="mc2">¢</span>+100 ¢</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category filter -->
+    <div class="cat-filter" id="cat-filter">
+      <button class="cat-btn on" onclick="filterCat('all',this)">全部</button>
+      <button class="cat-btn" onclick="filterCat('w',this)"><span class="cat-dot" style="background:var(--cw)"></span>工作</button>
+      <button class="cat-btn" onclick="filterCat('s',this)"><span class="cat-dot" style="background:var(--cs)"></span>学习</button>
+      <button class="cat-btn" onclick="filterCat('p',this)"><span class="cat-dot" style="background:var(--cp)"></span>运动</button>
+      <button class="cat-btn" onclick="filterCat('a',this)"><span class="cat-dot" style="background:var(--ca)"></span>个人</button>
+    </div>
+
+    <!-- Task list -->
+    <div class="task-section-title">
+      <span>今日任务</span>
+      <span class="task-count" id="task-count">3/5 已完成</span>
+    </div>
+    <div class="task-list" id="task-list"></div>
+
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="openModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modal" onclick="closeModalBg(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">新建任务</div>
+      <div class="fg">
+        <label class="fl">任务名称</label>
+        <input class="fi" id="inp-name" placeholder="输入任务名称…">
+      </div>
+      <div class="fg">
+        <label class="fl">分类</label>
+        <div class="cat-sel" id="cat-sel">
+          <button class="co cow" onclick="pickCat('w',this)">工作</button>
+          <button class="co" onclick="pickCat('s',this)">学习</button>
+          <button class="co" onclick="pickCat('p',this)">运动</button>
+          <button class="co" onclick="pickCat('a',this)">个人</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">时间段</label>
+        <div style="display:flex;gap:8px">
+          <input class="fi" id="inp-start" placeholder="开始" style="flex:1" value="09:00">
+          <input class="fi" id="inp-end" placeholder="结束" style="flex:1" value="10:00">
+        </div>
+      </div>
+      <button class="btn-p" onclick="addTask()">添加任务</button>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <button class="bb-item on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日程</span></button>
+    <button class="bb-item" onclick="showToast('日历页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>日历</span></button>
+    <button class="bb-item" onclick="showToast('连续天数页面')"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 4 5 4 8a4 4 0 11-8 0c0-3 3-5 4-8z"/></svg><span>连续</span></button>
+    <button class="bb-item" onclick="showToast('奖励页面')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><span>奖励</span></button>
+    <button class="bb-item" onclick="showToast('商店页面')"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span>商店</span></button>
+    <button class="bb-item" onclick="showToast('个人中心')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+const catMeta = {
+  w: {label:'工作', bar:'bar-w', badge:'bw', coin:30, xp:30},
+  s: {label:'学习', bar:'bar-s', badge:'bs', coin:25, xp:25},
+  p: {label:'运动', bar:'bar-p', badge:'bp', coin:20, xp:20},
+  a: {label:'个人', bar:'bar-a', badge:'ba', coin:15, xp:15}
+};
+
+let tasks = [
+  {id:1, name:'晨间冥想 15 分钟', cat:'a', start:'07:00', end:'07:15', done:true},
+  {id:2, name:'阅读《设计心理学》第 4 章', cat:'s', start:'08:30', end:'09:30', done:true},
+  {id:3, name:'完成项目周报', cat:'w', start:'10:00', end:'11:30', done:true},
+  {id:4, name:'跑步 5 公里', cat:'p', start:'18:00', end:'18:40', done:false},
+  {id:5, name:'整理书桌和文件', cat:'a', start:'20:00', end:'20:30', done:false},
+];
+
+let currentFilter = 'all';
+let nextId = 6;
+let selectedCat = 'w';
+
+// ── Render ──
+function render() {
+  const filtered = currentFilter === 'all' ? tasks : tasks.filter(t => t.cat === currentFilter);
+  const doneCount = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+
+  document.getElementById('task-count').textContent = `${doneCount}/${total} 已完成`;
+
+  // Ring
+  const pct = total > 0 ? doneCount / total : 0;
+  const circumference = 2 * Math.PI * 34;
+  const offset = circumference * (1 - pct);
+  document.getElementById('ring-fg').style.strokeDashoffset = offset;
+
+  // Task list
+  const list = document.getElementById('task-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">暂无任务</div></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const m = catMeta[t.cat];
+    return `<div class="task-card${t.done ? ' done' : ''}" onclick="toggleTask(${t.id})">
+      <div class="cat-bar ${m.bar}"></div>
+      <div class="t-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></div>
+      <div class="t-body">
+        <div class="t-name">${t.name}</div>
+        <div class="t-meta"><span class="t-badge ${m.badge}">${m.label}</span><span>${t.start} – ${t.end}</span></div>
+      </div>
+      <div class="t-right">
+        <div class="t-time">${t.start}</div>
+        <div class="t-reward"><span class="mc3">¢</span>${m.coin}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Toggle ──
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  if (t.done) {
+    const m = catMeta[t.cat];
+    showToast(`✓ ${t.name}  +${m.xp} XP  +${m.coin} ¢`);
+  }
+  render();
+}
+
+// ── Filter ──
+function filterCat(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+// ── Modal ──
+function openModal() {
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('inp-name').value = '';
+  selectedCat = 'w';
+  updateCatSel();
+}
+
+function closeModalBg(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('show');
+  }
+}
+
+function pickCat(cat, btn) {
+  selectedCat = cat;
+  updateCatSel();
+}
+
+function updateCatSel() {
+  const map = {w:'cow', s:'cos', p:'cop', a:'coa'};
+  document.querySelectorAll('#cat-sel .co').forEach(b => {
+    b.className = 'co';
+  });
+  const btns = document.querySelectorAll('#cat-sel .co');
+  const cats = ['w','s','p','a'];
+  cats.forEach((c, i) => {
+    if (c === selectedCat) btns[i].classList.add(map[c]);
+  });
+}
+
+function addTask() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) { showToast('请输入任务名称'); return; }
+  const start = document.getElementById('inp-start').value || '09:00';
+  const end = document.getElementById('inp-end').value || '10:00';
+  tasks.push({id: nextId++, name, cat: selectedCat, start, end, done: false});
+  document.getElementById('modal').classList.remove('show');
+  showToast(`已添加: ${name}`);
+  render();
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Init ──
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,882 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>轻松挂 — 挂号查询系统</title>
+<style>
+  :root {
+    --bg:      oklch(97.5% 0.008 250);
+    --surface: oklch(100% 0 0);
+    --fg:      oklch(18% 0.012 250);
+    --muted:   oklch(52% 0.012 250);
+    --border:  oklch(92% 0.005 250);
+    --accent:  oklch(52% 0.18 255);
+    --accent-light: oklch(95% 0.04 255);
+    --accent-dark: oklch(42% 0.18 255);
+    --success: oklch(55% 0.14 155);
+    --warning: oklch(68% 0.14 75);
+    --danger:  oklch(55% 0.18 25);
+    --card-shadow: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+
+    --radius-sm: 8px;
+    --radius:    12px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --nav-height: 64px;
+    --header-height: 56px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── App shell ── */
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    background: var(--bg);
+    box-shadow: 0 0 40px oklch(0% 0 0 / 0.05);
+  }
+
+  /* ── Top header bar ── */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--accent);
+    padding: 0 20px;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .top-bar-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .top-bar-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: oklch(100% 0 0 / 0.15);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .top-bar-btn:hover { background: oklch(100% 0 0 / 0.25); }
+  .top-bar-btn svg { width: 18px; height: 18px; color: #fff; }
+
+  /* ── Hero search section ── */
+  .hero-section {
+    background: var(--accent);
+    padding: 0 20px 28px;
+    border-radius: 0 0 24px 24px;
+    position: relative;
+  }
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+    z-index: 1;
+  }
+
+  .search-bar {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 42px;
+    border: none;
+    border-radius: 22px;
+    background: oklch(100% 0 0 / 0.92);
+    backdrop-filter: blur(8px);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--fg);
+    outline: none;
+    transition: box-shadow var(--transition);
+  }
+  .search-bar input:focus {
+    box-shadow: 0 0 0 2px oklch(100% 0 0 / 0.4);
+  }
+  .search-bar input::placeholder { color: oklch(60% 0.01 250); }
+  .search-bar svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+  }
+
+  /* Quick action pills */
+  .quick-pills {
+    display: flex;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .quick-pills::-webkit-scrollbar { display: none; }
+  .quick-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: oklch(100% 0 0 / 0.18);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition);
+    border: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+  }
+  .quick-pill:hover { background: oklch(100% 0 0 / 0.28); }
+  .quick-pill.active { background: #fff; color: var(--accent); }
+
+  /* ── Content area ── */
+  .content-area {
+    padding: 0 16px;
+    padding-bottom: calc(var(--nav-height) + 24px + var(--safe-bottom));
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 24px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .section-more {
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 4px 0;
+    transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .section-more:hover { color: var(--accent); }
+
+  /* ── Feature grid ── */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px 8px 12px;
+    box-shadow: var(--card-shadow);
+  }
+  .feat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .feat-item:hover { background: var(--bg); }
+  .feat-item:active { background: oklch(94% 0.008 250); }
+  .feat-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .feat-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    border-radius: inherit;
+  }
+  .feat-icon-wrap svg {
+    width: 24px;
+    height: 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .feat-item-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+
+  /* Feature color variants */
+  .feat-item[data-color="blue"] .feat-icon-wrap { background: oklch(95% 0.04 255); }
+  .feat-item[data-color="blue"] .feat-icon-wrap svg { color: var(--accent); }
+  .feat-item[data-color="green"] .feat-icon-wrap { background: oklch(95% 0.04 155); }
+  .feat-item[data-color="green"] .feat-icon-wrap svg { color: var(--success); }
+  .feat-item[data-color="amber"] .feat-icon-wrap { background: oklch(96% 0.04 80); }
+  .feat-item[data-color="amber"] .feat-icon-wrap svg { color: var(--warning); }
+  .feat-item[data-color="violet"] .feat-icon-wrap { background: oklch(94% 0.04 300); }
+  .feat-item[data-color="violet"] .feat-icon-wrap svg { color: oklch(50% 0.18 300); }
+  .feat-item[data-color="teal"] .feat-icon-wrap { background: oklch(95% 0.03 185); }
+  .feat-item[data-color="teal"] .feat-icon-wrap svg { color: oklch(50% 0.12 185); }
+  .feat-item[data-color="rose"] .feat-icon-wrap { background: oklch(95% 0.04 20); }
+  .feat-item[data-color="rose"] .feat-icon-wrap svg { color: var(--danger); }
+  .feat-item[data-color="indigo"] .feat-icon-wrap { background: oklch(94% 0.04 275); }
+  .feat-item[data-color="indigo"] .feat-icon-wrap svg { color: oklch(48% 0.16 275); }
+  .feat-item[data-color="cyan"] .feat-icon-wrap { background: oklch(95% 0.03 200); }
+  .feat-item[data-color="cyan"] .feat-icon-wrap svg { color: oklch(55% 0.12 200); }
+
+  /* ── Notice banner ── */
+  .notice-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--accent-light);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border: none;
+    width: 100%;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notice-banner:hover { background: oklch(93% 0.05 255); }
+  .notice-banner svg { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+  .notice-banner .notice-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--accent-dark);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .notice-banner .notice-text span {
+    display: inline-block;
+    animation: marquee 12s linear infinite;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── Doctor cards ── */
+  .doctor-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .doctor-scroll::-webkit-scrollbar { display: none; }
+
+  .doctor-card {
+    flex-shrink: 0;
+    width: 200px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+    border: none;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .doctor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.08);
+  }
+  .doctor-card:active { transform: translateY(0); }
+  .doctor-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .doctor-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .doctor-name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .doctor-title {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .doctor-dept {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .doctor-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .doctor-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .doctor-fee {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--danger);
+  }
+  .doctor-fee small {
+    font-size: 11px;
+    font-weight: 400;
+  }
+  .doctor-book-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .doctor-book-btn:hover { background: var(--accent-dark); }
+
+  /* ── Appointment list ── */
+  .appt-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform var(--transition);
+    border: none;
+    width: 100%;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .appt-card:hover { transform: translateY(-1px); }
+  .appt-card:active { transform: translateY(0); }
+  .appt-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .appt-hospital {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .appt-status {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .appt-status.confirmed { background: oklch(95% 0.04 155); color: var(--success); }
+  .appt-status.pending { background: oklch(96% 0.04 80); color: var(--warning); }
+  .appt-status.cancelled { background: oklch(95% 0.02 250); color: var(--muted); }
+  .appt-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .appt-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .appt-detail svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .appt-detail strong { color: var(--fg); font-weight: 500; }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: var(--nav-height);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 50;
+    padding-bottom: var(--safe-bottom);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity var(--transition);
+    position: relative;
+  }
+  .nav-item svg { width: 22px; height: 22px; color: var(--muted); transition: color var(--transition); }
+  .nav-item .nav-label { font-size: 10px; font-weight: 500; color: var(--muted); transition: color var(--transition); }
+  .nav-item.active svg { color: var(--accent); }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item:hover svg { color: var(--fg); }
+  .nav-item:hover .nav-label { color: var(--fg); }
+  .nav-badge {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Sub-screen overlay ── */
+  .screen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--bg);
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen-overlay.active { transform: translateX(0); }
+
+  .screen-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .screen-back {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .screen-back:hover { background: var(--border); }
+  .screen-back svg { width: 20px; height: 20px; color: var(--fg); }
+  .screen-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .screen-body { padding: 20px 16px 40px; }
+
+  /* ── Form elements ── */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--fg);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px oklch(52% 0.18 255 / 0.1);
+  }
+  .form-input::placeholder { color: oklch(70% 0.01 250); }
+  textarea.form-input { height: 100px; padding: 12px 14px; resize: vertical; }
+
+  .form-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .form-btn:hover { background: var(--accent-dark); }
+  .form-btn:active { transform: scale(0.98); }
+  .form-btn.secondary {
+    background: var(--surface);
+    color: var(--fg);
+    border: 1px solid var(--border);
+  }
+  .form-btn.secondary:hover { border-color: oklch(80% 0.01 250); }
+
+  /* ── Profile ── */
+  .profile-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+  }
+  .profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), oklch(55% 0.14 275));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .profile-name { font-size: 17px; font-weight: 600; }
+  .profile-role { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    padding: 16px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    text-align: center;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Dept list ── */
+  .dept-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .dept-item:last-child { border-bottom: none; }
+  .dept-name { font-size: 15px; font-weight: 500; min-width: 56px; }
+  .dept-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 0 14px;
+    overflow: hidden;
+  }
+  .dept-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dept-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+
+  /* ── Image placeholder ── */
+  .img-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius);
+    border: 2px dashed var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .img-placeholder svg { width: 32px; height: 32px; opacity: 0.4; }
+  .img-placeholder.sm { aspect-ratio: 1/1; font-size: 11px; }
+  .img-placeholder.sm svg { width: 20px; height: 20px; }
+
+  /* ── Broadcast ── */
+  .broadcast-form {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+  }
+  .broadcast-form .form-group:last-of-type { margin-bottom: 16px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: var(--fg);
+    color: var(--surface);
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 200;
+    opacity: 0;
+    transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .app-shell { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <span class="top-bar-title">轻松挂</span>
+    <div class="top-bar-actions">
+      <button class="top-bar-btn" onclick="showToast('暂无新消息')" aria-label="消息">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <button class="top-bar-btn" onclick="showToast('扫码功能开发中')" aria-label="扫码">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero / Search -->
+  <div class="hero-section">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="搜索医院、科室、医生">
+    </div>
+    <div class="quick-pills">
+      <button class="quick-pill active" onclick="selectPill(this)">预约挂号</button>
+      <button class="quick-pill" onclick="selectPill(this)">当天挂号</button>
+      <button class="quick-pill" onclick="selectPill(this)">报告查询</button>
+      <button class="quick-pill" onclick="selectPill(this)">在线问诊</button>
+      <button class="quick-pill" onclick="selectPill(this)">体检预约</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- Notice -->
+    <button class="notice-banner" onclick="showToast('公告详情页开发中')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div class="notice-text">
+        <span>系统公告：3月15日起支持医保在线结算&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;温馨提示：请提前30分钟到达候诊区&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;系统公告：3月15日起支持医保在线结算&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;温馨提示：请提前30分钟到达候诊区</span>
+      </div>
+    </button>
+
+    <!-- Feature grid -->
+    <section class="section" data-od-id="feature-nav">
+      <div class="section-header">
+        <h2 class="section-title">功能导航</h2>
+      </div>
+      <div class="feat-grid">
+        <button class="feat-item" data-color="blue" onclick="openScreen('register')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          </div>
+          <span class="feat-item-label">用户注册</span>
+        </button>
+        <button class="feat-item" data-color="green" onclick="openScreen('login')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span class="feat-item-label">用户登录</span>
+        </button>
+        <button class="feat-item" data-color="violet" onclick="openScreen('profile')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span class="feat-item-label">个人资料</span>
+        </button>
+        <button class="feat-item" data-color="amber" onclick="openScreen('stats')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <span class="feat-item-label">科室统计</span>
+        </button>
+        <button class="feat-item" data-color="teal" onclick="openScreen('preview')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <span class="feat-item-label">图片预览</span>
+        </button>
+        <button class="feat-item" data-color="rose" onclick="openScreen('camera')">
+          <div class="feat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19

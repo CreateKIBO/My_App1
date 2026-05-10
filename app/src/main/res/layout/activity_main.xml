@@ -1,26 +1,199 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/nav_graph" />
+        app:navGraph="@navigation/nav_graph"
+        android:layout_marginBottom="56dp" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
-        style="@style/Widget.App.BottomNavigationView"
+    <!-- Custom bottom bar with 6 tabs -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled" />
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:background="?attr/colorSurface"
+        android:elevation="8dp"
+        android:paddingHorizontal="4dp">
 
-</LinearLayout>
+        <LinearLayout
+            android:id="@+id/tab_home"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_home"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_task"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日程"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_calendar"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_calendar"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_calendar"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_calendar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日历"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_streak"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_streak"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_streak"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_streak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="连续"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_reward"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_reward"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_reward"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_reward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="奖励"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_shop"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_shop"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_shop"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_shop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="商店"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_profile"
+            style="@style/BottomTabItem"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/tab_icon_profile"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_profile"
+                android:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tab_label_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="我的"
+                android:textSize="10sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,224 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuestPlan 更换头像</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f9fb;--sf:#fff;--fg:#111;--mt:#6b7280;--bd:#e5e7eb;--ac:#3b82f6;--fd:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;--fb:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;--gd:#d4a017;--xp:#16a34a}
+body{font-family:var(--fb);background:#e5e7eb;color:var(--fg);display:flex;justify-content:center;padding:20px;-webkit-font-smoothing:antialiased}
+.P{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 24px 48px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.DI{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:#111;border-radius:20px;z-index:100}
+.SB{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+.C{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 24px;-webkit-overflow-scrolling:touch}
+.C::-webkit-scrollbar{display:none}
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal.show{opacity:1;pointer-events:auto}
+.mbox{width:300px;background:var(--sf);border-radius:20px;padding:24px;text-align:center;transform:scale(.9);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.modal.show .mbox{transform:scale(1)}
+input[type=file]{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="P">
+<div class="DI"></div>
+<div class="SB"><span>9:41</span><span>●●●●</span></div>
+<div class="C" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal" onclick="if(event.target===this)hM()"><div class="mbox" id="mbox"></div></div>
+<input type="file" id="fI" accept="image/*" onchange="hFile(event)">
+</div>
+<script>
+var D={coins:1280,eqA:'warrior',upA:null,avs:[
+{id:'warrior',n:'勇士',em:'⚔️',bg:'#fef3c7',p:0,o:true},
+{id:'mage',n:'魔法师',em:'🧙',bg:'#ede9fe',p:0,o:true},
+{id:'ninja',n:'忍者',em:'🥷',bg:'#d1fae5',p:0,o:true},
+{id:'knight',n:'骑士',em:'🛡️',bg:'#fee2e2',p:0,o:true},
+{id:'dragon',n:'龙人',em:'🐉',bg:'#fef08a',p:300,o:false},
+{id:'robot',n:'机器人',em:'🤖',bg:'#dbeafe',p:250,o:false},
+{id:'cat',n:'猫咪',em:'🐱',bg:'#fef9c3',p:200,o:false},
+{id:'ghost',n:'幽灵',em:'👻',bg:'#e0e7ff',p:350,o:false}
+]};
+
+var _tt;
+function T(m){
+  var t=document.getElementById('toast');
+  t.textContent=m;
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt=setTimeout(function(){t.classList.remove('show')},1800);
+}
+
+function sM(h){document.getElementById('mbox').innerHTML=h;document.getElementById('modal').classList.add('show')}
+function hM(){document.getElementById('modal').classList.remove('show')}
+
+function render(){
+  var isUp=D.eqA==='uploaded'&&D.upA;
+  var eqAv=D.avs.find(function(a){return a.id===D.eqA});
+  var curEm=isUp?'<img src="'+D.upA+'" style="width:100%;height:100%;object-fit:cover">':eqAv.em;
+  var curBg=isUp?'#eff6ff':eqAv.bg;
+  var curN=isUp?'自定义头像':eqAv.n;
+  var h='';
+
+  // Nav
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 16px">';
+  h+='<button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 18 18" stroke="var(--fg)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 3 5 9 11 15"/></svg></button>';
+  h+='<div style="font-family:var(--fd);font-size:18px;font-weight:700">更换头像</div>';
+  h+='<div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--gd)"><span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#fbbf24);display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#78350f">¢</span>'+D.coins.toLocaleString()+'</div>';
+  h+='</div>';
+
+  // Current avatar
+  h+='<div style="background:var(--sf);border-radius:20px;padding:20px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);margin-bottom:20px;display:flex;align-items:center;gap:16px">';
+  h+='<div style="position:relative;width:72px;height:72px;flex-shrink:0">';
+  h+='<div style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--ac);background:'+curBg+';overflow:hidden">'+curEm+'</div>';
+  h+='<div style="position:absolute;inset:-4px;border-radius:50%;border:2px dashed var(--ac);opacity:.3;animation:spin 12s linear infinite"></div>';
+  h+='</div>';
+  h+='<div style="flex:1"><div style="font-size:11px;color:var(--mt);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px">当前装备</div>';
+  h+='<div style="font-family:var(--fd);font-size:20px;font-weight:700">'+curN+'</div>';
+  h+='<div style="font-size:12px;color:var(--mt);margin-top:2px">在个人中心和任务页面展示</div></div>';
+  h+='</div>';
+
+  // Upload section
+  h+='<div style="background:var(--sf);border-radius:20px;padding:20px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);margin-bottom:20px">';
+  h+='<div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">📷</span>上传自定义头像</div>';
+
+  if(D.upA){
+    h+='<div style="border:2px solid var(--ac);border-radius:16px;padding:16px;display:flex;align-items:center;gap:16px">';
+    h+='<div style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:3px solid var(--ac);flex-shrink:0"><img src="'+D.upA+'" style="width:100%;height:100%;object-fit:cover"></div>';
+    h+='<div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:2px">自定义头像</div><div style="font-size:12px;color:var(--mt)">已上传 · 可随时装备</div>';
+    h+='<div style="display:flex;gap:8px;margin-top:8px">';
+    h+='<button style="padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--fb);background:var(--ac);color:#fff" onclick="eqUp()">装备此头像</button>';
+    h+='<button style="padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--fb);background:#fee2e2;color:#dc2626" onclick="rmUp()">删除</button>';
+    h+='</div></div></div>';
+  }else{
+    h+='<div style="border:2px dashed var(--bd);border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer" onclick="document.getElementById(\'fI\').click()">';
+    h+='<div style="font-size:32px;margin-bottom:8px;opacity:.6">📷</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--fg);margin-bottom:4px">上传自定义头像</div>';
+    h+='<div style="font-size:12px;color:var(--mt);margin-bottom:10px">支持 JPG、PNG，建议正方形图片</div>';
+    h+='<div style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;background:var(--ac);color:#fff;font-size:13px;font-weight:600">选择图片</div>';
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // Owned
+  h+='<div style="font-size:12px;font-weight:700;color:var(--mt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px">已拥有</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">';
+  D.avs.filter(function(a){return a.o}).forEach(function(a){
+    var isEq=a.id===D.eqA&&!isUp;
+    h+='<div style="background:var(--sf);border-radius:16px;padding:12px 8px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);text-align:center;cursor:pointer;border:2px solid '+(isEq?'var(--ac)':'transparent')+';position:relative;overflow:hidden" onclick="eqAv(\''+a.id+'\')">';
+    if(isEq) h+='<div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac)"></div>';
+    h+='<div style="width:48px;height:48px;margin:0 auto 6px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:'+a.bg+'">'+a.em+'</div>';
+    h+='<div style="font-size:12px;font-weight:700;margin-bottom:2px">'+a.n+'</div>';
+    h+='<div style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;display:inline-block;background:'+(isEq?'#eff6ff':'#f0fdf4')+';color:'+(isEq?'var(--ac)':'var(--xp)')+'">'+(isEq?'装备中':'点击装备')+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  // Locked
+  h+='<div style="font-size:12px;font-weight:700;color:var(--mt);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px">未解锁</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">';
+  D.avs.filter(function(a){return !a.o}).forEach(function(a){
+    h+='<div style="background:var(--sf);border-radius:16px;padding:12px 8px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);text-align:center;cursor:pointer;border:2px solid transparent;opacity:.55" onclick="buyAv(\''+a.id+'\')">';
+    h+='<div style="width:48px;height:48px;margin:0 auto 6px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:'+a.bg+'">'+a.em+'</div>';
+    h+='<div style="font-size:12px;font-weight:700;margin-bottom:2px">'+a.n+'</div>';
+    h+='<div style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;display:inline-block;background:#f3f4f6;color:var(--mt)">未解锁</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;color:var(--gd);margin-top:4px"><span style="width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#fbbf24);display:inline-flex;align-items:center;justify-content:center;font-size:5px;font-weight:900;color:#78350f">¢</span>'+a.p+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  // Tip
+  h+='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px">';
+  h+='<div style="font-size:20px;flex-shrink:0">🛒</div>';
+  h+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--gd)">赚取更多金币</div><div style="font-size:12px;color:var(--mt);line-height:1.3;margin-top:2px">完成任务获取金币，连续天数越多奖励越丰厚。升级时获得等级×50金币！</div></div>';
+  h+='</div>';
+
+  document.getElementById('app').innerHTML=h;
+}
+
+function eqAv(id){
+  if(D.eqA===id)return;
+  D.eqA=id;
+  var a=D.avs.find(function(x){return x.id===id});
+  T('✓ 已装备: '+a.n);
+  render();
+}
+
+function eqUp(){
+  if(!D.upA)return;
+  D.eqA='uploaded';
+  T('✓ 已装备自定义头像');
+  render();
+}
+
+function buyAv(id){
+  var a=D.avs.find(function(x){return x.id===id});
+  if(!a||a.o)return;
+  if(D.coins<a.p){T('金币不足！还需 '+(a.p-D.coins)+' 金币');return}
+  sM('<div style="font-size:48px;margin-bottom:12px">'+a.em+'</div><div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:6px">购买 '+a.n+'？</div><div style="font-size:13px;color:var(--mt);line-height:1.4;margin-bottom:20px">花费 '+a.p+' 金币购买并装备此头像</div><div style="display:flex;gap:10px"><button style="flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;font-family:var(--fb);cursor:pointer;background:#f3f4f6;color:var(--mt)" onclick="hM()">取消</button><button style="flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;font-family:var(--fb);cursor:pointer;background:var(--ac);color:#fff" onclick="confirmBuy(\''+id+'\')">确认</button></div>');
+}
+
+function confirmBuy(id){
+  hM();
+  var a=D.avs.find(function(x){return x.id===id});
+  D.coins-=a.p;
+  a.o=true;
+  D.eqA=id;
+  T('✓ 已购买并装备: '+a.n);
+  render();
+}
+
+function hFile(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){T('请选择图片文件');return}
+  if(file.size>5*1024*1024){T('图片大小不能超过 5MB');return}
+  var reader=new FileReader();
+  reader.onload=function(ev){D.upA=ev.target.result;T('✓ 头像已上传');render()};
+  reader.readAsDataURL(file);
+}
+
+function rmUp(){
+  sM('<div style="font-size:48px;margin-bottom:12px">🗑️</div><div style="font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:6px">删除自定义头像？</div><div style="font-size:13px;color:var(--mt);line-height:1.4;margin-bottom:20px">删除后无法恢复，将自动切换为勇士头像</div><div style="display:flex;gap:10px"><button style="flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;font-family:var(--fb);cursor:pointer;background:#f3f4f6;color:var(--mt)" onclick="hM()">取消</button><button style="flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;font-family:var(--fb);cursor:pointer;background:#dc2626;color:#fff" onclick="confirmRm()">删除</button></div>');
+}
+
+function confirmRm(){
+  hM();
+  D.upA=null;
+  if(D.eqA==='uploaded')D.eqA='warrior';
+  T('已删除自定义头像');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

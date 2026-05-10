@@ -1,36 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@color/card_surface"
+    android:elevation="1dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp">
+    android:padding="12dp">
 
-    <ImageView
-        android:id="@+id/iv_reward_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:contentDescription="@string/profile_recent_rewards"
-        android:src="@drawable/ic_coin" />
+    <!-- Left type color bar 3dp -->
+    <View
+        android:id="@+id/view_type_bar"
+        android:layout_width="3dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp" />
 
+    <!-- Icon square 36dp with rounded corners -->
     <TextView
-        android:id="@+id/tv_reward_reason"
+        android:id="@+id/tv_reward_icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_reward_icon_xp"
+        android:gravity="center"
+        android:text="⚡"
+        android:textSize="16sp" />
+
+    <!-- Body: name + detail + source -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurface" />
+        android:minWidth="0dp"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_reward_amount"
+        <TextView
+            android:id="@+id/tv_reward_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:text="完成任务 XP"
+            android:textColor="@color/md_on_surface"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_reward_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="完成项目周报"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <!-- Source category row -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/view_source_dot"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_reward_source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Right: amount + date -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:textAppearance="?attr/textAppearanceLabelLarge" />
+        android:gravity="end"
+        android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/tv_reward_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="-0.02"
+            android:text="+30 XP"
+            android:textColor="@color/xp_green"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_reward_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="今天 11:30"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp" />
+    </LinearLayout>
 </LinearLayout>

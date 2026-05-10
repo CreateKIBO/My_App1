@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avatar edit page matching HTML mockup design.
+     Top nav bar with back button, title, coin balance.
+     Current avatar card, upload section, name edit, owned/locked grids, tip card. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_surface"
+    android:fillViewport="true"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="32dp">
+
+        <!-- ═══ Top Nav Bar ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="16dp">
+
+            <!-- Back button: 36dp circle with chevron_left -->
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_avatar_circle"
+                android:contentDescription="返回"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/md_on_surface" />
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:letterSpacing="-0.02"
+                android:text="更换头像"
+                android:textColor="@color/md_on_surface"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Coin balance -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Mini coin orb -->
+                <TextView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_mini_coin"
+                    android:gravity="center"
+                    android:text="¢"
+                    android:textColor="#4E3B0A"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_coin_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="0"
+                    android:textColor="@color/coin_gold"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══ Current Avatar Card ═══ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/md_outline_variant"
+            app:strokeWidth="0.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="20dp">
+
+                <!-- Avatar circle 72dp with accent border -->
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginEnd="16dp">
+
+                    <!-- Dashed ring (decorative) -->
+                    <View
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="center"
+                        android:alpha="0.3"
+                        android:background="@drawable/bg_avatar_dashed_ring" />
+
+                    <!-- Avatar image -->
+                    <ImageView
+                        android:id="@+id/iv_current_avatar"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_avatar_circle"
+                        android:contentDescription="当前头像"
+                        android:padding="2dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile" />
+                </FrameLayout>
+
+                <!-- Avatar info -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.04"
+                        android:text="当前装备"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_current_avatar_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="-0.02"
+                        android:text="勇士"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="在个人中心和任务页面展示"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══ Upload Section ═══ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/md_outline_variant"
+            app:strokeWidth="0.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Section title -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="📷"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="上传自定义头像"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Upload area: dashed border (shown when no custom avatar) -->
+                <LinearLayout
+                    android:id="@+id/layout_upload_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_dashed_border"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="28dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:alpha="0.6"
+                        android:text="📷"
+                        android:textSize="32sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="上传自定义头像"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="支持 JPG、PNG，建议正方形图片"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <!-- Select image pill button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_select_image"
+                        style="@style/Widget.Material3.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"
+                        android:text="选择图片"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/md_primary"
+                        app:cornerRadius="9999dp" />
+                </LinearLayout>
+
+                <!-- Uploaded preview area (shown when custom avatar exists) -->
+                <LinearLayout
+                    android:id="@+id/layout_uploaded_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_uploaded_preview"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <!-- Preview avatar circle -->
+                    <ImageView
+                        android:id="@+id/iv_custom_preview"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/bg_avatar_circle"
+                        android:contentDescription="自定义头像"
+                        android:padding="3dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile" />
+
+                    <!-- Info + buttons -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="自定义头像"
+                            android:textColor="@color/md_on_surface"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="已上传 · 可随时装备"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal">
+
+                            <!-- Equip custom avatar button -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_equip_custom"
+                                style="@style/Widget.Material3.Button.UnelevatedButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:minWidth="0dp"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="6dp"
+                                android:text="装备此头像"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                app:backgroundTint="@color/md_primary"
+                                app:cornerRadius="9999dp" />
+
+                            <!-- Delete custom avatar button -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_delete_custom"
+                                style="@style/Widget.Material3.Button.UnelevatedButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:fontFamily="sans-serif-medium"
+                                android:minWidth="0dp"
+                                android:paddingHorizontal="14dp"
+                                android:paddingVertical="6dp"
+                                android:text="删除"
+                                android:textColor="#DC2626"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                app:backgroundTint="#FEE2E2"
+                                app:cornerRadius="9999dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══ Edit Name Section ═══ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/md_outline_variant"
+            app:strokeWidth="0.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="修改昵称"
+                    android:textColor="@color/md_on_surface"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_display_name"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_name_input"
+                    android:fontFamily="sans-serif-medium"
+                    android:hint="输入昵称"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp"
+                    android:textColor="@color/md_on_surface"
+                    android:textColorHint="@color/text_hint"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_save_name"
+                    style="@style/Widget.Material3.Button.UnelevatedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="6dp"
+                    android:text="保存"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/md_primary"
+                    app:cornerRadius="9999dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══ Owned Section Label ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
+            android:text="已拥有"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Owned avatars grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_owned_avatars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never" />
+
+        <!-- ═══ Locked Section Label ═══ -->
+        <TextView
+            android:id="@+id/tv_locked_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.06"
+            android:text="未解锁"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Locked avatars grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_locked_avatars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never" />
+
+        <!-- ═══ Tip Card ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_tip_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="🛒"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="赚取更多金币"
+                    android:textColor="@color/coin_gold"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="完成任务获取金币，连续天数越多奖励越丰厚。升级时获得等级×50金币！"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

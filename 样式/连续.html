@@ -1,0 +1,354 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuestPlan 连续</title>
+<style>
+:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --font-d: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --gold: oklch(78% 0.15 85);
+  --gold-dark: oklch(55% 0.12 80);
+  --xp: oklch(65% 0.18 155);
+  --streak: oklch(62% 0.20 30);
+  --cw: oklch(58% 0.14 260);
+  --cs: oklch(55% 0.16 290);
+  --cp: oklch(62% 0.18 155);
+  --ca: oklch(68% 0.12 55);
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-x: 20px; --r-p: 9999px;
+  --sh: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px;
+  --sh-lg: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.06) 0 8px 24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:oklch(94% 0.005 250);color:var(--fg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:rgba(0,0,0,0.12) 0 0 0 1px,rgba(0,0,0,0.08) 0 24px 48px;display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:oklch(10% 0.02 250);border-radius:20px;z-index:100}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 100px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+/* ── Hero ── */
+.streak-hero{text-align:center;padding:20px 0 24px;position:relative}
+.streak-ring{position:relative;width:140px;height:140px;margin:0 auto 16px}
+.streak-ring svg{width:140px;height:140px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:8}
+.ring-fg{fill:none;stroke:var(--streak);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1);filter:drop-shadow(0 0 6px rgba(234,88,12,0.3))}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-emoji{font-size:28px;margin-bottom:2px;animation:flicker 1.5s ease-in-out infinite alternate}
+.ring-num{font-family:var(--font-d);font-size:44px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:var(--streak)}
+.ring-unit{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+@keyframes flicker{0%{transform:scale(1) rotate(-3deg)}100%{transform:scale(1.12) rotate(3deg)}}
+
+.streak-msg{font-size:14px;color:var(--muted);font-weight:500;line-height:1.4}
+.streak-msg strong{color:var(--streak);font-weight:700}
+
+/* ── Stats row ── */
+.streak-stats{display:flex;gap:8px;margin-bottom:20px}
+.ss-card{flex:1;background:var(--surface);border-radius:var(--r-l);padding:14px 10px;box-shadow:var(--sh);text-align:center;position:relative;overflow:hidden}
+.ss-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ss-card.sc-cur::before{background:var(--streak)}
+.ss-card.sc-best::before{background:var(--gold)}
+.ss-card.sc-total::before{background:var(--xp)}
+
+.ss-val{font-family:var(--font-d);font-size:22px;font-weight:800;letter-spacing:-0.02em;line-height:1}
+.ss-val.sv-cur{color:var(--streak)}.ss-val.sv-best{color:var(--gold-dark)}.ss-val.sv-total{color:var(--xp)}
+.ss-label{font-size:10px;color:var(--muted);font-weight:500;margin-top:4px;letter-spacing:0.02em}
+
+/* ── Weekly heatmap ── */
+.heatmap-section{background:var(--surface);border-radius:var(--r-x);padding:18px;box-shadow:var(--sh);margin-bottom:20px}
+.hm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.hm-title{font-family:var(--font-d);font-size:15px;font-weight:700;letter-spacing:-0.01em}
+.hm-range{font-size:11px;color:var(--muted);font-weight:500}
+
+.hm-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+.hm-wd{text-align:center;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.04em}
+
+.hm-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.hm-cell{aspect-ratio:1;border-radius:var(--r-s);background:var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:all 0.15s;cursor:default;position:relative}
+.hm-cell .hm-day{font-size:10px;font-weight:600;color:var(--muted)}
+.hm-cell .hm-count{font-size:9px;font-weight:700;opacity:0.7}
+
+.hm-cell.lv0{background:var(--border)}
+.hm-cell.lv1{background:oklch(92% 0.05 30);color:oklch(45% 0.08 30)}.hm-cell.lv1 .hm-day{color:oklch(45% 0.08 30)}
+.hm-cell.lv2{background:oklch(82% 0.10 30);color:#fff}.hm-cell.lv2 .hm-day{color:#fff}
+.hm-cell.lv3{background:oklch(70% 0.16 30);color:#fff}.hm-cell.lv3 .hm-day{color:#fff}
+.hm-cell.lv4{background:oklch(58% 0.20 30);color:#fff}.hm-cell.lv4 .hm-day{color:#fff}
+.hm-cell.today-cell{box-shadow:inset 0 0 0 2px var(--accent)}
+.hm-cell.future{opacity:0.3}
+
+/* ── Milestones ── */
+.ms-section{margin-bottom:20px}
+.ms-title{font-family:var(--font-d);font-size:16px;font-weight:700;margin-bottom:14px;letter-spacing:-0.01em}
+
+.ms-timeline{position:relative;padding-left:28px}
+.ms-timeline::before{content:'';position:absolute;left:9px;top:12px;bottom:12px;width:2px;background:var(--border);border-radius:1px}
+
+.ms-item{position:relative;padding:0 0 24px}
+.ms-item:last-child{padding-bottom:0}
+
+.ms-dot{position:absolute;left:-24px;top:4px;width:16px;height:16px;border-radius:50%;border:3px solid var(--bg);z-index:1;transition:all 0.2s}
+.ms-item.achieved .ms-dot{background:var(--streak);box-shadow:0 0 0 3px oklch(90% 0.06 30)}
+.ms-item.current .ms-dot{background:var(--accent);box-shadow:0 0 0 3px oklch(90% 0.04 255);animation:pulseDot 2s ease-in-out infinite}
+.ms-item.locked .ms-dot{background:var(--border)}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 3px oklch(90% 0.04 255)}50%{box-shadow:0 0 0 6px oklch(90% 0.04 255)}}
+
+.ms-card{background:var(--surface);border-radius:var(--r-l);padding:14px 16px;box-shadow:var(--sh);transition:all 0.15s}
+.ms-item.achieved .ms-card{border-left:3px solid var(--streak)}
+.ms-item.current .ms-card{border-left:3px solid var(--accent);background:oklch(97% 0.02 255)}
+.ms-item.locked .ms-card{opacity:0.55}
+
+.ms-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.ms-name{font-size:15px;font-weight:700;letter-spacing:-0.01em}
+.ms-item.achieved .ms-name{color:var(--streak)}
+.ms-item.current .ms-name{color:var(--accent)}
+
+.ms-tag{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:var(--r-p);font-size:10px;font-weight:700}
+.ms-tag.tag-done{background:oklch(94% 0.06 30);color:var(--streak)}
+.ms-tag.tag-active{background:oklch(94% 0.04 255);color:var(--accent)}
+.ms-tag.tag-locked{background:var(--border);color:var(--muted)}
+
+.ms-desc{font-size:12px;color:var(--muted);line-height:1.3;margin-bottom:6px}
+.ms-reward{display:flex;align-items:center;gap:8px}
+.ms-reward-item{display:flex;align-items:center;gap:3px;font-size:12px;font-weight:700}
+.ms-reward-item .mc5{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:oklch(30% 0.06 80)}
+.ms-reward-item.coin-r{color:var(--gold-dark)}
+.ms-reward-item.xp-r{color:var(--xp)}
+.ms-reward-item.special-r{color:var(--accent)}
+
+/* ── Tips ── */
+.tip-card{background:linear-gradient(135deg,oklch(96% 0.04 30),oklch(97% 0.02 50));border:1px solid oklch(90% 0.04 30);border-radius:var(--r-l);padding:16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.tip-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.tip-body{flex:1}
+.tip-title{font-size:14px;font-weight:700;margin-bottom:2px;color:var(--streak)}
+.tip-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* ── Bottom bar ── */
+.bottom-bar{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px;z-index:10}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px;border:none;background:none;font-family:var(--font-b)}
+.bb-item svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.bb-item span{font-size:10px;font-weight:500;color:var(--muted);transition:color 0.2s}
+.bb-item.on svg{stroke:var(--accent)}.bb-item.on span{color:var(--accent)}
+
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:var(--r-p);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ms-item{animation:fadeUp 0.3s ease both}
+.ms-item:nth-child(2){animation-delay:0.06s}.ms-item:nth-child(3){animation-delay:0.12s}.ms-item:nth-child(4){animation-delay:0.18s}.ms-item:nth-child(5){animation-delay:0.24s}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="streak-hero">
+      <div class="streak-ring">
+        <svg viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="58"/>
+          <circle class="ring-fg" cx="70" cy="70" r="58" stroke-dasharray="364.4" stroke-dashoffset="273.3" id="streak-ring"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-emoji">🔥</div>
+          <div class="ring-num">7</div>
+          <div class="ring-unit">天连续</div>
+        </div>
+      </div>
+      <div class="streak-msg">再坚持 <strong>7 天</strong> 即可解锁下一个里程碑！</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="streak-stats">
+      <div class="ss-card sc-cur">
+        <div class="ss-val sv-cur">7</div>
+        <div class="ss-label">当前连续</div>
+      </div>
+      <div class="ss-card sc-best">
+        <div class="ss-val sv-best">14</div>
+        <div class="ss-label">最长连续</div>
+      </div>
+      <div class="ss-card sc-total">
+        <div class="ss-val sv-total">42</div>
+        <div class="ss-label">累计完成天数</div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="heatmap-section">
+      <div class="hm-header">
+        <div class="hm-title">本月活跃度</div>
+        <div class="hm-range">2025 年 1 月</div>
+      </div>
+      <div class="hm-weekdays"><span class="hm-wd">一</span><span class="hm-wd">二</span><span class="hm-wd">三</span><span class="hm-wd">四</span><span class="hm-wd">五</span><span class="hm-wd">六</span><span class="hm-wd">日</span></div>
+      <div class="hm-grid" id="heatmap"></div>
+    </div>
+
+    <!-- Tip -->
+    <div class="tip-card">
+      <div class="tip-icon">💡</div>
+      <div class="tip-body">
+        <div class="tip-title">保持连续的小技巧</div>
+        <div class="tip-desc">每天至少完成 1 个任务即可维持连续天数。设置一个简单的晨间任务作为保底！</div>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="ms-section">
+      <div class="ms-title">里程碑</div>
+      <div class="ms-timeline" id="milestones"></div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="bottom-bar">
+    <button class="bb-item" onclick="showToast('日程页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日程</span></button>
+    <button class="bb-item" onclick="showToast('日历页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>日历</span></button>
+    <button class="bb-item on"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 4 5 4 8a4 4 0 11-8 0c0-3 3-5 4-8z"/></svg><span>连续</span></button>
+    <button class="bb-item" onclick="showToast('奖励页面')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><span>奖励</span></button>
+    <button class="bb-item" onclick="showToast('商店页面')"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span>商店</span></button>
+    <button class="bb-item" onclick="showToast('个人中心')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+// ── Heatmap data ──
+const heatData = {
+  1:0, 2:3, 3:2, 4:4, 5:1, 6:0, 7:0,
+  8:2, 9:3, 10:4, 11:3, 12:5, 13:3, 14:4,
+  15:3, 16:0, 17:0, 18:0, 19:0, 20:0, 21:0,
+  22:0, 23:0, 24:0, 25:0, 26:0, 27:0, 28:0,
+  29:0, 30:0, 31:0
+};
+const today = 15;
+
+function renderHeatmap() {
+  const grid = document.getElementById('heatmap');
+  // Jan 1 2025 = Wednesday (index 2 in Mon-start week)
+  const startOffset = 2;
+  let html = '';
+
+  // Empty cells for offset
+  for (let i = 0; i < startOffset; i++) {
+    html += '<div class="hm-cell" style="opacity:0"></div>';
+  }
+
+  for (let d = 1; d <= 31; d++) {
+    const count = heatData[d] || 0;
+    let lv = 'lv0';
+    if (count === 1) lv = 'lv1';
+    else if (count === 2) lv = 'lv2';
+    else if (count === 3) lv = 'lv3';
+    else if (count >= 4) lv = 'lv4';
+
+    let extra = '';
+    if (d === today) extra = ' today-cell';
+    if (d > today) extra = ' future';
+
+    const countLabel = count > 0 ? `<span class="hm-count">${count}</span>` : '';
+
+    html += `<div class="hm-cell ${lv}${extra}"><span class="hm-day">${d}</span>${countLabel}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+// ── Milestones ──
+const milestones = [
+  {days:3, name:'3 天连续', desc:'初露锋芒，连续完成 3 天', coins:50, xp:30, achieved:true},
+  {days:7, name:'7 天连续', desc:'一周不间断，习惯正在养成', coins:150, xp:80, achieved:true, current:true},
+  {days:14, name:'14 天连续', desc:'两周坚持，意志力初见成效', coins:400, xp:200, achieved:false},
+  {days:30, name:'30 天连续', desc:'一个月！习惯已深深扎根', coins:1000, xp:500, special:'限定头像：龙人', achieved:false},
+  {days:60, name:'60 天连续', desc:'两个月，你已是自律的化身', coins:2500, xp:1200, special:'限定主题：极光绿', achieved:false},
+];
+
+function renderMilestones() {
+  const wrap = document.getElementById('milestones');
+  wrap.innerHTML = milestones.map(m => {
+    let cls = 'ms-item';
+    if (m.current) cls += ' current';
+    else if (m.achieved) cls += ' achieved';
+    else cls += ' locked';
+
+    let tag = '';
+    if (m.current) tag = '<span class="ms-tag tag-active">进行中</span>';
+    else if (m.achieved) tag = '<span class="ms-tag tag-done">已达成</span>';
+    else tag = '<span class="ms-tag tag-locked">未解锁</span>';
+
+    let rewards = `<span class="ms-reward-item coin-r"><span class="mc5">¢</span>${m.coins}</span>
+                   <span class="ms-reward-item xp-r">⚡${m.xp} XP</span>`;
+    if (m.special) rewards += `<span class="ms-reward-item special-r">🎁 ${m.special}</span>`;
+
+    return `<div class="${cls}">
+      <div class="ms-dot"></div>
+      <div class="ms-card">
+        <div class="ms-top"><div class="ms-name">${m.name}</div>${tag}</div>
+        <div class="ms-desc">${m.desc}</div>
+        <div class="ms-reward">${rewards}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Ring animation ──
+function animateRing() {
+  const currentStreak = 7;
+  const nextMilestone = 14;
+  const pct = currentStreak / nextMilestone;
+  const circumference = 2 * Math.PI * 58;
+  const offset = circumference * (1 - pct);
+  document.getElementById('streak-ring').style.strokeDashoffset = offset;
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ── Init ──
+renderHeatmap();
+renderMilestones();
+animateRing();
+</script>
+</body>
+</html>

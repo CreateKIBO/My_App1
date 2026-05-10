@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:clipToPadding="false"
+    android:background="?attr/colorSurface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="100dp">
+
+        <!-- ═══ Hero Section: Streak Ring ═══ -->
+        <LinearLayout
+            android:id="@+id/card_streak_hero"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp">
+
+            <!-- Ring: custom View drawn in Java -->
+            <FrameLayout
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_marginBottom="16dp">
+
+                <!-- Progress ring drawn by StreakRingView -->
+                <com.example.myapplication.ui.StreakRingView
+                    android:id="@+id/streak_ring_view"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp" />
+
+                <!-- Center content overlay -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_fire_emoji"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔥"
+                        android:textSize="24sp"
+                        android:layout_marginBottom="0dp" />
+
+                    <TextView
+                        android:id="@+id/tv_streak_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="36sp"
+                        android:textColor="@color/streak_orange"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.04"
+                        android:lineSpacingExtra="0dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="天连续"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:layout_marginTop="0dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Motivational message -->
+            <TextView
+                android:id="@+id/tv_streak_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="再坚持 7 天即可解锁下一个里程碑！"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:lineSpacingMultiplier="1.4" />
+
+            <!-- Freeze card indicator -->
+            <LinearLayout
+                android:id="@+id/layout_freeze_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_tag_locked"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🧊"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:id="@+id/tv_freeze_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 张冻结卡"
+                    android:textSize="12sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══ Stats Row ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <!-- Current Streak -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/card_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="10dp">
+
+                    <!-- Top accent bar 3dp -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/streak_orange" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_current"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="22sp"
+                        android:textColor="@color/streak_orange"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="当前连续"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Longest Streak -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/card_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="10dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/coin_gold" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_longest"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="22sp"
+                        android:textColor="@color/coin_gold_dark"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="最长连续"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Monthly Total -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/card_surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="10dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/xp_green" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_monthly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="22sp"
+                        android:textColor="@color/xp_green"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="累计完成天数"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- ═══ Heatmap Section ═══ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/card_surface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <!-- Header row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="本月活跃度"
+                        android:textSize="15sp"
+                        android:textColor="@color/md_on_surface"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.01" />
+
+                    <TextView
+                        android:id="@+id/tv_heatmap_range"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <!-- Weekday labels row -->
+                <LinearLayout
+                    android:id="@+id/layout_heatmap_weekdays"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp" />
+
+                <!-- Heatmap grid (7 columns, built dynamically) -->
+                <GridLayout
+                    android:id="@+id/grid_heatmap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="7"
+                    android:useDefaultMargins="false" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ═══ Tip Card ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_tip_gradient"
+            android:padding="16dp"
+            android:gravity="center_vertical|top"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡"
+                android:textSize="24sp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="2dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="保持连续的小技巧"
+                    android:textSize="14sp"
+                    android:textColor="@color/streak_orange"
+                    android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/tv_quote_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="每天至少完成 1 个任务即可维持连续天数。设置一个简单的晨间任务作为保底！"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingMultiplier="1.4" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══ Milestones Section ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:text="里程碑"
+                android:textSize="16sp"
+                android:textColor="@color/md_on_surface"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:letterSpacing="-0.01" />
+
+            <!-- Timeline container: milestones built dynamically -->
+            <FrameLayout
+                android:id="@+id/layout_milestones_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Timeline vertical line (drawn behind dots) -->
+                <View
+                    android:id="@+id/timeline_line"
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="9dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/md_outline_variant" />
+
+                <LinearLayout
+                    android:id="@+id/layout_milestones"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="28dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- ═══ Week Day Circles (kept for compatibility) ═══ -->
+        <LinearLayout
+            android:id="@+id/layout_week_days"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>

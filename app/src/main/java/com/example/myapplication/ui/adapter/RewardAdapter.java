@@ -3,7 +3,6 @@ package com.example.myapplication.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
 import com.example.myapplication.data.local.RewardTransactionEntity;
 import com.example.myapplication.util.RewardCalculator;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class RewardAdapter extends ListAdapter<RewardTransactionEntity, RewardAdapter.RewardViewHolder> {
 
@@ -48,43 +51,103 @@ public class RewardAdapter extends ListAdapter<RewardTransactionEntity, RewardAd
 
     static class RewardViewHolder extends RecyclerView.ViewHolder {
 
-        private final ImageView ivIcon;
+        private final TextView tvIcon;
+        private final TextView tvName;
+        private final TextView tvDesc;
         private final TextView tvAmount;
-        private final TextView tvReason;
+        private final TextView tvTime;
 
         public RewardViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivIcon = itemView.findViewById(R.id.iv_reward_icon);
+            tvIcon = itemView.findViewById(R.id.tv_reward_icon);
+            tvName = itemView.findViewById(R.id.tv_reward_name);
+            tvDesc = itemView.findViewById(R.id.tv_reward_desc);
             tvAmount = itemView.findViewById(R.id.tv_reward_amount);
-            tvReason = itemView.findViewById(R.id.tv_reward_reason);
+            tvTime = itemView.findViewById(R.id.tv_reward_time);
         }
 
         public void bind(RewardTransactionEntity tx) {
             String type = tx.getType();
             int amount = tx.getAmount();
 
-            if (RewardCalculator.TX_COIN.equals(type)) {
-                ivIcon.setImageResource(R.drawable.ic_coin);
-                tvAmount.setText("+" + amount);
-                tvAmount.setTextColor(itemView.getContext().getColor(R.color.coin_gold));
-            } else if (RewardCalculator.TX_XP.equals(type)) {
-                ivIcon.setImageResource(R.drawable.ic_xp);
+            if (RewardCalculator.TX_XP.equals(type)) {
+                // XP type: green icon bg, bolt emoji, green amount
+                tvIcon.setText("⚡");
+                tvIcon.setBackgroundResource(R.drawable.bg_reward_icon_xp);
                 tvAmount.setText("+" + amount + " XP");
                 tvAmount.setTextColor(itemView.getContext().getColor(R.color.xp_green));
+            } else if (RewardCalculator.TX_COIN.equals(type)) {
+                // Coin type: gold icon bg, cent emoji, gold-dark amount
+                tvIcon.setText("¢");
+                tvIcon.setBackgroundResource(R.drawable.bg_reward_icon_coin);
+                tvAmount.setText("+" + amount + " ¢");
+                tvAmount.setTextColor(itemView.getContext().getColor(R.color.coin_gold_dark));
             } else if (RewardCalculator.TX_LEVEL_UP.equals(type)) {
-                ivIcon.setImageResource(R.drawable.ic_streak);
-                tvAmount.setText("+" + amount);
-                tvAmount.setTextColor(itemView.getContext().getColor(R.color.streak_orange));
+                // Level-up type: blue icon bg, arrow emoji, blue amount
+                tvIcon.setText("↑");
+                tvIcon.setBackgroundResource(R.drawable.bg_reward_icon_level);
+                tvAmount.setText("+" + amount + " ¢");
+                tvAmount.setTextColor(itemView.getContext().getColor(R.color.coin_gold_dark));
             } else if (RewardCalculator.TX_SPEND.equals(type)) {
-                ivIcon.setImageResource(R.drawable.ic_coin);
+                // Spend type: gold icon bg, cent emoji, red amount
+                tvIcon.setText("¢");
+                tvIcon.setBackgroundResource(R.drawable.bg_reward_icon_coin);
                 tvAmount.setText(String.valueOf(amount));
                 tvAmount.setTextColor(itemView.getContext().getColor(R.color.md_error));
             } else {
-                ivIcon.setImageResource(R.drawable.ic_coin);
-                tvAmount.setText(String.valueOf(amount));
+                // Default / bonus: streak icon bg, star emoji, gold amount
+                tvIcon.setText("★");
+                tvIcon.setBackgroundResource(R.drawable.bg_reward_icon_streak);
+                tvAmount.setText("+" + amount + " ¢");
+                tvAmount.setTextColor(itemView.getContext().getColor(R.color.coin_gold_dark));
             }
 
-            tvReason.setText(tx.getReason() != null ? tx.getReason() : "");
+            // Name: use reason as primary text, or fallback
+            String reason = tx.getReason();
+            tvName.setText(reason != null ? reason : getDefaultName(type));
+
+            // Description: show type-based detail
+            tvDesc.setText(getDetailText(type, amount));
+
+            // Time
+            tvTime.setText(formatTimestamp(tx.getTimestamp()));
+        }
+
+        private String getDefaultName(String type) {
+            if (RewardCalculator.TX_XP.equals(type)) return "完成任务 XP";
+            if (RewardCalculator.TX_COIN.equals(type)) return "任务金币奖励";
+            if (RewardCalculator.TX_LEVEL_UP.equals(type)) return "升级奖励";
+            if (RewardCalculator.TX_SPEND.equals(type)) return "消费";
+            return "奖励";
+        }
+
+        private String getDetailText(String type, int amount) {
+            if (RewardCalculator.TX_LEVEL_UP.equals(type)) {
+                return "升级奖励金币";
+            }
+            if (RewardCalculator.TX_SPEND.equals(type)) {
+                return "商店购买";
+            }
+            return "";
+        }
+
+        private String formatTimestamp(long timestamp) {
+            if (timestamp <= 0) return "";
+            long now = System.currentTimeMillis();
+            long diff = now - timestamp;
+            SimpleDateFormat sdf;
+
+            if (diff < 86400000L) {
+                // Today
+                sdf = new SimpleDateFormat("今天 HH:mm", Locale.CHINA);
+            } else if (diff < 172800000L) {
+                // Yesterday
+                sdf = new SimpleDateFormat("昨天 HH:mm", Locale.CHINA);
+            } else {
+                // Older
+                sdf = new SimpleDateFormat("M月d日", Locale.CHINA);
+            }
+            return sdf.format(new Date(timestamp));
         }
     }
 }

@@ -24,6 +24,7 @@ public class ProfileViewModel extends AndroidViewModel {
 
     private final LiveData<UserEntity> user;
     private final LiveData<List<RewardTransactionEntity>> recentRewards;
+    private final LiveData<Integer> completedCount;
 
     public ProfileViewModel(@NonNull Application application) {
         super(application);
@@ -33,13 +34,23 @@ public class ProfileViewModel extends AndroidViewModel {
 
         user = db.userDao().observeUser(userId);
         recentRewards = db.rewardTransactionDao().getRecentForUser(userId, 20);
+        completedCount = db.taskDao().getTotalCompletedCount(userId);
     }
 
     public LiveData<UserEntity> getUser() { return user; }
     public LiveData<List<RewardTransactionEntity>> getRecentRewards() { return recentRewards; }
+    public LiveData<Integer> getCompletedCount() { return completedCount; }
 
     public ShopItemEntity getAvatarItem(int avatarId) {
         return db.shopItemDao().getItemById(avatarId);
+    }
+
+    public ShopItemEntity getEquippedAvatarItem(int avatarId) {
+        return db.shopItemDao().getItemById(avatarId);
+    }
+
+    public ShopItemEntity getEquippedThemeItem(int themeId) {
+        return db.shopItemDao().getItemById(themeId);
     }
 
     public int getXpForNextLevel(int level) {

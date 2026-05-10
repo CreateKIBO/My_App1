@@ -1,0 +1,208 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuestPlan 新建日程</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f8f9fb;--sf:#fff;--fg:#111;--mt:#6b7280;--bd:#e5e7eb;--ac:#3b82f6;--fd:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;--fb:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;--gd:#d4a017;--xp:#16a34a;--sk:#ea580c;--cw:#3b82f6;--cs:#7c3aed;--cp:#16a34a;--ca:#d97706}
+body{font-family:var(--fb);background:#e5e7eb;color:var(--fg);display:flex;justify-content:center;padding:20px;-webkit-font-smoothing:antialiased}
+.P{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 24px 48px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.DI{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:#111;border-radius:20px;z-index:100}
+.SB{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+.C{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 24px;-webkit-overflow-scrolling:touch}
+.C::-webkit-scrollbar{display:none}
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding:4px 0 16px}
+.nb{width:36px;height:36px;border-radius:50%;border:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.nb:hover{background:var(--bd)}
+.nb svg{width:18px;height:18px;stroke:var(--fg);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nt{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-.01em}
+.na{font-size:14px;font-weight:600;color:var(--ac);cursor:pointer;padding:6px 0}
+
+.fg{margin-bottom:18px}
+.fl{font-size:12px;font-weight:600;color:var(--mt);margin-bottom:6px;display:block;letter-spacing:.02em}
+.fi{width:100%;padding:12px 14px;border:1.5px solid var(--bd);border-radius:12px;font-size:15px;font-family:var(--fb);background:var(--sf);color:var(--fg);outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--ac)}
+.fi::placeholder{color:#9ca3af}
+.fi-row{display:flex;gap:10px}
+.fi-row .fi{flex:1}
+
+.cat-sel{display:flex;gap:8px;flex-wrap:wrap}
+.cat-opt{display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--bd);background:var(--sf);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;font-family:var(--fb)}
+.cat-opt .cd{width:8px;height:8px;border-radius:50%}
+.cat-opt.on{border-color:var(--ac);background:#eff6ff;color:var(--ac)}
+.cat-opt.on.cw{border-color:var(--cw);background:#eff6ff;color:var(--cw)}
+.cat-opt.on.cs{border-color:var(--cs);background:#f5f3ff;color:var(--cs)}
+.cat-opt.on.cp{border-color:var(--cp);background:#f0fdf4;color:var(--cp)}
+.cat-opt.on.ca{border-color:var(--ca);background:#fffbeb;color:var(--ca)}
+
+.rp{background:var(--sf);border-radius:16px;padding:16px;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 6px rgba(0,0,0,.04);display:flex;align-items:center;gap:14px}
+.rp-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rp-info{flex:1}
+.rp-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.rp-desc{font-size:12px;color:var(--mt)}
+.rp-right{text-align:right;flex-shrink:0}
+.rp-val{font-size:16px;font-weight:800}
+.rp-sub{font-size:14px;font-weight:800;margin-top:2px}
+
+.btn-s{width:100%;padding:16px;border:none;border-radius:14px;background:var(--ac);color:#fff;font-size:16px;font-weight:700;font-family:var(--fd);cursor:pointer;transition:opacity .15s;letter-spacing:-.01em}
+.btn-s:hover{opacity:.9}
+.btn-s:active{transform:scale(.98)}
+.btn-s:disabled{background:var(--bd);color:var(--mt);cursor:not-allowed;transform:none}
+
+.tip{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.tip-icon{font-size:20px;flex-shrink:0}
+.tip-body{flex:1}
+.tip-title{font-size:13px;font-weight:600;color:var(--xp)}
+.tip-desc{font-size:12px;color:var(--mt);line-height:1.3;margin-top:2px}
+
+/* Success overlay */
+.success{position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:50;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.success.show{opacity:1;pointer-events:auto}
+.success-box{width:280px;background:var(--sf);border-radius:20px;padding:32px 24px;text-align:center;transform:scale(.9);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.success.show .success-box{transform:scale(1)}
+.success-emoji{font-size:56px;margin-bottom:16px}
+.success-title{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:6px}
+.success-desc{font-size:13px;color:var(--mt);line-height:1.4;margin-bottom:16px}
+.success-rewards{display:flex;justify-content:center;gap:16px;margin-bottom:20px}
+.sr-item{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700}
+.sr-xp{color:var(--xp)}
+.sr-coin{color:var(--gd)}
+.sr-coin .mc3{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#d4a017,#fbbf24);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#78350f}
+.success-btn{padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;font-family:var(--fb);cursor:pointer;width:100%;background:var(--ac);color:#fff;transition:opacity .15s}
+.success-btn:hover{opacity:.9}
+</style>
+</head>
+<body>
+<div class="P">
+<div class="DI"></div>
+<div class="SB"><span>9:41</span><span>●●●●</span></div>
+<div class="C" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="success" id="success"><div class="success-box" id="sbox"></div></div>
+</div>
+
+<script>
+const CM={w:{l:'工作',co:30,xp:30,icon:'💼',bg:'#eff6ff'},s:{l:'学习',co:25,xp:25,icon:'📚',bg:'#f5f3ff'},p:{l:'运动',co:20,xp:20,icon:'🏃',bg:'#f0fdf4'},a:{l:'个人',co:15,xp:15,icon:'🏠',bg:'#fffbeb'}};
+const CC={w:'#3b82f6',s:'#7c3aed',p:'#16a34a',a:'#d97706'};
+
+let cat='w',name='',start='09:00',end='10:00',date='2025-01-16';
+
+let _tt;
+function T(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),1800)}
+
+function render(){
+const m=CM[cat];
+const canSubmit=name.trim().length>0;
+
+document.getElementById('app').innerHTML=`
+<div class="nav">
+<button class="nb" onclick="T('返回日程页面')"><svg viewBox="0 0 18 18"><polyline points="11 3 5 9 11 15"/></svg></button>
+<div class="nt">新建日程</div>
+<div class="na" onclick="submit()" style="${canSubmit?'':'opacity:.3;cursor:not-allowed'}">完成</div>
+</div>
+
+<div class="fg">
+<label class="fl">任务名称</label>
+<input class="fi" id="tName" placeholder="输入任务名称…" value="${name}" oninput="name=this.value;render()" autofocus>
+</div>
+
+<div class="fg">
+<label class="fl">分类</label>
+<div class="cat-sel">
+${Object.entries(CM).map(([k,v])=>{
+const on=cat===k;
+return`<div class="cat-opt${on?' on c'+k:''}" onclick="cat='${k}';render()">
+<span class="cd" style="background:${CC[k]}"></span>${v.l}</div>`;
+}).join('')}
+</div>
+</div>
+
+<div class="fg">
+<label class="fl">日期</label>
+<input class="fi" type="date" value="${date}" oninput="date=this.value">
+</div>
+
+<div class="fg">
+<label class="fl">时间段</label>
+<div class="fi-row">
+<input class="fi" type="time" value="${start}" oninput="start=this.value">
+<input class="fi" type="time" value="${end}" oninput="end=this.value">
+</div>
+</div>
+
+<div class="fg">
+<label class="fl">完成奖励预览</label>
+<div class="rp">
+<div class="rp-icon" style="background:${m.bg};color:${CC[cat]}">${m.icon}</div>
+<div class="rp-info">
+<div class="rp-title">${m.l}任务奖励</div>
+<div class="rp-desc">完成后自动发放到账户</div>
+</div>
+<div class="rp-right">
+<div class="rp-val" style="color:var(--xp)">⚡ +${m.xp}</div>
+<div class="rp-sub" style="color:var(--gd)">¢ +${m.co}</div>
+</div>
+</div>
+</div>
+
+<div class="tip">
+<div class="tip-icon">💡</div>
+<div class="tip-body">
+<div class="tip-title">小贴士</div>
+<div class="tip-desc">每天完成所有任务可获得额外 50 金币奖励，连续完成天数越多奖励越丰厚！</div>
+</div>
+</div>
+
+<button class="btn-s" onclick="submit()" ${canSubmit?'':'disabled'}>添加任务</button>`;
+}
+
+function submit(){
+if(!name.trim()){T('请输入任务名称');return}
+const m=CM[cat];
+document.getElementById('sbox').innerHTML=`
+<div class="success-emoji">🎉</div>
+<div class="success-title">任务已创建</div>
+<div class="success-desc">「${name.trim()}」已添加到 ${date} 的日程中</div>
+<div class="success-rewards">
+<div class="sr-item sr-xp">⚡ +${m.xp} XP</div>
+<div class="sr-item sr-coin"><span class="mc3">¢</span> +${m.co}</div>
+</div>
+<button class="success-btn" onclick="hideSuccess();name='';start='09:00';end='10:00';cat='w';render()">继续添加</button>`;
+document.getElementById('success').classList.add('show');
+}
+
+function hideSuccess(){document.getElementById('success').classList.remove('show')}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuestPlan 商店</title>
+<style>
+:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --font-d: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --gold: oklch(78% 0.15 85);
+  --gold-dark: oklch(55% 0.12 80);
+  --xp: oklch(65% 0.18 155);
+  --streak: oklch(62% 0.20 30);
+  --cw: oklch(58% 0.14 260);
+  --cs: oklch(55% 0.16 290);
+  --cp: oklch(62% 0.18 155);
+  --ca: oklch(68% 0.12 55);
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-x: 20px; --r-p: 9999px;
+  --sh: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px;
+  --sh-lg: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.06) 0 8px 24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:oklch(94% 0.005 250);color:var(--fg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:rgba(0,0,0,0.12) 0 0 0 1px,rgba(0,0,0,0.08) 0 24px 48px;display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:oklch(10% 0.02 250);border-radius:20px;z-index:100}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 100px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+/* Header */
+.shop-header{padding:8px 0 20px}
+.shop-title{font-family:var(--font-d);font-size:28px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px}
+.shop-sub{font-size:13px;color:var(--muted);font-weight:500}
+
+/* Balance bar */
+.balance-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:var(--r-l);padding:14px 18px;box-shadow:var(--sh);margin-bottom:20px}
+.balance-left{display:flex;align-items:center;gap:10px}
+.coin-orb{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:oklch(30% 0.06 80);box-shadow:0 2px 8px rgba(218,165,32,0.3)}
+.balance-num{font-family:var(--font-d);font-size:24px;font-weight:800;letter-spacing:-0.02em}
+.balance-label{font-size:11px;color:var(--muted);font-weight:500}
+.balance-earn{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;padding:6px 12px;border-radius:var(--r-p);border:1px solid var(--border);background:var(--bg);transition:all 0.15s}
+.balance-earn:hover{background:var(--border)}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:20px;position:relative}
+.tab-btn{flex:1;padding:10px 0;border-radius:var(--r-m);border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:var(--font-b);text-align:center}
+.tab-btn.on{background:var(--fg);color:#fff;border-color:var(--fg);box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.tab-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:-2px;margin-right:4px}
+
+/* Section label */
+.sec-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px}
+
+/* ===== AVATAR GRID ===== */
+.av-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.av-card{background:var(--surface);border-radius:var(--r-l);padding:18px 14px 14px;box-shadow:var(--sh);text-align:center;cursor:pointer;transition:all 0.2s;border:2px solid transparent;position:relative;overflow:hidden}
+.av-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+.av-card.equipped{border-color:var(--accent)}
+.av-card.equipped::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.av-card.owned{border-color:oklch(90% 0.01 250)}
+.av-card.locked{opacity:0.7}
+
+.av-emoji{width:64px;height:64px;margin:0 auto 10px;border-radius:var(--r-l);display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
+.av-emoji::after{content:'';position:absolute;inset:0;border-radius:var(--r-l);box-shadow:inset 0 -2px 6px rgba(0,0,0,0.06)}
+
+.av-name{font-size:15px;font-weight:700;margin-bottom:2px;letter-spacing:-0.01em}
+.av-desc{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.3}
+
+.av-price{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-p);font-size:12px;font-weight:700;background:oklch(96% 0.04 85);color:var(--gold-dark)}
+.av-price .mini-coin{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:oklch(30% 0.06 80)}
+
+.av-tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-p);font-size:10px;font-weight:700;letter-spacing:0.02em;margin-top:6px}
+.av-tag.equipped-tag{background:oklch(94% 0.06 255);color:var(--accent)}
+.av-tag.owned-tag{background:oklch(95% 0.04 155);color:var(--xp)}
+.av-tag.lock-tag{background:oklch(95% 0.01 250);color:var(--muted)}
+
+/* ===== THEME GRID ===== */
+.th-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+.th-card{background:var(--surface);border-radius:var(--r-l);padding:14px;box-shadow:var(--sh);cursor:pointer;transition:all 0.2s;border:2px solid transparent;position:relative;overflow:hidden}
+.th-card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+.th-card.equipped{border-color:var(--accent)}
+.th-card.equipped::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.th-card.owned{border-color:oklch(90% 0.01 250)}
+
+.th-preview{height:64px;border-radius:var(--r-m);margin-bottom:12px;position:relative;overflow:hidden}
+.th-preview::after{content:'';position:absolute;inset:0;border-radius:var(--r-m);box-shadow:inset 0 -3px 8px rgba(0,0,0,0.08)}
+.th-preview .th-circle{position:absolute;width:28px;height:28px;border-radius:50%;opacity:0.5}
+.th-preview .th-circle:nth-child(1){top:8px;right:10px}
+.th-preview .th-circle:nth-child(2){bottom:8px;left:10px}
+
+.th-name{font-size:14px;font-weight:700;margin-bottom:2px;letter-spacing:-0.01em}
+.th-desc{font-size:11px;color:var(--muted);margin-bottom:8px}
+
+.th-price{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-p);font-size:12px;font-weight:700;background:oklch(96% 0.04 85);color:var(--gold-dark)}
+.th-price .mini-coin{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:oklch(30% 0.06 80)}
+
+.th-tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:var(--r-p);font-size:10px;font-weight:700;letter-spacing:0.02em;margin-top:6px}
+.th-tag.equipped-tag{background:oklch(94% 0.06 255);color:var(--accent)}
+.th-tag.owned-tag{background:oklch(95% 0.04 155);color:var(--xp)}
+.th-tag.lock-tag{background:oklch(95% 0.01 250);color:var(--muted)}
+
+/* Bottom bar */
+.bottom-bar{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px;border:none;background:none;font-family:var(--font-b)}
+.bb-item svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.bb-item span{font-size:10px;font-weight:500;color:var(--muted);transition:color 0.2s}
+.bb-item.on svg{stroke:var(--accent)}.bb-item.on span{color:var(--accent)}
+
+/* Toast */
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:var(--r-p);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Animations */
+@keyframes pop{0%{transform:scale(0.9)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+.av-card.pop,.th-card.pop{animation:pop 0.3s ease}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+
+  <div class="content" id="main">
+    <!-- Header -->
+    <div class="shop-header">
+      <div class="shop-title">商店</div>
+      <div class="shop-sub">用金币解锁头像和主题</div>
+    </div>
+
+    <!-- Balance -->
+    <div class="balance-bar">
+      <div class="balance-left">
+        <div class="coin-orb">¢</div>
+        <div>
+          <div class="balance-num" id="coin-display">1,280</div>
+          <div class="balance-label">金币余额</div>
+        </div>
+      </div>
+      <button class="balance-earn" onclick="showToast('完成任务赚取更多金币！')">赚取金币</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn on" id="tab-av" onclick="switchTab('av')">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>头像
+      </button>
+      <button class="tab-btn" id="tab-th" onclick="switchTab('th')">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.5"/></svg>主题
+      </button>
+    </div>
+
+    <!-- ===== AVATARS ===== -->
+    <div id="panel-av">
+      <div class="sec-label">像素头像</div>
+      <div class="av-grid" id="av-grid"></div>
+    </div>
+
+    <!-- ===== THEMES ===== -->
+    <div id="panel-th" style="display:none">
+      <div class="sec-label">主题样式</div>
+      <div class="th-grid" id="th-grid"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <button class="bb-item" onclick="showToast('日程页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日程</span></button>
+    <button class="bb-item" onclick="showToast('日历页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>日历</span></button>
+    <button class="bb-item" onclick="showToast('连续天数页面')"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 4 5 4 8a4 4 0 11-8 0c0-3 3-5 4-8z"/></svg><span>连续</span></button>
+    <button class="bb-item" onclick="showToast('奖励页面')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><span>奖励</span></button>
+    <button class="bb-item on"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span>商店</span></button>
+    <button class="bb-item" onclick="showToast('个人中心页面')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+let coins = 1280;
+let equippedAvatar = 'warrior';
+let equippedTheme = 'default-blue';
+
+const avatars = [
+  { id:'warrior', name:'勇士', desc:'无畏前行的冒险者', emoji:'⚔️', bg:'oklch(88% 0.06 50)', price:0, owned:true },
+  { id:'mage', name:'魔法师', desc:'掌控元素的智者', emoji:'🧙', bg:'oklch(88% 0.06 290)', price:0, owned:true },
+  { id:'ninja', name:'忍者', desc:'暗影中的执行者', emoji:'🥷', bg:'oklch(88% 0.06 155)', price:0, owned:true },
+  { id:'knight', name:'骑士', desc:'守护正义的盾牌', emoji:'🛡️', bg:'oklch(88% 0.06 30)', price:0, owned:true },
+  { id:'dragon', name:'龙人', desc:'龙族血脉的继承者', emoji:'🐉', bg:'oklch(85% 0.08 30)', price:300, owned:false },
+  { id:'robot', name:'机器人', desc:'来自未来的机械体', emoji:'🤖', bg:'oklch(88% 0.06 260)', price:250, owned:false },
+  { id:'cat', name:'猫咪', desc:'慵懒而敏捷的伙伴', emoji:'🐱', bg:'oklch(90% 0.04 80)', price:200, owned:false },
+  { id:'ghost', name:'幽灵', desc:'飘渺不定的灵魂', emoji:'👻', bg:'oklch(85% 0.04 260)', price:350, owned:false },
+];
+
+const themes = [
+  { id:'default-blue', name:'默认蓝', desc:'清爽经典的蓝色调', grad:'linear-gradient(135deg,#3b82f6,#60a5fa)', accent:'#3b82f6', price:0, owned:true },
+  { id:'forest-green', name:'森林绿', desc:'自然宁静的绿色', grad:'linear-gradient(135deg,#16a34a,#4ade80)', accent:'#16a34a', price:400, owned:false },
+  { id:'sunset-orange', name:'日落橙', desc:'温暖活力的橙色调', grad:'linear-gradient(135deg,#ea580c,#fb923c)', accent:'#ea580c', price:400, owned:false },
+  { id:'sakura-pink', name:'樱花粉', desc:'柔美浪漫的粉色', grad:'linear-gradient(135deg,#db2777,#f472b6)', accent:'#db2777', price:450, owned:false },
+  { id:'night-purple', name:'暗夜紫', desc:'神秘深邃的紫色', grad:'linear-gradient(135deg,#7c3aed,#a78bfa)', accent:'#7c3aed', price:500, owned:false },
+  { id:'ocean-blue', name:'海洋蓝', desc:'深沉广阔的蓝色', grad:'linear-gradient(135deg,#0369a1,#38bdf8)', accent:'#0369a1', price:400, owned:false },
+  { id:'desert-gold', name:'沙漠金', desc:'金色沙漠的温暖', grad:'linear-gradient(135deg,#b45309,#fbbf24)', accent:'#b45309', price:450, owned:false },
+  { id:'aurora-green', name:'极光绿', desc:'北极光的奇幻色彩', grad:'linear-gradient(135deg,#0d9488,#5eead4)', accent:'#0d9488', price:500, owned:false },
+];
+
+// ── Render ──
+function renderAvatars() {
+  const grid = document.getElementById('av-grid');
+  grid.innerHTML = avatars.map(a => {
+    const isEq = a.id === equippedAvatar;
+    const cls = isEq ? 'equipped' : a.owned ? 'owned' : 'locked';
+    const tag = isEq ? '<span class="av-tag equipped-tag">装备中</span>' :
+                a.owned ? '<span class="av-tag owned-tag">已拥有</span>' :
+                `<span class="av-tag lock-tag">未解锁</span>`;
+    const price = !a.owned ? `<div class="av-price"><span class="mini-coin">¢</span>${a.price}</div>` : '';
+    return `<div class="av-card ${cls}" data-id="${a.id}" onclick="handleAvClick('${a.id}')">
+      <div class="av-emoji" style="background:${a.bg}">${a.emoji}</div>
+      <div class="av-name">${a.name}</div>
+      <div class="av-desc">${a.desc}</div>
+      ${price}${tag}
+    </div>`;
+  }).join('');
+}
+
+function renderThemes() {
+  const grid = document.getElementById('th-grid');
+  grid.innerHTML = themes.map(t => {
+    const isEq = t.id === equippedTheme;
+    const cls = isEq ? 'equipped' : t.owned ? 'owned' : '';
+    const tag = isEq ? '<span class="th-tag equipped-tag">装备中</span>' :
+                t.owned ? '<span class="th-tag owned-tag">已拥有</span>' :
+                `<span class="th-tag lock-tag">未解锁</span>`;
+    const price = !t.owned ? `<div class="th-price"><span class="mini-coin">¢</span>${t.price}</div>` : '';
+    return `<div class="th-card ${cls}" data-id="${t.id}" onclick="handleThClick('${t.id}')">
+      <div class="th-preview" style="background:${t.grad}">
+        <div class="th-circle" style="background:rgba(255,255,255,0.3)"></div>
+        <div class="th-circle" style="background:rgba(255,255,255,0.2)"></div>
+      </div>
+      <div class="th-name">${t.name}</div>
+      <div class="th-desc">${t.desc}</div>
+      ${price}${tag}
+    </div>`;
+  }).join('');
+}
+
+// ── Handlers ──
+function handleAvClick(id) {
+  const a = avatars.find(x => x.id === id);
+  if (!a) return;
+  if (a.owned) {
+    if (equippedAvatar === id) return;
+    equippedAvatar = id;
+    showToast(`已装备 ${a.name}`);
+    renderAvatars();
+    popCard(`.av-card[data-id="${id}"]`);
+  } else {
+    if (coins < a.price) { showToast('金币不足！'); return; }
+    coins -= a.price;
+    a.owned = true;
+    equippedAvatar = id;
+    updateCoins();
+    showToast(`购买并装备 ${a.name}`);
+    renderAvatars();
+    popCard(`.av-card[data-id="${id}"]`);
+  }
+}
+
+function handleThClick(id) {
+  const t = themes.find(x => x.id === id);
+  if (!t) return;
+  if (t.owned) {
+    if (equippedTheme === id) return;
+    equippedTheme = id;
+    showToast(`已切换 ${t.name} 主题`);
+    renderThemes();
+    popCard(`.th-card[data-id="${id}"]`);
+  } else {
+    if (coins < t.price) { showToast('金币不足！'); return; }
+    coins -= t.price;
+    t.owned = true;
+    equippedTheme = id;
+    updateCoins();
+    showToast(`购买并装备 ${t.name} 主题`);
+    renderThemes();
+    popCard(`.th-card[data-id="${id}"]`);
+  }
+}
+
+function popCard(sel) {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+function updateCoins() {
+  document.getElementById('coin-display').textContent = coins.toLocaleString();
+}
+
+// ── Tab switch ──
+function switchTab(tab) {
+  document.getElementById('tab-av').classList.toggle('on', tab === 'av');
+  document.getElementById('tab-th').classList.toggle('on', tab === 'th');
+  document.getElementById('panel-av').style.display = tab === 'av' ? '' : 'none';
+  document.getElementById('panel-th').style.display = tab === 'th' ? '' : 'none';
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ── Init ──
+renderAvatars();
+renderThemes();
+</script>
+</body>
+</html>

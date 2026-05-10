@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.adapter;
 
-import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,27 +27,23 @@ public class TaskAdapter extends ListAdapter<TaskEntity, TaskAdapter.TaskViewHol
         void onTaskClicked(TaskEntity task);
     }
 
-    public TaskAdapter(OnTaskCompleteListener listener) {
-        super(DIFF_CALLBACK);
-        this.listener = listener;
-    }
-
-    private static final DiffUtil.ItemCallback<TaskEntity> DIFF_CALLBACK = new DiffUtil.ItemCallback<TaskEntity>() {
+    private static final DiffUtil.ItemCallback<TaskEntity> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<TaskEntity>() {
         @Override
         public boolean areItemsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
             return oldItem.getId() == newItem.getId();
         }
-
         @Override
         public boolean areContentsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
             return oldItem.isCompleted() == newItem.isCompleted()
-                    && oldItem.getTitle().equals(newItem.getTitle())
-                    && oldItem.getStartTime() == newItem.getStartTime()
-                    && oldItem.getEndTime() == newItem.getEndTime()
-                    && oldItem.getCoinsEarned() == newItem.getCoinsEarned()
-                    && oldItem.getXpEarned() == newItem.getXpEarned();
+                    && oldItem.getTitle().equals(newItem.getTitle());
         }
     };
+
+    public TaskAdapter(OnTaskCompleteListener listener) {
+        super(DIFF_CALLBACK);
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
@@ -65,77 +61,131 @@ public class TaskAdapter extends ListAdapter<TaskEntity, TaskAdapter.TaskViewHol
     class TaskViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView ivCheck;
-        private final TextView tvTaskTitle;
-        private final TextView tvTaskTime;
-        private final TextView tvTaskCategory;
+        private final TextView tvTitle;
+        private final TextView tvCategoryBadge;
+        private final TextView tvTime;
+        private final TextView tvStartTime;
         private final TextView tvCoinsBadge;
-        private final TextView tvXpBadge;
+        private final LinearLayout layoutCoins;
+        private final View viewCatBar;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             ivCheck = itemView.findViewById(R.id.iv_check);
-            tvTaskTitle = itemView.findViewById(R.id.tv_task_title);
-            tvTaskTime = itemView.findViewById(R.id.tv_task_time);
-            tvTaskCategory = itemView.findViewById(R.id.tv_task_category);
+            tvTitle = itemView.findViewById(R.id.tv_task_title);
+            tvCategoryBadge = itemView.findViewById(R.id.tv_category_badge);
+            tvTime = itemView.findViewById(R.id.tv_task_time);
+            tvStartTime = itemView.findViewById(R.id.tv_start_time);
             tvCoinsBadge = itemView.findViewById(R.id.tv_coins_badge);
-            tvXpBadge = itemView.findViewById(R.id.tv_xp_badge);
+            layoutCoins = itemView.findViewById(R.id.layout_coins);
+            viewCatBar = itemView.findViewById(R.id.view_cat_bar);
         }
 
         public void bind(TaskEntity task) {
-            tvTaskTitle.setText(task.getTitle());
-            tvTaskTime.setText(DateUtils.minutesToTime(task.getStartTime()) + " - " + DateUtils.minutesToTime(task.getEndTime()));
-            tvTaskCategory.setText(getCategoryLabel(task.getCategory()));
+            boolean done = task.isCompleted();
 
-            boolean completed = task.isCompleted();
-
-            if (completed) {
-                // Grey out + strikethrough
-                tvTaskTitle.setAlpha(0.5f);
-                tvTaskTitle.setPaintFlags(tvTaskTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                tvTaskTime.setAlpha(0.5f);
-                tvTaskCategory.setAlpha(0.5f);
-
-                // Filled check icon, not clickable
-                ivCheck.setImageResource(R.drawable.ic_check);
-                ivCheck.setAlpha(1f);
-                ivCheck.setClickable(false);
-                ivCheck.setOnClickListener(null);
-
-                // Show earned rewards
-                tvCoinsBadge.setText("+" + task.getCoinsEarned());
-                tvXpBadge.setText("+" + task.getXpEarned());
+            // Title
+            tvTitle.setText(task.getTitle());
+            if (done) {
+                tvTitle.setAlpha(0.45f);
+                tvTitle.setPaintFlags(tvTitle.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
-                // Normal appearance
-                tvTaskTitle.setAlpha(1f);
-                tvTaskTitle.setPaintFlags(tvTaskTitle.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-                tvTaskTime.setAlpha(1f);
-                tvTaskCategory.setAlpha(1f);
-
-                // Outline check icon, clickable
-                ivCheck.setImageResource(R.drawable.ic_check_outline);
-                ivCheck.setAlpha(0.3f);
-                ivCheck.setClickable(true);
-                ivCheck.setOnClickListener(v -> {
-                    if (listener != null) listener.onTaskComplete(task);
-                });
-
-                // Show potential rewards
-                RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(task.getCategory());
-                tvCoinsBadge.setText("+" + reward.coins);
-                tvXpBadge.setText("+" + reward.xp);
+                tvTitle.setAlpha(1f);
+                tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG));
             }
 
+            // Checkbox
+            if (done) {
+                ivCheck.setImageResource(R.drawable.ic_check);
+                ivCheck.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        itemView.getContext().getColor(R.color.md_primary)));
+            } else {
+                ivCheck.setImageResource(R.drawable.ic_check_circle_outline);
+                ivCheck.setImageTintList(null);
+            }
+
+            ivCheck.setOnClickListener(v -> {
+                if (!done && listener != null) {
+                    ivCheck.setEnabled(false);
+                    listener.onTaskComplete(task);
+                    ivCheck.postDelayed(() -> ivCheck.setEnabled(true), 500);
+                }
+            });
+
+            // Category badge and color bar
+            String catLabel;
+            int badgeBgColor, badgeTextColor, barColor;
+            switch (task.getCategory()) {
+                case RewardCalculator.CAT_WORK:
+                    catLabel = "工作";
+                    badgeBgColor = 0xFFE8EDFF; badgeTextColor = 0xFF3F51B5;
+                    barColor = 0xFF3F51B5;
+                    break;
+                case RewardCalculator.CAT_STUDY:
+                    catLabel = "学习";
+                    badgeBgColor = 0xFFF3E8FF; badgeTextColor = 0xFF7C3AED;
+                    barColor = 0xFF7C3AED;
+                    break;
+                case RewardCalculator.CAT_EXERCISE:
+                    catLabel = "运动";
+                    badgeBgColor = 0xFFDCFCE7; badgeTextColor = 0xFF16A34A;
+                    barColor = 0xFF16A34A;
+                    break;
+                case RewardCalculator.CAT_PERSONAL:
+                    catLabel = "个人";
+                    badgeBgColor = 0xFFFFF7ED; badgeTextColor = 0xFFEA580C;
+                    barColor = 0xFFEA580C;
+                    break;
+                default:
+                    catLabel = "其他";
+                    badgeBgColor = 0xFFF5F5F5; badgeTextColor = 0xFF757575;
+                    barColor = 0xFF757575;
+                    break;
+            }
+            tvCategoryBadge.setText(catLabel);
+            GradientDrawable badgeBg = new GradientDrawable();
+            badgeBg.setShape(GradientDrawable.RECTANGLE);
+            badgeBg.setCornerRadius(itemView.getContext().getResources().getDisplayMetrics().density * 9999);
+            badgeBg.setColor(badgeBgColor);
+            tvCategoryBadge.setBackground(badgeBg);
+            tvCategoryBadge.setTextColor(badgeTextColor);
+
+            // Category color bar on left
+            viewCatBar.setBackgroundColor(barColor);
+
+            // Time range in meta row
+            if (task.getStartTime() > 0 && task.getEndTime() > 0) {
+                tvTime.setText(DateUtils.minutesToTime(task.getStartTime()) + " – " + DateUtils.minutesToTime(task.getEndTime()));
+            } else if (task.getStartTime() > 0) {
+                tvTime.setText(DateUtils.minutesToTime(task.getStartTime()));
+            } else {
+                tvTime.setText("");
+            }
+
+            // Start time on right side
+            if (task.getStartTime() > 0) {
+                tvStartTime.setText(DateUtils.minutesToTime(task.getStartTime()));
+            } else {
+                tvStartTime.setText("");
+            }
+
+            // Coins
+            if (done) {
+                layoutCoins.setAlpha(0.45f);
+                tvCoinsBadge.setText("+" + task.getCoinsEarned());
+            } else {
+                layoutCoins.setAlpha(1f);
+                RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(task.getCategory());
+                tvCoinsBadge.setText("+" + reward.coins);
+            }
+
+            // Card click for editing
             itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onTaskClicked(task);
             });
-        }
 
-        private String getCategoryLabel(String category) {
-            if (RewardCalculator.CAT_WORK.equals(category)) return "工作";
-            if (RewardCalculator.CAT_STUDY.equals(category)) return "学习";
-            if (RewardCalculator.CAT_EXERCISE.equals(category)) return "运动";
-            if (RewardCalculator.CAT_PERSONAL.equals(category)) return "个人";
-            return "其他";
+            // Dim completed card
+            itemView.setAlpha(done ? 0.45f : 1f);
         }
     }
 }

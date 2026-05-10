@@ -1,6 +1,6 @@
 package com.example.myapplication.data.local;
 
-import androidx.room.ColumnInfo;
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -9,80 +9,68 @@ public class ShopItemEntity {
 
     @PrimaryKey(autoGenerate = true)
     private long id;
-
-    @ColumnInfo(name = "name")
-    private String name;
-
-    @ColumnInfo(name = "description")
-    private String description;
-
-    @ColumnInfo(name = "type")
     private String type;
-
-    @ColumnInfo(name = "price")
+    private String name;
+    private String description;
     private int price;
-
-    @ColumnInfo(name = "iconResName")
     private String iconResName;
-
-    @ColumnInfo(name = "colorHex")
     private String colorHex;
-
-    public ShopItemEntity() {}
+    private String emoji;
+    private String colorHexDark;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
-
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
-
     public String getIconResName() { return iconResName; }
     public void setIconResName(String iconResName) { this.iconResName = iconResName; }
-
     public String getColorHex() { return colorHex; }
     public void setColorHex(String colorHex) { this.colorHex = colorHex; }
+    public String getEmoji() { return emoji; }
+    public void setEmoji(String emoji) { this.emoji = emoji; }
+    public String getColorHexDark() { return colorHexDark; }
+    public void setColorHexDark(String colorHexDark) { this.colorHexDark = colorHexDark; }
 
+    @NonNull
     public static ShopItemEntity[] getDefaultItems() {
-        return new ShopItemEntity[] {
-            // ===== Avatars (pixel art) =====
-            item("小勇士", "勇敢的像素冒险者", "AVATAR", 0, "ic_avatar_warrior", "#4CAF50"),
-            item("魔法师", "神秘的像素法师", "AVATAR", 50, "ic_avatar_mage", "#7C4DFF"),
-            item("忍者", "敏捷的像素忍者", "AVATAR", 80, "ic_avatar_ninja", "#607D8B"),
-            item("骑士", "坚毅的像素骑士", "AVATAR", 120, "ic_avatar_knight", "#1565C0"),
-            item("龙人", "传说中的像素龙人", "AVATAR", 200, "ic_avatar_dragon", "#FF6F00"),
-            item("机器人", "未来感的像素机器人", "AVATAR", 150, "ic_avatar_robot", "#00BCD4"),
-            item("猫咪", "可爱的像素猫咪", "AVATAR", 100, "ic_avatar_cat", "#FF9800"),
-            item("幽灵", "神秘的像素幽灵", "AVATAR", 180, "ic_avatar_ghost", "#9C27B0"),
-
-            // ===== Themes =====
-            item("默认蓝", "经典蓝靛色主题", "THEME", 0, "ic_theme_default", "#3F51B5"),
-            item("森林绿", "清新自然主题", "THEME", 100, "ic_theme_forest", "#2E7D32"),
-            item("日落橙", "温暖夕阳主题", "THEME", 100, "ic_theme_sunset", "#E65100"),
-            item("樱花粉", "浪漫樱花主题", "THEME", 120, "ic_theme_sakura", "#D81B60"),
-            item("暗夜紫", "深邃夜空主题", "THEME", 150, "ic_theme_night", "#4A148C"),
-            item("海洋蓝", "深海探索主题", "THEME", 120, "ic_theme_ocean", "#01579B"),
-            item("沙漠金", "金色沙漠主题", "THEME", 180, "ic_theme_desert", "#F9A825"),
-            item("极光绿", "北极极光主题", "THEME", 200, "ic_theme_aurora", "#00BFA5"),
+        return new ShopItemEntity[]{
+                // Avatars
+                create("AVATAR", "勇士", "无畏前行的冒险者", 0, "ic_avatar_warrior", "#F59E0B", "#B45309", "⚔️"),
+                create("AVATAR", "魔法师", "掌控元素的智者", 0, "ic_avatar_mage", "#7C3AED", "#5B21B6", "🧙"),
+                create("AVATAR", "忍者", "暗影中的执行者", 0, "ic_avatar_ninja", "#16A34A", "#15803D", "🥷"),
+                create("AVATAR", "骑士", "守护正义的盾牌", 0, "ic_avatar_knight", "#EA580C", "#C2410C", "🛡️"),
+                create("AVATAR", "龙人", "龙族血脉的继承者", 300, "ic_avatar_dragon", "#DC2626", "#B91C1C", "🐉"),
+                create("AVATAR", "机器人", "来自未来的机械体", 250, "ic_avatar_robot", "#3B82F6", "#2563EB", "🤖"),
+                create("AVATAR", "猫咪", "慵懒而敏捷的伙伴", 200, "ic_avatar_cat", "#F59E0B", "#D97706", "🐱"),
+                create("AVATAR", "幽灵", "飘渺不定的灵魂", 350, "ic_avatar_ghost", "#6366F1", "#4F46E5", "👻"),
+                // Themes
+                create("THEME", "默认蓝", "清爽经典的蓝色调", 0, "ic_theme_default", "#3B82F6", "#2563EB", "🎨"),
+                create("THEME", "森林绿", "自然宁静的绿色", 400, "ic_theme_forest", "#16A34A", "#15803D", "🌲"),
+                create("THEME", "日落橙", "温暖活力的橙色调", 400, "ic_theme_sunset", "#EA580C", "#C2410C", "🌅"),
+                create("THEME", "樱花粉", "柔美浪漫的粉色", 450, "ic_theme_sakura", "#DB2777", "#BE185D", "🌸"),
+                create("THEME", "暗夜紫", "神秘深邃的紫色", 500, "ic_theme_night", "#7C3AED", "#5B21B6", "🌙"),
+                create("THEME", "海洋蓝", "深沉广阔的蓝色", 400, "ic_theme_ocean", "#0369A1", "#075985", "🌊"),
+                create("THEME", "沙漠金", "金色沙漠的温暖", 450, "ic_theme_desert", "#B45309", "#92400E", "🏜️"),
+                create("THEME", "极光绿", "北极光的奇幻色彩", 500, "ic_theme_aurora", "#0D9488", "#0F766E", "🌌"),
         };
     }
 
-    private static ShopItemEntity item(String name, String desc, String type, int price, String iconRes, String color) {
-        ShopItemEntity e = new ShopItemEntity();
-        e.setName(name);
-        e.setDescription(desc);
-        e.setType(type);
-        e.setPrice(price);
-        e.setIconResName(iconRes);
-        e.setColorHex(color);
-        return e;
+    private static ShopItemEntity create(String type, String name, String desc, int price, String icon, String color, String colorDark, String emoji) {
+        ShopItemEntity item = new ShopItemEntity();
+        item.setType(type);
+        item.setName(name);
+        item.setDescription(desc);
+        item.setPrice(price);
+        item.setIconResName(icon);
+        item.setColorHex(color);
+        item.setColorHexDark(colorDark);
+        item.setEmoji(emoji);
+        return item;
     }
 }

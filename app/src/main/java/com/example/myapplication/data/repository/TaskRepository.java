@@ -36,7 +36,7 @@ public class TaskRepository {
     }
 
     public void insertTask(TaskEntity task) {
-        executor.execute(() -> taskDao.insert(task));
+        taskDao.insert(task);
     }
 
     public void updateTask(TaskEntity task) {

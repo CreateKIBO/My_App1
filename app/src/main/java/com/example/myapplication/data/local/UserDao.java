@@ -54,4 +54,16 @@ public interface UserDao {
 
     @Query("UPDATE users SET unlockedThemes = :csv WHERE id = :userId")
     void setUnlockedThemes(long userId, String csv);
+
+    @Query("UPDATE users SET freezeCount = freezeCount + 1 WHERE id = :userId")
+    void addFreezeCard(long userId);
+
+    @Query("UPDATE users SET freezeCount = freezeCount - 1 WHERE id = :userId AND freezeCount > 0")
+    void useFreezeCard(long userId);
+
+    @Query("UPDATE users SET customAvatarPath = :path WHERE id = :userId")
+    void setCustomAvatarPath(long userId, String path);
+
+    @Query("UPDATE users SET displayName = :name WHERE id = :userId")
+    void setDisplayName(long userId, String name);
 }

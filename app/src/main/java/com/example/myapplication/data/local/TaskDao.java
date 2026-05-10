@@ -44,4 +44,7 @@ public interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE id = :id")
     void deleteById(long id);
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE userId = :userId AND isCompleted = 1")
+    LiveData<Integer> getTotalCompletedCount(long userId);
 }

@@ -1,207 +1,624 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="@color/md_surface">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <!-- Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="新建日程"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold" />
-
-        <!-- Task Title -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.FilledTextBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="日程标题"
-            app:startIconDrawable="@drawable/ic_task">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_task_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:maxLines="1" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Category -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="分类"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            android:textColor="?attr/colorOnSurfaceVariant" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:singleSelection="true"
-            app:chipSpacingHorizontal="8dp">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_work"
-                style="@style/Widget.Material3.Chip.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="工作" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_study"
-                style="@style/Widget.Material3.Chip.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="学习" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_exercise"
-                style="@style/Widget.Material3.Chip.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="运动" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_personal"
-                style="@style/Widget.Material3.Chip.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="个人" />
-        </com.google.android.material.chip.ChipGroup>
-
-        <!-- Time Row -->
+        <!-- Nav bar -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="horizontal">
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.FilledTextBox"
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_back_btn_circle"
+                android:contentDescription="返回"
+                android:padding="8dp"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="#374151" />
+
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:hint="开始时间"
-                app:startIconDrawable="@drawable/ic_clock">
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="新建日程"
+                android:textColor="@color/md_on_surface"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_start_time"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.FilledTextBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:hint="结束时间">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_end_time"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:id="@+id/btn_done"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:text="完成"
+                android:textColor="#3B82F6"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
-        <!-- Date -->
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.FilledTextBox"
+        <!-- Scrollable content -->
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="日期"
-            app:startIconDrawable="@drawable/ic_calendar">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:focusable="false"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Reward Preview Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="?attr/colorSurfaceVariant"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="120dp">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:contentDescription="奖励"
-                    android:src="@drawable/ic_coin" />
-
+                <!-- Task name -->
                 <TextView
-                    android:id="@+id/tv_reward_preview"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:text="完成后可获得奖励"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
+                    android:text="任务名称"
+                    android:textColor="#6B7280"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="12dp"
-                    android:contentDescription="经验"
-                    android:src="@drawable/ic_xp" />
+                <EditText
+                    android:id="@+id/et_task_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_bordered"
+                    android:fontFamily="sans-serif-medium"
+                    android:hint="输入任务名称..."
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingHorizontal="16dp"
+                    android:textColor="@color/md_on_surface"
+                    android:textColorHint="#9CA3AF"
+                    android:textSize="15sp" />
+
+                <!-- Category -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
+                    android:text="分类"
+                    android:textColor="#6B7280"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Work pill -->
+                    <LinearLayout
+                        android:id="@+id/pill_work"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_dot_work" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="工作"
+                            android:textColor="#111827"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Study pill -->
+                    <LinearLayout
+                        android:id="@+id/pill_study"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="4dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_dot_study" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="学习"
+                            android:textColor="#111827"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Exercise pill -->
+                    <LinearLayout
+                        android:id="@+id/pill_exercise"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="4dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_dot_exercise" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="运动"
+                            android:textColor="#111827"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Personal pill -->
+                    <LinearLayout
+                        android:id="@+id/pill_personal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_dot_personal" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="个人"
+                            android:textColor="#111827"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Date -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
+                    android:text="日期"
+                    android:textColor="#6B7280"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/et_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_bordered"
+                    android:drawableEnd="@drawable/ic_calendar"
+                    android:drawablePadding="12dp"
+                    android:focusable="false"
+                    android:fontFamily="sans-serif-medium"
+                    android:hint="选择日期"
+                    android:inputType="none"
+                    android:paddingHorizontal="16dp"
+                    android:textColor="@color/md_on_surface"
+                    android:textColorHint="#9CA3AF"
+                    android:textSize="15sp" />
+
+                <!-- Time range -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
+                    android:text="时间段"
+                    android:textColor="#6B7280"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/et_start_time"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:drawableEnd="@drawable/ic_clock"
+                        android:drawablePadding="8dp"
+                        android:focusable="false"
+                        android:fontFamily="sans-serif-medium"
+                        android:hint="开始时间"
+                        android:inputType="none"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/md_on_surface"
+                        android:textColorHint="#9CA3AF"
+                        android:textSize="15sp" />
+
+                    <EditText
+                        android:id="@+id/et_end_time"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="5dp"
+                        android:background="@drawable/bg_input_bordered"
+                        android:drawableEnd="@drawable/ic_clock"
+                        android:drawablePadding="8dp"
+                        android:focusable="false"
+                        android:fontFamily="sans-serif-medium"
+                        android:hint="结束时间"
+                        android:inputType="none"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="@color/md_on_surface"
+                        android:textColorHint="#9CA3AF"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <!-- Reward preview -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
+                    android:text="完成奖励预览"
+                    android:textColor="#6B7280"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
+
+                        <!-- Category icon -->
+                        <FrameLayout
+                            android:id="@+id/layout_reward_icon"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="12dp">
+
+                            <View
+                                android:id="@+id/v_reward_bg"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp" />
+
+                            <TextView
+                                android:id="@+id/tv_reward_emoji"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
+                                android:gravity="center"
+                                android:text="💼"
+                                android:textSize="20sp" />
+                        </FrameLayout>
+
+                        <!-- Reward info -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_reward_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="工作任务奖励"
+                                android:textColor="@color/md_on_surface"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="完成后自动发放到账户"
+                                android:textColor="@color/md_on_surface_variant"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <!-- XP + Coins -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_reward_xp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="+35 XP"
+                                android:textColor="#16A34A"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_reward_coins"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="+15 ¢"
+                                android:textColor="#D97706"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Tip card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_tip_green"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:text="💡"
+                        android:textSize="20sp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="小贴士"
+                            android:textColor="#16A34A"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:lineSpacingMultiplier="1.3"
+                            android:text="运动类任务奖励更多金币，坚持每天完成所有任务可获得额外奖励！"
+                            android:textColor="#6B7280"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Bottom submit button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/md_surface"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="12dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_submit"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="添加任务"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#3B82F6"
+                app:cornerRadius="14dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Success overlay -->
+    <FrameLayout
+        android:id="@+id/layout_success_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#4D000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="32dp">
 
                 <TextView
-                    android:id="@+id/tv_xp_preview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/xp_green" />
+                    android:text="🎉"
+                    android:textSize="56sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="任务已创建"
+                    android:textColor="@color/md_on_surface"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_success_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:text=""
+                    android:textColor="@color/md_on_surface_variant"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_success_xp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text=""
+                        android:textColor="#16A34A"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_success_coins"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text=""
+                        android:textColor="#D97706"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_continue_add"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="继续添加"
+                        android:textColor="#3B82F6"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="8dp"
+                        app:backgroundTint="#EFF6FF"
+                        app:cornerRadius="10dp"
+                        app:strokeColor="#3B82F6"
+                        app:strokeWidth="1dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_done_add"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="添加完成"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="8dp"
+                        app:backgroundTint="#3B82F6"
+                        app:cornerRadius="10dp" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Save Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="保存日程"
-            android:textAppearance="?attr/textAppearanceLabelLarge"
-            app:cornerRadius="12dp"
-            app:icon="@drawable/ic_check"
-            app:iconGravity="textStart" />
-
-    </LinearLayout>
-</ScrollView>
+    </FrameLayout>
+</FrameLayout>

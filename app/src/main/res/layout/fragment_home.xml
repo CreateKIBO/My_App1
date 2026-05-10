@@ -1,86 +1,693 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:background="@color/md_background">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradient_home_header"
-        app:liftOnScroll="false">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp"
-            app:title="@string/home_title"
-            app:titleTextColor="@color/white" />
-
-        <TextView
-            android:id="@+id/tv_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="@color/white" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <LinearLayout
-        android:id="@+id/layout_empty"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:alpha="0.6"
-            android:contentDescription="@string/content_description_empty_state"
-            android:src="@drawable/ic_empty_tasks"
-            app:tint="?attr/colorPrimary" />
-
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/home_empty_title"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textColor="?attr/colorOnSurface" />
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="100dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/home_empty_subtitle"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant" />
-    </LinearLayout>
+            <!-- ═══ Top bar ═══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="16dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_tasks"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="80dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                <!-- Left: avatar + greeting -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
+                    <!-- Avatar circle 36dp with accent border -->
+                    <ImageView
+                        android:id="@+id/iv_avatar"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/bg_avatar_circle"
+                        android:contentDescription="头像"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_avatar_warrior"
+                        app:tint="@null" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_greeting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="下午好 ☀️"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/tv_user_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="冒险者小明"
+                            android:textColor="@color/md_on_surface"
+                            android:textSize="17sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold"
+                            android:letterSpacing="-0.01" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Right: coin pill + notification -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Coin pill -->
+                    <LinearLayout
+                        android:id="@+id/layout_coin_pill"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_coin_pill"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="8dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp">
+
+                        <!-- Mini coin circle 18dp -->
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="4dp"
+                            android:contentDescription="金币"
+                            android:src="@drawable/bg_coin_pill_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_header_coins"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/coin_gold_dark"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Notification button -->
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp">
+
+                        <ImageView
+                            android:id="@+id/btn_notification"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_notif_btn"
+                            android:contentDescription="通知"
+                            android:padding="9dp"
+                            android:src="@drawable/ic_notification" />
+
+                        <!-- Red dot -->
+                        <View
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="6dp"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_notif_dot" />
+                    </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ═══ Level + XP card ═══ -->
+            <FrameLayout
+                android:id="@+id/layout_level_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_level_card"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Level row: badge + info + streak -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Level badge circle 44dp -->
+                        <TextView
+                            android:id="@+id/tv_level_badge"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_level_badge"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:elevation="2dp" />
+
+                        <!-- Level info -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_level_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="专注行者"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"
+                                android:fontFamily="sans-serif-medium"
+                                android:textStyle="bold"
+                                android:letterSpacing="-0.01" />
+
+                            <TextView
+                                android:id="@+id/tv_level_sub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="距离下一等级还需 200 XP"
+                                android:textColor="@color/white"
+                                android:alpha="0.55"
+                                android:textSize="12sp"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+
+                        <!-- Streak pill -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_streak_pill"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="6dp"
+                                android:text="@string/streak_fire_emoji"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/tv_streak_preview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/white"
+                                android:textSize="13sp"
+                                android:fontFamily="sans-serif"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- XP row labels -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_xp_label"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="0 / 200 XP"
+                            android:textColor="@color/white"
+                            android:alpha="0.55"
+                            android:textSize="11sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/tv_xp_percent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:textColor="@color/white"
+                            android:alpha="0.55"
+                            android:textSize="11sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- XP bar -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:background="@drawable/bg_xp_track">
+
+                        <View
+                            android:id="@+id/view_xp_fill"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_xp_fill" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <!-- Decorative circle top-right 120dp -->
+                <View
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="-40dp"
+                    android:layout_marginEnd="-30dp"
+                    android:alpha="0.03"
+                    android:background="@drawable/bg_level_badge" />
+
+                <!-- Decorative circle bottom-center 80dp -->
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="-20dp"
+                    android:layout_marginStart="20dp"
+                    android:alpha="0.02"
+                    android:background="@drawable/bg_level_badge" />
+            </FrameLayout>
+
+            <!-- ═══ Progress section ═══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Progress ring -->
+                <FrameLayout
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginEnd="16dp">
+
+                    <ImageView
+                        android:id="@+id/iv_progress_ring"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="进度环"
+                        android:src="@drawable/bg_progress_ring" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_ring_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0/0"
+                            android:textColor="@color/md_primary"
+                            android:textSize="22sp"
+                            android:fontFamily="sans-serif"
+                            android:textStyle="bold"
+                            android:letterSpacing="-0.02"
+                            android:lineSpacingMultiplier="1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="已完成"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="9sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginTop="1dp" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- Progress info -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="今日进度"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="16sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.01" />
+
+                    <TextView
+                        android:id="@+id/tv_progress_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="还剩 0 个任务，全部完成可获得额外奖励！"
+                        android:textColor="@color/md_on_surface_variant"
+                        android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.4" />
+
+                    <!-- Chips -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- XP chip -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_chip_xp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="2dp"
+                                android:text="@string/xp_bolt_emoji"
+                                android:textSize="11sp" />
+
+                            <TextView
+                                android:id="@+id/tv_xp_preview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+0 XP"
+                                android:textColor="@color/xp_green"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Coin chip -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_chip_coin"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp">
+
+                            <ImageView
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:layout_marginEnd="3dp"
+                                android:contentDescription="金币"
+                                android:src="@drawable/bg_mini_coin_chip" />
+
+                            <TextView
+                                android:id="@+id/tv_coin_preview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+0 ¢"
+                                android:textColor="@color/coin_gold_dark"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ═══ Category filter ═══ -->
+            <HorizontalScrollView
+                android:id="@+id/hsv_cat_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:scrollbars="none"
+                android:overScrollMode="never">
+
+                <LinearLayout
+                    android:id="@+id/layout_cat_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- All (active by default) -->
+                    <LinearLayout
+                        android:id="@+id/btn_cat_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_cat_filter_selected"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="全部"
+                            android:textColor="@color/md_primary"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- Work -->
+                    <LinearLayout
+                        android:id="@+id/btn_cat_work"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_cat_filter_default"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp">
+
+                        <View
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/bg_dot_work" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="工作"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- Study -->
+                    <LinearLayout
+                        android:id="@+id/btn_cat_study"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_cat_filter_default"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp">
+
+                        <View
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/bg_dot_study" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="学习"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- Exercise -->
+                    <LinearLayout
+                        android:id="@+id/btn_cat_exercise"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_cat_filter_default"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp">
+
+                        <View
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/bg_dot_exercise" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="运动"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+
+                    <!-- Personal -->
+                    <LinearLayout
+                        android:id="@+id/btn_cat_personal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
+                        android:background="@drawable/bg_cat_filter_default"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp">
+
+                        <View
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/bg_dot_personal" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="个人"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- ═══ Task section title ═══ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="今日任务"
+                    android:textColor="@color/md_on_surface"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.01" />
+
+                <TextView
+                    android:id="@+id/tv_task_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/0 已完成"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <!-- Empty state -->
+            <LinearLayout
+                android:id="@+id/layout_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingVertical="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:alpha="0.6"
+                    android:contentDescription="@string/content_description_empty_state"
+                    android:src="@drawable/ic_empty_tasks"
+                    app:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/home_empty_title"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/home_empty_subtitle"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+
+            <!-- Task list -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_tasks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ═══ FAB ═══ -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:contentDescription="@string/fab_add_task"
         android:src="@drawable/ic_add"
-        app:tint="@color/white" />
+        app:fabCustomSize="52dp"
+        app:maxImageSize="24dp"
+        app:tint="@color/white"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

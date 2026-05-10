@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp" android:height="22dp"
+    android:viewportWidth="22" android:viewportHeight="22">
+    <!-- Circle outline -->
+    <path
+        android:strokeColor="#767680"
+        android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M11,1.5A9.5,9.5 0 1,1 10.99,1.5Z" />
+</vector>

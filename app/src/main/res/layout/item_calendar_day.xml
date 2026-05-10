@@ -2,36 +2,98 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="2dp">
+    android:layout_height="44dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_day"
         style="@style/Widget.App.CalendarDayCard"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        app:cardBackgroundColor="@android:color/transparent">
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="2dp">
 
             <TextView
                 android:id="@+id/tv_day"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/md_on_surface"
+                android:textSize="15sp" />
 
-            <View
-                android:id="@+id/dot_indicator"
-                android:layout_width="6dp"
+            <!-- Task category dots row -->
+            <LinearLayout
+                android:id="@+id/dots_row"
+                android:layout_width="wrap_content"
                 android:layout_height="6dp"
                 android:layout_marginTop="2dp"
-                android:background="@drawable/bg_timeline_dot"
-                android:visibility="gone" />
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <View
+                    android:id="@+id/dot_work"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_cat_dot_work"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/dot_study"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_cat_dot_study"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/dot_exercise"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_cat_dot_exercise"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/dot_personal"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:background="@drawable/bg_cat_dot_personal"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <!-- Streak dot indicator (top-right corner) -->
+    <View
+        android:id="@+id/streak_dot"
+        android:layout_width="5dp"
+        android:layout_height="5dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_streak_dot"
+        android:visibility="gone" />
+
+    <!-- All-done star indicator -->
+    <TextView
+        android:id="@+id/tv_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="1dp"
+        android:text="★"
+        android:textColor="@color/coin_gold"
+        android:textSize="7sp"
+        android:visibility="gone" />
 </FrameLayout>

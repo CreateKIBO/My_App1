@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avatar grid item for 4-column grid matching HTML mockup.
+     White card with 16dp corner radius, 48dp avatar icon, name, status tag,
+     optional price badge, optional equipped top bar. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Top accent bar for equipped state (3dp) -->
+    <View
+        android:id="@+id/v_equipped_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="top"
+        android:visibility="gone" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/md_outline_variant"
+        app:strokeWidth="1dp"
+        app:cardBackgroundColor="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="10dp">
+
+            <!-- Avatar icon: 48dp rounded square with bg color -->
+            <FrameLayout
+                android:id="@+id/layout_avatar_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp">
+
+                <View
+                    android:id="@+id/v_avatar_bg"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp" />
+
+                <TextView
+                    android:id="@+id/tv_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="24sp" />
+            </FrameLayout>
+
+            <!-- Name -->
+            <TextView
+                android:id="@+id/tv_avatar_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/md_on_surface"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Status tag: 装备中 / 点击装备 / 未解锁 -->
+            <TextView
+                android:id="@+id/tv_status_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.02"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <!-- Price badge for locked items: mini coin + price -->
+            <LinearLayout
+                android:id="@+id/layout_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <!-- Mini coin -->
+                <View
+                    android:id="@+id/v_mini_coin"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/bg_mini_coin" />
+
+                <TextView
+                    android:id="@+id/tv_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/coin_gold"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

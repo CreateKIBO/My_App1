@@ -1,86 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/md_surface">
 
-    <!-- Header -->
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="商店"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="100dp">
 
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:contentDescription="金币"
-                android:src="@drawable/ic_coin" />
+            <!-- Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.03"
+                android:text="商店"
+                android:textColor="@color/md_on_surface"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tv_coins"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="0"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="@color/coin_gold" />
+                android:layout_marginBottom="20dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="用金币解锁头像和主题"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="13sp" />
+
+            <!-- Balance bar: white surface card with coin orb, balance, earn button -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/md_outline_variant"
+                app:strokeWidth="1dp"
+                app:cardBackgroundColor="@color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="18dp"
+                    android:paddingVertical="14dp">
+
+                    <!-- Coin orb: 40dp circle with gold gradient and "¢" text -->
+                    <TextView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/bg_coin_orb"
+                        android:gravity="center"
+                        android:text="¢"
+                        android:textColor="#4E3B0A"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_coin_balance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="-0.02"
+                            android:text="0"
+                            android:textColor="@color/md_on_surface"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="金币余额"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <!-- Earn button: pill shape with border, accent text -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_recharge"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:text="赚取金币"
+                        android:textColor="@color/md_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="9999dp"
+                        app:strokeColor="@color/md_outline_variant"
+                        app:strokeWidth="1dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tabs: two equal-width buttons with icons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_tab_avatar"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:minHeight="36dp"
+                    android:text="头像"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="18dp"
+                    app:icon="@drawable/ic_tab_avatar"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp"
+                    app:iconSize="16dp"
+                    app:strokeWidth="1.5dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_tab_theme"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:minHeight="36dp"
+                    android:text="主题"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="18dp"
+                    app:icon="@drawable/ic_tab_theme"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp"
+                    app:iconSize="16dp"
+                    app:strokeWidth="1.5dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_tab_prop"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:minHeight="36dp"
+                    android:text="道具"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="18dp"
+                    app:icon="@drawable/ic_freeze_card"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp"
+                    app:iconSize="16dp"
+                    app:strokeWidth="1.5dp" />
+            </LinearLayout>
+
+            <!-- Section label -->
+            <TextView
+                android:id="@+id/tv_section_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.06"
+                android:text="像素头像"
+                android:textColor="@color/md_on_surface_variant"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_shop_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
+
         </LinearLayout>
-    </LinearLayout>
-
-    <!-- Tab Chips -->
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_type"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
-        android:paddingBottom="8dp"
-        app:singleSelection="true"
-        app:chipSpacingHorizontal="8dp">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_avatar"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="头像" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_theme"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="主题" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- Grid -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_shop_items"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp" />
-
-</LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

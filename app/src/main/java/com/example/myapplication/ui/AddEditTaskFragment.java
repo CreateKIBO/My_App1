@@ -1,10 +1,15 @@
 package com.example.myapplication.ui;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +29,20 @@ public class AddEditTaskFragment extends Fragment {
     private FragmentAddEditTaskBinding binding;
     private AddEditTaskViewModel viewModel;
     private String selectedCategory = RewardCalculator.CAT_WORK;
+    private long taskId = -1;
+    private String selectedDate;
+    private int startHour = 9, startMinute = 0;
+    private int endHour = 10, endMinute = 0;
+
+    private LinearLayout[] pillViews;
+    private final String[] categories = {
+            RewardCalculator.CAT_WORK, RewardCalculator.CAT_STUDY,
+            RewardCalculator.CAT_EXERCISE, RewardCalculator.CAT_PERSONAL
+    };
+    private final String[] categoryLabels = {"工作", "学习", "运动", "个人"};
+    private final String[] categoryEmojis = {"💼", "📚", "🏃", "🏠"};
+    private final int[] categoryColors = {0xFF3B82F6, 0xFF7C3AED, 0xFF16A34A, 0xFFD97706};
+    private final int[] categoryLightBgs = {0xFFEFF6FF, 0xFFF5F3FF, 0xFFF0FDF4, 0xFFFFFBEB};
 
     @Nullable
     @Override
@@ -37,93 +56,209 @@ public class AddEditTaskFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AddEditTaskViewModel.class);
 
-        // Category chips
-        binding.chipGroupCategory.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.contains(R.id.chip_work)) selectedCategory = RewardCalculator.CAT_WORK;
-            else if (checkedIds.contains(R.id.chip_study)) selectedCategory = RewardCalculator.CAT_STUDY;
-            else if (checkedIds.contains(R.id.chip_exercise)) selectedCategory = RewardCalculator.CAT_EXERCISE;
-            else if (checkedIds.contains(R.id.chip_personal)) selectedCategory = RewardCalculator.CAT_PERSONAL;
-            updateRewardPreview();
-        });
-        binding.chipWork.setChecked(true);
+        if (getArguments() != null) {
+            taskId = getArguments().getLong("taskId", -1);
+            String dateArg = getArguments().getString("selectedDate");
+            if (dateArg != null) selectedDate = dateArg;
+        }
 
-        // Time pickers
-        binding.etStartTime.setOnClickListener(v -> showTimePicker(0));
-        binding.etEndTime.setOnClickListener(v -> showTimePicker(1));
+        pillViews = new LinearLayout[]{binding.pillWork, binding.pillStudy, binding.pillExercise, binding.pillPersonal};
 
-        // Date
-        binding.etDate.setText(DateUtils.getTodayString());
-        binding.etDate.setOnClickListener(v -> {
-            // Simple date display, uses today by default
-        });
+        // Back button
+        binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
 
-        // Edit mode
-        long taskId = getArguments() != null ? getArguments().getLong("taskId", -1) : -1;
-        if (taskId > 0) {
-            viewModel.loadTask(taskId);
-            viewModel.getTask().observe(getViewLifecycleOwner(), task -> {
-                if (task == null) return;
-                binding.etTaskTitle.setText(task.getTitle());
-                binding.etDate.setText(task.getDate());
-                if (task.getStartTime() != null) binding.etStartTime.setText(DateUtils.minutesToTime(task.getStartTime()));
-                if (task.getEndTime() != null) binding.etEndTime.setText(DateUtils.minutesToTime(task.getEndTime()));
-                selectedCategory = task.getCategory();
-                selectCategoryChip();
+        // Done button
+        binding.btnDone.setOnClickListener(v -> saveTask());
+
+        // Category pills
+        for (int i = 0; i < pillViews.length; i++) {
+            final int index = i;
+            pillViews[i].setOnClickListener(v -> {
+                selectedCategory = categories[index];
+                updateCategoryPills();
                 updateRewardPreview();
             });
         }
 
-        // Save
-        binding.btnSave.setOnClickListener(v -> saveTask(taskId));
+        // Title text watcher for submit state
+        binding.etTaskTitle.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                updateSubmitState();
+            }
+        });
 
+        // Time pickers
+        binding.etStartTime.setOnClickListener(v -> {
+            new TimePickerDialog(requireContext(), (picker, hour, minute) -> {
+                startHour = hour;
+                startMinute = minute;
+                binding.etStartTime.setText(DateUtils.minutesToTime(hour * 60 + minute));
+            }, startHour, startMinute, true).show();
+        });
+
+        binding.etEndTime.setOnClickListener(v -> {
+            new TimePickerDialog(requireContext(), (picker, hour, minute) -> {
+                endHour = hour;
+                endMinute = minute;
+                binding.etEndTime.setText(DateUtils.minutesToTime(hour * 60 + minute));
+            }, endHour, endMinute, true).show();
+        });
+
+        // Date
+        if (selectedDate == null) selectedDate = DateUtils.getTodayString();
+        binding.etDate.setText(DateUtils.getDisplayDate(selectedDate));
+        binding.etDate.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(DateUtils.DATE_FORMAT_STR, java.util.Locale.getDefault());
+                cal.setTime(sdf.parse(selectedDate));
+            } catch (Exception ignored) {}
+            new DatePickerDialog(requireContext(), (picker, year, month, day) -> {
+                selectedDate = String.format(java.util.Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, day);
+                binding.etDate.setText(DateUtils.getDisplayDate(selectedDate));
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        // Edit mode
+        if (taskId != -1) {
+            viewModel.loadTask(taskId);
+            viewModel.getTaskLiveData().observe(getViewLifecycleOwner(), task -> {
+                if (task == null) return;
+                binding.etTaskTitle.setText(task.getTitle());
+                selectedDate = task.getDate();
+                binding.etDate.setText(DateUtils.getDisplayDate(selectedDate));
+                startHour = task.getStartTime() / 60;
+                startMinute = task.getStartTime() % 60;
+                endHour = task.getEndTime() / 60;
+                endMinute = task.getEndTime() % 60;
+                binding.etStartTime.setText(DateUtils.minutesToTime(task.getStartTime()));
+                binding.etEndTime.setText(DateUtils.minutesToTime(task.getEndTime()));
+                selectedCategory = task.getCategory();
+                updateCategoryPills();
+                updateRewardPreview();
+            });
+        } else {
+            binding.etStartTime.setText(DateUtils.minutesToTime(startHour * 60 + startMinute));
+            binding.etEndTime.setText(DateUtils.minutesToTime(endHour * 60 + endMinute));
+        }
+
+        // Submit button
+        binding.btnSubmit.setOnClickListener(v -> saveTask());
+
+        // Continue adding button
+        binding.btnContinueAdd.setOnClickListener(v -> {
+            binding.layoutSuccessOverlay.setVisibility(View.GONE);
+            resetForm();
+        });
+
+        // Done adding button — navigate back to home
+        binding.btnDoneAdd.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigateUp();
+        });
+
+        updateCategoryPills();
         updateRewardPreview();
+        updateSubmitState();
     }
 
-    private void selectCategoryChip() {
-        switch (selectedCategory) {
-            case "WORK": binding.chipWork.setChecked(true); break;
-            case "STUDY": binding.chipStudy.setChecked(true); break;
-            case "EXERCISE": binding.chipExercise.setChecked(true); break;
-            case "PERSONAL": binding.chipPersonal.setChecked(true); break;
+    private void updateCategoryPills() {
+        for (int i = 0; i < pillViews.length; i++) {
+            boolean isSelected = categories[i].equals(selectedCategory);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setShape(GradientDrawable.RECTANGLE);
+            bg.setCornerRadius(12f);
+            if (isSelected) {
+                bg.setColor(categoryLightBgs[i]);
+                bg.setStroke(2, categoryColors[i]);
+            } else {
+                bg.setColor(0xFFFFFFFF);
+                bg.setStroke(2, 0xFFE5E7EB);
+            }
+            pillViews[i].setBackground(bg);
+
+            // Update text color
+            int childCount = pillViews[i].getChildCount();
+            for (int c = 0; c < childCount; c++) {
+                View child = pillViews[i].getChildAt(c);
+                if (child instanceof TextView) {
+                    ((TextView) child).setTextColor(isSelected ? categoryColors[i] : 0xFF111827);
+                }
+            }
         }
     }
 
     private void updateRewardPreview() {
+        int catIndex = 0;
+        for (int i = 0; i < categories.length; i++) {
+            if (categories[i].equals(selectedCategory)) { catIndex = i; break; }
+        }
+
         RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(selectedCategory);
-        binding.tvRewardPreview.setText("+" + reward.coins + " 金币");
-        binding.tvXpPreview.setText("+" + reward.xp + " XP");
+
+        // Update icon background
+        GradientDrawable iconBg = new GradientDrawable();
+        iconBg.setShape(GradientDrawable.OVAL);
+        iconBg.setColor(categoryLightBgs[catIndex]);
+        binding.vRewardBg.setBackground(iconBg);
+        binding.tvRewardEmoji.setText(categoryEmojis[catIndex]);
+        binding.tvRewardName.setText(categoryLabels[catIndex] + "任务奖励");
+        binding.tvRewardXp.setText("⚡ +" + reward.xp + " XP");
+        binding.tvRewardCoins.setText("¢ +" + reward.coins);
     }
 
-    private void showTimePicker(int type) {
-        Calendar c = Calendar.getInstance();
-        new TimePickerDialog(requireContext(), (view, hour, minute) -> {
-            String time = String.format("%02d:%02d", hour, minute);
-            if (type == 0) binding.etStartTime.setText(time);
-            else binding.etEndTime.setText(time);
-        }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
-    }
-
-    private void saveTask(long taskId) {
+    private void updateSubmitState() {
         String title = binding.etTaskTitle.getText() != null ? binding.etTaskTitle.getText().toString().trim() : "";
-        if (title.isEmpty()) {
-            binding.etTaskTitle.setError("请输入标题");
-            return;
-        }
+        boolean canSubmit = !title.isEmpty();
+        binding.btnSubmit.setEnabled(canSubmit);
+        binding.btnDone.setAlpha(canSubmit ? 1.0f : 0.3f);
+        binding.btnDone.setClickable(canSubmit);
+    }
 
-        String date = binding.etDate.getText() != null ? binding.etDate.getText().toString().trim() : DateUtils.getTodayString();
-        String startStr = binding.etStartTime.getText() != null ? binding.etStartTime.getText().toString().trim() : null;
-        String endStr = binding.etEndTime.getText() != null ? binding.etEndTime.getText().toString().trim() : null;
+    private void saveTask() {
+        String title = binding.etTaskTitle.getText() != null ? binding.etTaskTitle.getText().toString().trim() : "";
+        if (title.isEmpty()) return;
 
-        Integer startMinutes = startStr != null && !startStr.isEmpty() ? DateUtils.timeToMinutes(startStr) : null;
-        Integer endMinutes = endStr != null && !endStr.isEmpty() ? DateUtils.timeToMinutes(endStr) : null;
+        int startTime = DateUtils.timeToMinutes(startHour, startMinute);
+        int endTime = DateUtils.timeToMinutes(endHour, endMinute);
 
-        if (taskId > 0) {
-            viewModel.updateTask(taskId, title, date, startMinutes, endMinutes, selectedCategory);
+        viewModel.saveTask(title, "", selectedDate, startTime, endTime, selectedCategory, taskId);
+
+        if (taskId != -1) {
+            Navigation.findNavController(requireView()).navigateUp();
         } else {
-            viewModel.createTask(title, date, startMinutes, endMinutes, selectedCategory);
+            // New task added — if it's for today, notify HomeViewModel to check streak
+            if (DateUtils.getTodayString().equals(selectedDate)) {
+                HomeViewModel homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+                homeViewModel.onTaskAddedToday();
+            }
+            showSuccessOverlay(title);
         }
+    }
 
-        Navigation.findNavController(requireView()).navigateUp();
+    private void showSuccessOverlay(String taskName) {
+        RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(selectedCategory);
+        binding.tvSuccessDesc.setText("「" + taskName + "」已添加到 " + DateUtils.getDisplayDate(selectedDate) + " 的日程中");
+        binding.tvSuccessXp.setText("⚡ +" + reward.xp + " XP");
+        binding.tvSuccessCoins.setText("¢ +" + reward.coins);
+        binding.layoutSuccessOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private void resetForm() {
+        taskId = -1;
+        selectedCategory = RewardCalculator.CAT_WORK;
+        startHour = 9; startMinute = 0;
+        endHour = 10; endMinute = 0;
+        selectedDate = DateUtils.getTodayString();
+        binding.etTaskTitle.setText("");
+        binding.etDate.setText(DateUtils.getDisplayDate(selectedDate));
+        binding.etStartTime.setText(DateUtils.minutesToTime(startHour * 60 + startMinute));
+        binding.etEndTime.setText(DateUtils.minutesToTime(endHour * 60 + endMinute));
+        updateCategoryPills();
+        updateRewardPreview();
+        updateSubmitState();
     }
 
     @Override

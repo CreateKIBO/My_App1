@@ -10,6 +10,7 @@ public class RewardCalculator {
 
     public static final String TYPE_AVATAR = "AVATAR";
     public static final String TYPE_THEME = "THEME";
+    public static final String TYPE_PROP = "PROP";
     public static final String TX_COIN = "COIN";
     public static final String TX_XP = "XP";
     public static final String TX_SPEND = "SPEND";
@@ -91,5 +92,15 @@ public class RewardCalculator {
 
     public static int getLevelUpBonusCoins(int newLevel) {
         return newLevel * LEVEL_UP_COIN_MULTIPLIER;
+    }
+
+    public static String getLevelTitle(int level) {
+        if (level >= 51) return "至尊王者";
+        if (level >= 41) return "传奇大师";
+        if (level >= 31) return "无双勇者";
+        if (level >= 21) return "精通行者";
+        if (level >= 11) return "专注先锋";
+        if (level >= 6) return "进阶冒险者";
+        return "新手冒险者";
     }
 }

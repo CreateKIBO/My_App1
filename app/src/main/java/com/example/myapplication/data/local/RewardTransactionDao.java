@@ -21,4 +21,7 @@ public interface RewardTransactionDao {
 
     @Query("SELECT * FROM reward_transactions WHERE userId = :userId AND type = :type ORDER BY timestamp DESC LIMIT 1")
     RewardTransactionEntity getLatestByType(long userId, String type);
+
+    @Query("SELECT COALESCE(SUM(amount), 0) FROM reward_transactions WHERE userId = :userId AND type = :type AND timestamp >= :sinceTimestamp")
+    int getSumByTypeSince(long userId, String type, long sinceTimestamp);
 }

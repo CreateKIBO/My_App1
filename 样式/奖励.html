@@ -1,0 +1,356 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuestPlan 奖励</title>
+<style>
+:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --font-d: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --gold: oklch(78% 0.15 85);
+  --gold-dark: oklch(55% 0.12 80);
+  --xp: oklch(65% 0.18 155);
+  --streak: oklch(62% 0.20 30);
+  --cw: oklch(58% 0.14 260);
+  --cs: oklch(55% 0.16 290);
+  --cp: oklch(62% 0.18 155);
+  --ca: oklch(68% 0.12 55);
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-x: 20px; --r-p: 9999px;
+  --sh: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px;
+  --sh-lg: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.06) 0 8px 24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:oklch(94% 0.005 250);color:var(--fg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:rgba(0,0,0,0.12) 0 0 0 1px,rgba(0,0,0,0.08) 0 24px 48px;display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:oklch(10% 0.02 250);border-radius:20px;z-index:100}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 100px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+/* ── Level hero ── */
+.hero{background:linear-gradient(135deg,oklch(25% 0.04 260),oklch(20% 0.06 280));border-radius:var(--r-x);padding:24px 20px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.03)}
+.hero::after{content:'';position:absolute;bottom:-30px;left:30%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.02)}
+
+.hero-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;position:relative;z-index:1}
+.hero-badge{width:52px;height:52px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:24px;font-weight:800;flex-shrink:0;box-shadow:0 4px 12px rgba(59,130,246,0.4)}
+.hero-info{flex:1}
+.hero-title{font-family:var(--font-d);font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+.hero-sub{font-size:13px;opacity:0.6;font-weight:500}
+
+.hero-xp{position:relative;z-index:1}
+.hero-xp-row{display:flex;justify-content:space-between;font-size:12px;opacity:0.6;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.hero-xp-bar{width:100%;height:8px;background:rgba(255,255,255,0.12);border-radius:var(--r-p);overflow:hidden}
+.hero-xp-fill{height:100%;border-radius:var(--r-p);background:linear-gradient(90deg,var(--xp),oklch(75% 0.20 170));transition:width 0.6s cubic-bezier(0.22,1,0.36,1)}
+.hero-next{font-size:11px;opacity:0.5;margin-top:6px;text-align:center}
+
+/* ── Stats row ── */
+.stats-row{display:flex;gap:10px;margin-bottom:16px}
+.stat-card{flex:1;background:var(--surface);border-radius:var(--r-l);padding:16px 12px;box-shadow:var(--sh);text-align:center;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.stat-card.gold-card::before{background:var(--gold)}
+.stat-card.xp-card::before{background:var(--xp)}
+.stat-card.streak-card::before{background:var(--streak)}
+
+.stat-icon{font-size:20px;margin-bottom:4px}
+.stat-val{font-family:var(--font-d);font-size:24px;font-weight:800;letter-spacing:-0.02em;line-height:1}
+.stat-val.gold-v{color:var(--gold-dark)}
+.stat-val.xp-v{color:var(--xp)}
+.stat-val.streak-v{color:var(--streak)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:500;margin-top:4px}
+.stat-change{font-size:10px;font-weight:600;margin-top:2px}
+.stat-change.up{color:var(--xp)}
+.stat-change.flat{color:var(--muted)}
+
+/* ── Reward categories ── */
+.cat-tabs{display:flex;gap:6px;margin-bottom:14px}
+.cat-tab{padding:8px 14px;border-radius:var(--r-p);border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:var(--font-b)}
+.cat-tab.on{background:var(--fg);color:#fff;border-color:var(--fg)}
+
+/* ── Reward list ── */
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-title{font-family:var(--font-d);font-size:16px;font-weight:700;letter-spacing:-0.01em}
+.section-action{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer}
+
+.reward-list{display:flex;flex-direction:column;gap:8px}
+.reward-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);border-radius:var(--r-l);box-shadow:var(--sh);transition:all 0.15s;position:relative;overflow:hidden}
+.reward-card:hover{box-shadow:var(--sh-lg)}
+.reward-card:active{transform:scale(0.98)}
+
+.reward-card .type-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.type-bar.tb-xp{background:var(--xp)}
+.type-bar.tb-coin{background:var(--gold)}
+.type-bar.tb-streak{background:var(--streak)}
+.type-bar.tb-level{background:var(--accent)}
+.type-bar.tb-bonus{background:oklch(68% 0.12 55)}
+
+.reward-icon{width:40px;height:40px;border-radius:var(--r-m);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.reward-icon.ri-xp{background:oklch(94% 0.06 155)}
+.reward-icon.ri-coin{background:oklch(95% 0.06 85)}
+.reward-icon.ri-streak{background:oklch(94% 0.06 30)}
+.reward-icon.ri-level{background:oklch(94% 0.06 260)}
+.reward-icon.ri-bonus{background:oklch(94% 0.04 55)}
+
+.reward-body{flex:1;min-width:0}
+.reward-name{font-size:14px;font-weight:600;margin-bottom:2px;letter-spacing:-0.01em}
+.reward-desc{font-size:12px;color:var(--muted);line-height:1.3}
+.reward-source{font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px}
+.reward-source .src-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+.reward-right{text-align:right;flex-shrink:0}
+.reward-amount{font-family:var(--font-d);font-size:16px;font-weight:800;letter-spacing:-0.02em}
+.reward-amount.am-xp{color:var(--xp)}
+.reward-amount.am-coin{color:var(--gold-dark)}
+.reward-time{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── Level milestones ── */
+.milestones{margin-top:20px}
+.ms-title{font-family:var(--font-d);font-size:16px;font-weight:700;margin-bottom:14px;letter-spacing:-0.01em}
+.ms-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ms-cell{background:var(--surface);border-radius:var(--r-m);padding:10px 6px;box-shadow:var(--sh);text-align:center;position:relative}
+.ms-cell.reached{border:2px solid var(--accent)}
+.ms-cell.current{border:2px solid var(--accent);background:oklch(96% 0.03 255)}
+.ms-cell.future{opacity:0.5}
+
+.ms-lv{font-family:var(--font-d);font-size:16px;font-weight:800;margin-bottom:2px}
+.ms-lv.reached-lv{color:var(--accent)}
+.ms-name{font-size:10px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.ms-reward{font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:2px}
+.ms-reward .mc4{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--gold),oklch(72% 0.14 75));display:inline-flex;align-items:center;justify-content:center;font-size:5px;font-weight:900;color:oklch(30% 0.06 80)}
+.ms-check{font-size:14px;color:var(--accent);margin-top:2px}
+
+/* ── Bottom bar ── */
+.bottom-bar{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px;z-index:10}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px;border:none;background:none;font-family:var(--font-b)}
+.bb-item svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.bb-item span{font-size:10px;font-weight:500;color:var(--muted);transition:color 0.2s}
+.bb-item.on svg{stroke:var(--accent)}.bb-item.on span{color:var(--accent)}
+
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:var(--r-p);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.reward-card{animation:fadeUp 0.25s ease both}
+.reward-card:nth-child(2){animation-delay:0.04s}.reward-card:nth-child(3){animation-delay:0.08s}.reward-card:nth-child(4){animation-delay:0.12s}.reward-card:nth-child(5){animation-delay:0.16s}.reward-card:nth-child(6){animation-delay:0.2s}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+
+  <div class="content">
+
+    <!-- Level hero -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-badge">12</div>
+        <div class="hero-info">
+          <div class="hero-title">专注行者</div>
+          <div class="hero-sub">Lv.12 · 累计 1,840 XP</div>
+        </div>
+      </div>
+      <div class="hero-xp">
+        <div class="hero-xp-row"><span>1,840 / 2,200 XP</span><span>84%</span></div>
+        <div class="hero-xp-bar"><div class="hero-xp-fill" style="width:84%"></div></div>
+        <div class="hero-next">距离「专注大师」还需 360 XP</div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card gold-card">
+        <div class="stat-icon" style="color:var(--gold)">¢</div>
+        <div class="stat-val gold-v">1,280</div>
+        <div class="stat-label">金币余额</div>
+        <div class="stat-change up">↑ +180 本周</div>
+      </div>
+      <div class="stat-card xp-card">
+        <div class="stat-icon" style="color:var(--xp)">⚡</div>
+        <div class="stat-val xp-v">1,840</div>
+        <div class="stat-label">总 XP</div>
+        <div class="stat-change up">↑ +85 今日</div>
+      </div>
+      <div class="stat-card streak-card">
+        <div class="stat-icon" style="color:var(--streak)">🔥</div>
+        <div class="stat-val streak-v">7</div>
+        <div class="stat-label">连续天数</div>
+        <div class="stat-change flat">最长 14 天</div>
+      </div>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="cat-tabs">
+      <button class="cat-tab on" onclick="filterRewards('all',this)">全部</button>
+      <button class="cat-tab" onclick="filterRewards('xp',this)">XP</button>
+      <button class="cat-tab" onclick="filterRewards('coin',this)">金币</button>
+      <button class="cat-tab" onclick="filterRewards('level',this)">升级</button>
+      <button class="cat-tab" onclick="filterRewards('bonus',this)">额外</button>
+    </div>
+
+    <!-- Reward list -->
+    <div class="section-head">
+      <div class="section-title">奖励记录</div>
+      <div class="section-action" onclick="showToast('查看更多历史记录')">查看全部 ›</div>
+    </div>
+    <div class="reward-list" id="reward-list"></div>
+
+    <!-- Level milestones -->
+    <div class="milestones">
+      <div class="ms-title">等级里程碑</div>
+      <div class="ms-grid" id="ms-grid"></div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="bottom-bar">
+    <button class="bb-item" onclick="showToast('日程页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日程</span></button>
+    <button class="bb-item" onclick="showToast('日历页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>日历</span></button>
+    <button class="bb-item" onclick="showToast('连续天数页面')"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 4 5 4 8a4 4 0 11-8 0c0-3 3-5 4-8z"/></svg><span>连续</span></button>
+    <button class="bb-item on"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><span>奖励</span></button>
+    <button class="bb-item" onclick="showToast('商店页面')"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span>商店</span></button>
+    <button class="bb-item" onclick="showToast('个人中心')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+// ── Data ──
+const rewards = [
+  {type:'xp', name:'完成任务 XP', desc:'完成项目周报', source:'w', amount:30, time:'今天 11:30'},
+  {type:'coin', name:'任务金币', desc:'完成项目周报', source:'w', amount:30, time:'今天 11:30'},
+  {type:'xp', name:'完成任务 XP', desc:'阅读《设计心理学》第4章', source:'s', amount:25, time:'今天 09:30'},
+  {type:'xp', name:'完成任务 XP', desc:'晨间冥想 15 分钟', source:'a', amount:15, time:'今天 07:15'},
+  {type:'coin', name:'任务金币', desc:'晨间冥想 15 分钟', source:'a', amount:15, time:'今天 07:15'},
+  {type:'level', name:'升级奖励', desc:'达到等级 12 · 专注行者', source:'lv', amount:600, time:'昨天 20:30'},
+  {type:'bonus', name:'每日全清奖励', desc:'1月14日所有任务完成', source:'bonus', amount:50, time:'昨天 20:30'},
+  {type:'streak', name:'连续 7 天奖励', desc:'每日全部完成额外奖励', source:'streak', amount:150, time:'昨天 20:30'},
+  {type:'coin', name:'任务金币', desc:'阅读《设计心理学》', source:'s', amount:25, time:'昨天 09:30'},
+  {type:'xp', name:'完成任务 XP', desc:'跑步 5 公里', source:'p', amount:20, time:'1月13日'},
+  {type:'coin', name:'任务金币', desc:'跑步 5 公里', source:'p', amount:20, time:'1月13日'},
+  {type:'bonus', name:'每日全清奖励', desc:'1月13日所有任务完成', source:'bonus', amount:50, time:'1月13日'},
+];
+
+const catColors = {w:'var(--cw)',s:'var(--cs)',p:'var(--cp)',a:'var(--ca)',lv:'var(--accent)',bonus:'var(--ca)',streak:'var(--streak)'};
+const catLabels = {w:'工作',s:'学习',p:'运动',a:'个人',lv:'升级',bonus:'额外',streak:'连续'};
+
+const levels = [
+  {lv:10, name:'初心者', coin:500, reached:true},
+  {lv:11, name:'坚持者', coin:550, reached:true},
+  {lv:12, name:'专注行者', coin:600, reached:true, current:true},
+  {lv:13, name:'专注大师', coin:650, reached:false},
+  {lv:14, name:'自律王者', coin:700, reached:false},
+  {lv:15, name:'传奇勇者', coin:750, reached:false},
+  {lv:16, name:'不朽之星', coin:800, reached:false},
+  {lv:17, name:'至高守护', coin:850, reached:false},
+];
+
+let currentFilter = 'all';
+
+// ── Render rewards ──
+function renderRewards() {
+  const filtered = currentFilter === 'all' ? rewards : rewards.filter(r => r.type === currentFilter);
+  const list = document.getElementById('reward-list');
+
+  const typeBarMap = {xp:'tb-xp',coin:'tb-coin',streak:'tb-streak',level:'tb-level',bonus:'tb-bonus'};
+  const iconMap = {xp:'ri-xp',coin:'ri-coin',streak:'ri-streak',level:'ri-level',bonus:'ri-bonus'};
+  const emojiMap = {xp:'⚡',coin:'¢',streak:'🔥',level:'↑',bonus:'★'};
+  const amMap = {xp:'am-xp',coin:'am-coin',streak:'am-coin',level:'am-coin',bonus:'am-coin'};
+  const unitMap = {xp:' XP',coin:' ¢',streak:' ¢',level:' ¢',bonus:' ¢'};
+
+  list.innerHTML = filtered.map(r => {
+    const srcColor = catColors[r.source] || 'var(--muted)';
+    const srcLabel = catLabels[r.source] || '';
+    return `<div class="reward-card">
+      <div class="type-bar ${typeBarMap[r.type]}"></div>
+      <div class="reward-icon ${iconMap[r.type]}">${emojiMap[r.type]}</div>
+      <div class="reward-body">
+        <div class="reward-name">${r.name}</div>
+        <div class="reward-desc">${r.desc}</div>
+        <div class="reward-source"><span class="src-dot" style="background:${srcColor}"></span>${srcLabel}</div>
+      </div>
+      <div class="reward-right">
+        <div class="reward-amount ${amMap[r.type]}">+${r.amount}${unitMap[r.type]}</div>
+        <div class="reward-time">${r.time}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render milestones ──
+function renderMilestones() {
+  const grid = document.getElementById('ms-grid');
+  grid.innerHTML = levels.map(l => {
+    let cls = 'ms-cell';
+    if (l.current) cls += ' current';
+    else if (l.reached) cls += ' reached';
+    else cls += ' future';
+
+    const lvCls = l.reached ? 'reached-lv' : '';
+    const check = l.reached ? '<div class="ms-check">✓</div>' : '';
+
+    return `<div class="${cls}">
+      <div class="ms-lv ${lvCls}">${l.lv}</div>
+      <div class="ms-name">${l.name}</div>
+      <div class="ms-reward"><span class="mc4">¢</span>${l.coin}</div>
+      ${check}
+    </div>`;
+  }).join('');
+}
+
+// ── Filter ──
+function filterRewards(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRewards();
+}
+
+// ── Toast ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ── Init ──
+renderRewards();
+renderMilestones();
+</script>
+</body>
+</html>

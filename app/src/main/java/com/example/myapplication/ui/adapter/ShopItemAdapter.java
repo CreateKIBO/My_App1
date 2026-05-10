@@ -1,126 +1,210 @@
 package com.example.myapplication.ui.adapter;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.data.local.ShopItemEntity;
+import com.example.myapplication.databinding.ItemShopBinding;
+import com.example.myapplication.util.RewardCalculator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-public class ShopItemAdapter extends ListAdapter<ShopItemEntity, ShopItemAdapter.ShopViewHolder> {
-
-    private final OnShopActionListener listener;
-    private Set<Long> ownedIds;
-    private long equippedId = -1;
+public class ShopItemAdapter extends RecyclerView.Adapter<ShopItemAdapter.ViewHolder> {
 
     public interface OnShopActionListener {
         void onBuyClick(ShopItemEntity item);
         void onEquipClick(ShopItemEntity item);
     }
 
+    private List<ShopItemEntity> items = new ArrayList<>();
+    private Set<Long> ownedIds = new java.util.HashSet<>();
+    private long equippedId = -1;
+    private final OnShopActionListener listener;
+
     public ShopItemAdapter(OnShopActionListener listener) {
-        super(DIFF_CALLBACK);
         this.listener = listener;
     }
 
-    private static final DiffUtil.ItemCallback<ShopItemEntity> DIFF_CALLBACK = new DiffUtil.ItemCallback<ShopItemEntity>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull ShopItemEntity oldItem, @NonNull ShopItemEntity newItem) {
-            return oldItem.getId() == newItem.getId();
-        }
-        @Override
-        public boolean areContentsTheSame(@NonNull ShopItemEntity oldItem, @NonNull ShopItemEntity newItem) {
-            return oldItem.getName().equals(newItem.getName()) && oldItem.getPrice() == newItem.getPrice();
-        }
-    };
+    public void submitList(List<ShopItemEntity> newItems) {
+        items = newItems != null ? newItems : new ArrayList<>();
+        notifyDataSetChanged();
+    }
 
     public void setOwnedIds(Set<Long> ids) {
-        this.ownedIds = ids;
+        ownedIds = ids != null ? ids : new java.util.HashSet<>();
         notifyDataSetChanged();
     }
 
     public void setEquippedId(long id) {
-        this.equippedId = id;
+        equippedId = id;
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public ShopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_shop, parent, false);
-        return new ShopViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ItemShopBinding binding = ItemShopBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ShopViewHolder holder, int position) {
-        holder.bind(getItem(position));
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(items.get(position));
     }
 
-    class ShopViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
 
-        private final ImageView ivItemIcon;
-        private final TextView tvItemName;
-        private final TextView tvItemPrice;
-        private final com.google.android.material.button.MaterialButton btnAction;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private final ItemShopBinding binding;
 
-        public ShopViewHolder(@NonNull View itemView) {
-            super(itemView);
-            ivItemIcon = itemView.findViewById(R.id.iv_item_icon);
-            tvItemName = itemView.findViewById(R.id.tv_item_name);
-            tvItemPrice = itemView.findViewById(R.id.tv_item_price);
-            btnAction = itemView.findViewById(R.id.btn_action);
+        ViewHolder(ItemShopBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
 
-        public void bind(ShopItemEntity item) {
-            tvItemName.setText(item.getName());
-
-            // Set icon
-            int resId = itemView.getContext().getResources().getIdentifier(
-                    item.getIconResName(), "drawable", itemView.getContext().getPackageName());
-            if (resId != 0) {
-                ivItemIcon.setImageResource(resId);
-            } else {
-                ivItemIcon.setImageResource(R.drawable.ic_profile);
-            }
-
-            boolean isOwned = ownedIds != null && ownedIds.contains(item.getId());
+        void bind(ShopItemEntity item) {
+            String type = item.getType();
+            boolean isAvatar = RewardCalculator.TYPE_AVATAR.equals(type);
+            boolean isTheme = RewardCalculator.TYPE_THEME.equals(type);
+            boolean isProp = RewardCalculator.TYPE_PROP.equals(type);
+            boolean isOwned = ownedIds.contains(item.getId());
             boolean isEquipped = equippedId == item.getId();
 
-            if (isEquipped) {
-                tvItemPrice.setText("已装备");
-                tvItemPrice.setTextColor(itemView.getContext().getColor(R.color.md_primary));
-                btnAction.setText("使用中");
-                btnAction.setIcon(null);
-                btnAction.setEnabled(false);
-            } else if (isOwned) {
-                tvItemPrice.setText("已拥有");
-                tvItemPrice.setTextColor(itemView.getContext().getColor(R.color.xp_green));
-                btnAction.setText("装备");
-                btnAction.setIconResource(R.drawable.ic_check);
-                btnAction.setEnabled(true);
-                btnAction.setOnClickListener(v -> {
-                    if (listener != null) listener.onEquipClick(item);
-                });
-            } else {
-                tvItemPrice.setText(item.getPrice() == 0 ? "免费" : String.valueOf(item.getPrice()));
-                tvItemPrice.setTextColor(itemView.getContext().getColor(R.color.coin_gold));
-                btnAction.setText(item.getPrice() == 0 ? "领取" : "购买");
-                btnAction.setIconResource(R.drawable.ic_coin);
-                btnAction.setEnabled(true);
-                btnAction.setOnClickListener(v -> {
-                    if (listener != null) listener.onBuyClick(item);
-                });
+            int bgColor = parseColor(item.getColorHex(), 0xFF3B82F6);
+            int bgColorDark = parseColor(item.getColorHexDark(), darken(bgColor));
+
+            // Icon area
+            if (isAvatar || isProp) {
+                binding.layoutAvatarIcon.setVisibility(View.VISIBLE);
+                binding.layoutThemePreview.setVisibility(View.GONE);
+
+                binding.tvEmoji.setText(item.getEmoji() != null ? item.getEmoji() : "");
+
+                GradientDrawable avatarBg = new GradientDrawable();
+                avatarBg.setShape(GradientDrawable.RECTANGLE);
+                avatarBg.setCornerRadius(16);
+                avatarBg.setColor(bgColor);
+                binding.vAvatarBg.setBackground(avatarBg);
+            } else if (isTheme) {
+                binding.layoutAvatarIcon.setVisibility(View.GONE);
+                binding.layoutThemePreview.setVisibility(View.VISIBLE);
+
+                GradientDrawable themeBg = new GradientDrawable(
+                        GradientDrawable.Orientation.TL_BR,
+                        new int[]{bgColorDark, bgColor}
+                );
+                themeBg.setCornerRadius(12);
+                binding.vThemeBg.setBackground(themeBg);
+
+                GradientDrawable c1 = new GradientDrawable();
+                c1.setShape(GradientDrawable.OVAL);
+                c1.setColor(bgColor);
+                c1.setAlpha(80);
+                binding.vThemeCircle1.setBackground(c1);
+
+                GradientDrawable c2 = new GradientDrawable();
+                c2.setShape(GradientDrawable.OVAL);
+                c2.setColor(bgColor);
+                c2.setAlpha(80);
+                binding.vThemeCircle2.setBackground(c2);
             }
+
+            // Name & description
+            binding.tvItemName.setText(item.getName());
+            binding.tvItemDesc.setText(item.getDescription());
+
+            // Price / status badge area — always visible to keep card height consistent
+            if (isEquipped) {
+                // Equipped: show "装备中" badge in price area
+                binding.layoutPrice.setVisibility(View.GONE);
+                binding.tvFreeTag.setVisibility(View.VISIBLE);
+                binding.tvFreeTag.setText("装备中");
+                binding.tvFreeTag.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.xp_green));
+                GradientDrawable ownedBg = new GradientDrawable();
+                ownedBg.setShape(GradientDrawable.RECTANGLE);
+                ownedBg.setCornerRadius(9999);
+                ownedBg.setColor(0xFFDCFCE7);
+                binding.tvFreeTag.setBackground(ownedBg);
+            } else if (isOwned && !isProp) {
+                // Owned: show "已拥有" badge in price area
+                binding.layoutPrice.setVisibility(View.GONE);
+                binding.tvFreeTag.setVisibility(View.VISIBLE);
+                binding.tvFreeTag.setText("已拥有");
+                binding.tvFreeTag.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.md_primary));
+                GradientDrawable ownedBg = new GradientDrawable();
+                ownedBg.setShape(GradientDrawable.RECTANGLE);
+                ownedBg.setCornerRadius(9999);
+                ownedBg.setColor(0xFFE8EAF6);
+                binding.tvFreeTag.setBackground(ownedBg);
+            } else if (isProp || !isOwned) {
+                // Not owned or prop: show price
+                if (item.getPrice() > 0) {
+                    binding.layoutPrice.setVisibility(View.VISIBLE);
+                    binding.tvFreeTag.setVisibility(View.GONE);
+                    binding.tvItemPrice.setText(String.valueOf(item.getPrice()));
+                } else {
+                    binding.layoutPrice.setVisibility(View.GONE);
+                    binding.tvFreeTag.setVisibility(View.VISIBLE);
+                    binding.tvFreeTag.setText("免费");
+                    binding.tvFreeTag.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.coin_gold_dark));
+                    binding.tvFreeTag.setBackground(ContextCompat.getDrawable(itemView.getContext(), R.drawable.bg_price_badge));
+                }
+            }
+
+            // Corner status tag — only show for locked items
+            binding.tvStatusTag.setVisibility(View.GONE);
+            if (!isOwned && !isProp) {
+                binding.tvStatusTag.setVisibility(View.VISIBLE);
+                binding.tvStatusTag.setText("未解锁");
+                binding.tvStatusTag.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.md_on_surface_variant));
+                GradientDrawable tagBg = new GradientDrawable();
+                tagBg.setShape(GradientDrawable.RECTANGLE);
+                tagBg.setCornerRadius(6);
+                tagBg.setColor(0xFFF1F1F1);
+                binding.tvStatusTag.setBackground(tagBg);
+            }
+
+            // Click handling
+            itemView.setOnClickListener(v -> {
+                if (isProp) {
+                    listener.onBuyClick(item);
+                } else if (isOwned && !isEquipped) {
+                    listener.onEquipClick(item);
+                } else if (!isOwned) {
+                    listener.onBuyClick(item);
+                }
+            });
+        }
+
+        private int parseColor(String hex, int fallback) {
+            try {
+                return Color.parseColor(hex);
+            } catch (Exception e) {
+                return fallback;
+            }
+        }
+
+        private int darken(int color) {
+            float factor = 0.7f;
+            int r = (int) (((color >> 16) & 0xFF) * factor);
+            int g = (int) (((color >> 8) & 0xFF) * factor);
+            int b = (int) ((color & 0xFF) * factor);
+            return (0xFF << 24) | (r << 16) | (g << 8) | b;
         }
     }
 }

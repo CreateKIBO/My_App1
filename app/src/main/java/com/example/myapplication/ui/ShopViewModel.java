@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.myapplication.data.local.AppDatabase;
+import com.example.myapplication.data.local.RewardTransactionEntity;
 import com.example.myapplication.data.local.ShopItemEntity;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.ShopRepository;
@@ -60,6 +61,11 @@ public class ShopViewModel extends AndroidViewModel {
         });
 
         currentOwnedIds = Transformations.switchMap(selectedType, type -> {
+            if (RewardCalculator.TYPE_PROP.equals(type)) {
+                MutableLiveData<Set<Long>> empty = new MutableLiveData<>();
+                empty.setValue(new HashSet<>());
+                return empty;
+            }
             if (RewardCalculator.TYPE_THEME.equals(type)) {
                 return Transformations.map(unlockedThemesLiveData, this::csvToSet);
             }
@@ -67,6 +73,11 @@ public class ShopViewModel extends AndroidViewModel {
         });
 
         currentEquippedId = Transformations.switchMap(selectedType, type -> {
+            if (RewardCalculator.TYPE_PROP.equals(type)) {
+                MutableLiveData<Long> none = new MutableLiveData<>();
+                none.setValue(-1L);
+                return none;
+            }
             if (RewardCalculator.TYPE_THEME.equals(type)) {
                 return Transformations.map(currentUser, user -> user != null ? (long) user.getThemeId() : 0L);
             }
@@ -108,6 +119,32 @@ public class ShopViewModel extends AndroidViewModel {
                     break;
             }
             mainHandler.post(() -> message.setValue(msg));
+        });
+    }
+
+    public void purchaseProp(long itemId, int price) {
+        AppDatabase db = AppDatabase.getInstance(getApplication());
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            UserEntity user = db.userDao().getUserById(userId);
+            if (user == null || user.getCurrentCoins() < price) {
+                mainHandler.post(() -> message.setValue("金币不足！"));
+                return;
+            }
+            user.setCurrentCoins(user.getCurrentCoins() - price);
+            user.setFreezeCount(user.getFreezeCount() + 1);
+            db.userDao().update(user);
+
+            // Record transaction
+            RewardTransactionEntity tx = new RewardTransactionEntity();
+            tx.setUserId(userId);
+            tx.setTaskId(null);
+            tx.setType(RewardCalculator.TX_SPEND);
+            tx.setAmount(-price);
+            tx.setReason("购买: 冻结卡");
+            tx.setTimestamp(System.currentTimeMillis());
+            db.rewardTransactionDao().insert(tx);
+
+            mainHandler.post(() -> message.setValue("购买成功！获得 1 张冻结卡"));
         });
     }
 

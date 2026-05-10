@@ -1,0 +1,305 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head><script data-od-sandbox-shim>(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuestPlan 个人中心</title>
+<style>
+:root {
+  --bg: oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(18% 0.012 250);
+  --muted: oklch(54% 0.012 250);
+  --border: oklch(92% 0.005 250);
+  --accent: oklch(58% 0.18 255);
+  --font-d: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-b: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --gold: oklch(78% 0.15 85);
+  --gold-dark: oklch(55% 0.12 80);
+  --xp: oklch(65% 0.18 155);
+  --streak: oklch(62% 0.20 30);
+  --cw: oklch(58% 0.14 260);
+  --cs: oklch(55% 0.16 290);
+  --cp: oklch(62% 0.18 155);
+  --ca: oklch(68% 0.12 55);
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-x: 20px; --r-p: 9999px;
+  --sh: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px;
+  --sh-lg: rgba(0,0,0,0.06) 0 0 0 1px, rgba(0,0,0,0.06) 0 8px 24px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:oklch(94% 0.005 250);color:var(--fg);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:rgba(0,0,0,0.12) 0 0 0 1px,rgba(0,0,0,0.08) 0 24px 48px;display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:oklch(10% 0.02 250);border-radius:20px;z-index:100}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 4px;font-size:14px;font-weight:600;flex-shrink:0}
+
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 100px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+/* ── Hero card ── */
+.hero{background:linear-gradient(135deg,oklch(25% 0.04 260),oklch(20% 0.06 280));border-radius:var(--r-x);padding:28px 20px 24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.03)}
+.hero::after{content:'';position:absolute;bottom:-40px;left:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.02)}
+
+.hero-top{display:flex;align-items:center;gap:16px;margin-bottom:20px;position:relative;z-index:1}
+.hero-avatar{width:64px;height:64px;border-radius:50%;background:oklch(88% 0.06 50);display:flex;align-items:center;justify-content:center;font-size:32px;border:3px solid rgba(255,255,255,0.2);flex-shrink:0;position:relative}
+.hero-avatar::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent);opacity:0.6}
+
+.hero-info{flex:1;min-width:0}
+.hero-name{font-family:var(--font-d);font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:2px}
+.hero-level{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;opacity:0.7}
+.hero-level .lv-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+.hero-xp{position:relative;z-index:1}
+.hero-xp-label{display:flex;justify-content:space-between;font-size:12px;opacity:0.6;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.hero-xp-bar{width:100%;height:8px;background:rgba(255,255,255,0.12);border-radius:var(--r-p);overflow:hidden}
+.hero-xp-fill{height:100%;border-radius:var(--r-p);background:linear-gradient(90deg,var(--xp),oklch(75% 0.20 170));transition:width 0.6s cubic-bezier(0.22,1,0.36,1)}
+
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.stat{background:var(--surface);border-radius:var(--r-m);padding:14px 8px;box-shadow:var(--sh);text-align:center}
+.stat-icon{font-size:18px;margin-bottom:4px}
+.stat-val{font-family:var(--font-d);font-size:20px;font-weight:800;letter-spacing:-0.02em;line-height:1}
+.stat-label{font-size:10px;color:var(--muted);font-weight:500;margin-top:4px;letter-spacing:0.02em}
+
+/* ── Equipped section ── */
+.equip{background:var(--surface);border-radius:var(--r-l);padding:16px;box-shadow:var(--sh);margin-bottom:20px}
+.equip-title{font-size:14px;font-weight:700;margin-bottom:14px;letter-spacing:-0.01em}
+.equip-row{display:flex;align-items:center;gap:14px}
+.equip-av{width:52px;height:52px;border-radius:50%;background:oklch(88% 0.06 50);display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid var(--accent);flex-shrink:0}
+.equip-info{flex:1}
+.equip-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.equip-desc{font-size:12px;color:var(--muted)}
+.equip-btn{padding:8px 16px;border-radius:var(--r-p);border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font-b);transition:all 0.15s}
+.equip-btn:hover{background:var(--border)}
+
+/* ── Reward log ── */
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.log-title{font-size:16px;font-weight:700;letter-spacing:-0.01em}
+.log-filter{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer}
+
+.log-list{display:flex;flex-direction:column;gap:8px}
+.log-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border-radius:var(--r-m);box-shadow:var(--sh);transition:transform 0.15s}
+.log-item:hover{transform:translateX(2px)}
+
+.log-dot-wrap{width:36px;height:36px;border-radius:var(--r-s);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.log-dot-wrap.xp-w{background:oklch(94% 0.06 155)}
+.log-dot-wrap.coin-w{background:oklch(95% 0.06 85)}
+.log-dot-wrap.streak-w{background:oklch(94% 0.06 30)}
+.log-dot-wrap.level-w{background:oklch(94% 0.06 260)}
+.log-dot-wrap.bonus-w{background:oklch(94% 0.06 255)}
+
+.log-body{flex:1;min-width:0}
+.log-name{font-size:14px;font-weight:600;margin-bottom:1px}
+.log-detail{font-size:12px;color:var(--muted);line-height:1.3}
+.log-right{text-align:right;flex-shrink:0}
+.log-amount{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.log-amount.pos{color:var(--xp)}
+.log-amount.coin-c{color:var(--gold-dark)}
+.log-date{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── Settings links ── */
+.settings{margin-top:20px}
+.settings-title{font-size:16px;font-weight:700;margin-bottom:12px;letter-spacing:-0.01em}
+.set-list{display:flex;flex-direction:column;gap:0}
+.set-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);cursor:pointer;transition:background 0.15s}
+.set-item:first-child{border-radius:var(--r-m) var(--r-m) 0 0;box-shadow:var(--sh)}
+.set-item:last-child{border-radius:0 0 var(--r-m) var(--r-m);box-shadow:var(--sh)}
+.set-item:not(:first-child):not(:last-child){box-shadow:var(--sh)}
+.set-item+.set-item{margin-top:-1px}
+.set-item:hover{background:oklch(97% 0.005 250)}
+
+.set-left{display:flex;align-items:center;gap:10px}
+.set-icon{width:32px;height:32px;border-radius:var(--r-s);display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg)}
+.set-text{font-size:14px;font-weight:600}
+.set-arrow{font-size:14px;color:var(--muted)}
+
+/* ── Bottom bar ── */
+.bottom-bar{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px;z-index:10}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px;border:none;background:none;font-family:var(--font-b)}
+.bb-item svg{width:24px;height:24px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.bb-item span{font-size:10px;font-weight:500;color:var(--muted);transition:color 0.2s}
+.bb-item.on svg{stroke:var(--accent)}.bb-item.on span{color:var(--accent)}
+
+/* ── Toast ── */
+.toast{position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--fg);color:#fff;padding:10px 20px;border-radius:var(--r-p);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.log-item{animation:fadeUp 0.3s ease both}
+.log-item:nth-child(1){animation-delay:0s}
+.log-item:nth-child(2){animation-delay:0.05s}
+.log-item:nth-child(3){animation-delay:0.1s}
+.log-item:nth-child(4){animation-delay:0.15s}
+.log-item:nth-child(5){animation-delay:0.2s}
+.log-item:nth-child(6){animation-delay:0.25s}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar"><span>9:41</span><span>●●●●</span></div>
+
+  <div class="content">
+
+    <!-- Hero card -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-avatar">⚔️</div>
+        <div class="hero-info">
+          <div class="hero-name">冒险者小明</div>
+          <div class="hero-level"><span class="lv-dot"></span>等级 12 · 专注行者</div>
+        </div>
+      </div>
+      <div class="hero-xp">
+        <div class="hero-xp-label"><span>1,840 / 2,200 XP</span><span>下一等级：专注大师</span></div>
+        <div class="hero-xp-bar"><div class="hero-xp-fill" style="width:84%"></div></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon" style="color:var(--gold)">¢</div>
+        <div class="stat-val" style="color:var(--gold-dark)">1,280</div>
+        <div class="stat-label">金币</div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon" style="color:var(--xp)">⚡</div>
+        <div class="stat-val" style="color:var(--xp)">1,840</div>
+        <div class="stat-label">总 XP</div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon" style="color:var(--streak)">🔥</div>
+        <div class="stat-val" style="color:var(--streak)">7</div>
+        <div class="stat-label">连续天数</div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon" style="color:var(--accent)">✓</div>
+        <div class="stat-val" style="color:var(--accent)">42</div>
+        <div class="stat-label">已完成</div>
+      </div>
+    </div>
+
+    <!-- Equipped -->
+    <div class="equip">
+      <div class="equip-title">当前装备</div>
+      <div class="equip-row">
+        <div class="equip-av">⚔️</div>
+        <div class="equip-info">
+          <div class="equip-name">勇士头像</div>
+          <div class="equip-desc">默认蓝主题</div>
+        </div>
+        <button class="equip-btn" onclick="showToast('前往商店更换装备')">更换</button>
+      </div>
+    </div>
+
+    <!-- Reward log -->
+    <div class="log-header">
+      <div class="log-title">奖励记录</div>
+      <div class="log-filter" onclick="showToast('筛选功能')">全部 ▾</div>
+    </div>
+    <div class="log-list">
+      <div class="log-item">
+        <div class="log-dot-wrap xp-w">⚡</div>
+        <div class="log-body"><div class="log-name">完成任务 XP</div><div class="log-detail">完成项目周报 · 工作</div></div>
+        <div class="log-right"><div class="log-amount pos">+30 XP</div><div class="log-date">今天 11:30</div></div>
+      </div>
+      <div class="log-item">
+        <div class="log-dot-wrap coin-w">¢</div>
+        <div class="log-body"><div class="log-name">任务金币奖励</div><div class="log-detail">完成项目周报</div></div>
+        <div class="log-right"><div class="log-amount coin-c">+30 ¢</div><div class="log-date">今天 11:30</div></div>
+      </div>
+      <div class="log-item">
+        <div class="log-dot-wrap xp-w">⚡</div>
+        <div class="log-body"><div class="log-name">完成任务 XP</div><div class="log-detail">阅读《设计心理学》· 学习</div></div>
+        <div class="log-right"><div class="log-amount pos">+25 XP</div><div class="log-date">今天 09:30</div></div>
+      </div>
+      <div class="log-item">
+        <div class="log-dot-wrap streak-w">🔥</div>
+        <div class="log-body"><div class="log-name">连续 7 天奖励</div><div class="log-detail">每日全部完成额外奖励</div></div>
+        <div class="log-right"><div class="log-amount coin-c">+150 ¢</div><div class="log-date">昨天 20:30</div></div>
+      </div>
+      <div class="log-item">
+        <div class="log-dot-wrap level-w">↑</div>
+        <div class="log-body"><div class="log-name">升级奖励</div><div class="log-detail">达到等级 12 · 专注行者</div></div>
+        <div class="log-right"><div class="log-amount coin-c">+600 ¢</div><div class="log-date">昨天 20:30</div></div>
+      </div>
+      <div class="log-item">
+        <div class="log-dot-wrap bonus-w">★</div>
+        <div class="log-body"><div class="log-name">每日全清奖励</div><div class="log-detail">1月14日所有任务完成</div></div>
+        <div class="log-right"><div class="log-amount coin-c">+50 ¢</div><div class="log-date">1月14日</div></div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="settings">
+      <div class="settings-title">设置</div>
+      <div class="set-list">
+        <div class="set-item" onclick="showToast('通知设置')">
+          <div class="set-left"><div class="set-icon">🔔</div><div class="set-text">通知提醒</div></div>
+          <div class="set-arrow">›</div>
+        </div>
+        <div class="set-item" onclick="showToast('数据导出')">
+          <div class="set-left"><div class="set-icon">📊</div><div class="set-text">数据导出</div></div>
+          <div class="set-arrow">›</div>
+        </div>
+        <div class="set-item" onclick="showToast('关于 QuestPlan')">
+          <div class="set-left"><div class="set-icon">ℹ️</div><div class="set-text">关于 QuestPlan</div></div>
+          <div class="set-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <button class="bb-item" onclick="showToast('日程页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日程</span></button>
+    <button class="bb-item" onclick="showToast('日历页面')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>日历</span></button>
+    <button class="bb-item" onclick="showToast('连续天数页面')"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 4 5 4 8a4 4 0 11-8 0c0-3 3-5 4-8z"/></svg><span>连续</span></button>
+    <button class="bb-item" onclick="showToast('奖励页面')"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><span>奖励</span></button>
+    <button class="bb-item" onclick="showToast('商店页面')"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><span>商店</span></button>
+    <button class="bb-item on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+</script>
+</body>
+</html>
