@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card_rounded"
+    android:padding="14dp"
+    android:layout_marginBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_item_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="高数第三章"
+            android:textSize="14sp"
+            android:textColor="#1B1B1F"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_status_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="复习中"
+            android:textSize="11sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
+    </LinearLayout>
+
+    <!-- Progress bar -->
+    <FrameLayout
+        android:id="@+id/v_progress_track"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="10dp"
+        android:background="#E8E8F0">
+
+        <View
+            android:id="@+id/v_progress_fill"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@color/md_primary" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/tv_item_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="2/6"
+            android:textSize="12sp"
+            android:textColor="@color/md_on_surface_variant" />
+
+        <TextView
+            android:id="@+id/tv_next_review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="下次: 2026-05-12"
+            android:textSize="12sp"
+            android:textColor="@color/md_on_surface_variant" />
+    </LinearLayout>
+
+</LinearLayout>

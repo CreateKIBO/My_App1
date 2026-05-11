@@ -41,6 +41,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/focusFragment"
+        android:name="com.example.myapplication.ui.FocusFragment"
+        android:label="专注"
+        tools:layout="@layout/fragment_focus" />
+
+    <fragment
         android:id="@+id/shopFragment"
         android:name="com.example.myapplication.ui.ShopFragment"
         android:label="商店"
@@ -52,6 +58,13 @@
         android:label="我的"
         tools:layout="@layout/fragment_profile">
         <action
+            android:id="@+id/action_profileFragment_to_avatarEditFragment"
+            app:destination="@id/avatarEditFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
+        <action
             android:id="@+id/action_profileFragment_to_rewardFragment"
             app:destination="@id/rewardFragment"
             app:enterAnim="@anim/nav_enter"
@@ -61,6 +74,13 @@
         <action
             android:id="@+id/action_profileFragment_to_streakFragment"
             app:destination="@id/streakFragment"
+            app:enterAnim="@anim/nav_enter"
+            app:exitAnim="@anim/nav_exit"
+            app:popEnterAnim="@anim/nav_pop_enter"
+            app:popExitAnim="@anim/nav_pop_exit" />
+        <action
+            android:id="@+id/action_profileFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment"
             app:enterAnim="@anim/nav_enter"
             app:exitAnim="@anim/nav_exit"
             app:popEnterAnim="@anim/nav_pop_enter"
@@ -84,5 +104,17 @@
         android:name="com.example.myapplication.ui.RewardFragment"
         android:label="奖励"
         tools:layout="@layout/fragment_reward" />
+
+    <fragment
+        android:id="@+id/avatarEditFragment"
+        android:name="com.example.myapplication.ui.AvatarEditFragment"
+        android:label="更换头像"
+        tools:layout="@layout/fragment_avatar_edit" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.myapplication.ui.SettingsFragment"
+        android:label="设置"
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>

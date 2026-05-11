@@ -45,6 +45,7 @@
     <color name="category_study">#7C3AED</color>
     <color name="category_exercise">#16A34A</color>
     <color name="category_personal">#EA580C</color>
+    <color name="category_other">#90A4AE</color>
     <color name="category_badge_bg">#E8EDFF</color>
 
     <!-- Reward colors -->
@@ -53,6 +54,7 @@
     <color name="coin_gold_dark">#B45309</color>
     <color name="xp_green">#16A34A</color>
     <color name="xp_green_light">#DCFCE7</color>
+    <color name="xp_green_dark">#00E676</color>
 
     <!-- Streak colors -->
     <color name="streak_orange">#EA580C</color>
@@ -67,6 +69,8 @@
     <color name="gradient_end">#1A237E</color>
 
     <!-- Card & tag backgrounds -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="card_background">#FFFFFF</color>
     <color name="tag_equipped_bg">#E8EDFF</color>
     <color name="tag_equipped_text">#3F51B5</color>
     <color name="tag_owned_bg">#E8F5E9</color>
@@ -169,6 +173,10 @@
     <color name="tip_yellow_border">#FDE68A</color>
     <color name="btn_disabled_bg">#E5E7EB</color>
     <color name="btn_disabled_text">#6B7280</color>
+
+    <!-- XP Progress -->
+    <color name="xp_progress_bg">#E2E1EC</color>
+    <color name="xp_progress_fg">#3F51B5</color>
 
     <!-- Milestone tag colors -->
     <color name="tag_done_bg">#FDDCB0</color>

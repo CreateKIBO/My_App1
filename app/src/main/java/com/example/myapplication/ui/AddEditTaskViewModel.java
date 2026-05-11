@@ -37,6 +37,12 @@ public class AddEditTaskViewModel extends AndroidViewModel {
         });
     }
 
+    private final MutableLiveData<Long> savedTaskId = new MutableLiveData<>();
+
+    public MutableLiveData<Long> getSavedTaskId() {
+        return savedTaskId;
+    }
+
     public void saveTask(String title, String description, String date,
                          int startTime, int endTime, String category, long existingTaskId) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
@@ -56,7 +62,8 @@ public class AddEditTaskViewModel extends AndroidViewModel {
                 task.setXpEarned(reward.xp);
                 task.setCreatedAt(System.currentTimeMillis());
                 task.setUpdatedAt(System.currentTimeMillis());
-                taskRepository.insertTask(task);
+                long id = taskRepository.insertTaskSync(task);
+                savedTaskId.postValue(id);
             } else {
                 TaskEntity task = taskRepository.getTaskByIdSync(existingTaskId);
                 if (task != null) {

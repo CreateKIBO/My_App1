@@ -322,6 +322,67 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- ═══ Streak Entry Card ═══ -->
+        <LinearLayout
+            android:id="@+id/item_streak_entry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@color/card_surface"
+            android:elevation="1dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="10dp"
+                    android:gravity="center"
+                    android:text="🔥"
+                    android:textSize="18sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="连续打卡"
+                        android:textColor="@color/md_on_surface"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_streak_entry_sub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="查看连续打卡记录"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:alpha="0.4"
+                android:contentDescription="查看"
+                android:src="@drawable/ic_chevron_right" />
+        </LinearLayout>
+
         <!-- ═══ Equipped Section ═══ -->
         <LinearLayout
             android:layout_width="match_parent"

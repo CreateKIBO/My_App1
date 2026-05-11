@@ -39,6 +39,10 @@ public class TaskRepository {
         taskDao.insert(task);
     }
 
+    public long insertTaskSync(TaskEntity task) {
+        return taskDao.insert(task);
+    }
+
     public void updateTask(TaskEntity task) {
         executor.execute(() -> {
             task.setUpdatedAt(System.currentTimeMillis());

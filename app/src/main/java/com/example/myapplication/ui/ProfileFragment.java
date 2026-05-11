@@ -131,6 +131,14 @@ public class ProfileFragment extends Fragment {
         AnimUtils.scaleOnClick(binding.itemSettingsNotifications);
         AnimUtils.scaleOnClick(binding.itemSettingsExport);
         AnimUtils.scaleOnClick(binding.itemSettingsAbout);
+        AnimUtils.scaleOnClick(binding.itemStreakEntry);
+
+        // Streak entry -> navigate to streak page
+        binding.itemStreakEntry.setOnClickListener(v -> {
+            try {
+                Navigation.findNavController(v).navigate(R.id.action_profileFragment_to_streakFragment);
+            } catch (Exception ignored) {}
+        });
 
         // Equipped change button -> navigate to shop
         binding.btnChangeEquipped.setOnClickListener(v -> {

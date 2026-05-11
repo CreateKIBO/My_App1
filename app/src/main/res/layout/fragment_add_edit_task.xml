@@ -237,6 +237,48 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <!-- Learning item toggle (only visible when category = Study) -->
+                <LinearLayout
+                    android:id="@+id/layout_learning_toggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_card_rounded"
+                    android:padding="12dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="加入复习计划"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_on_surface" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="开启后，系统会自动在最佳时间提醒你复习"
+                            android:textSize="12sp"
+                            android:textColor="@color/md_on_surface_variant"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_learning_item"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false" />
+                </LinearLayout>
+
                 <!-- Date -->
                 <TextView
                     android:layout_width="match_parent"

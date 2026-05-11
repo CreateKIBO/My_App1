@@ -3,197 +3,181 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"
-        android:layout_marginBottom="56dp" />
+        android:clipToPadding="false" />
 
-    <!-- Custom bottom bar with 6 tabs -->
     <LinearLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:background="?attr/colorSurface"
-        android:elevation="8dp"
-        android:paddingHorizontal="4dp">
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:elevation="12dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#E0E0E0" />
 
         <LinearLayout
-            android:id="@+id/tab_home"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:weightSum="5"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
 
-            <ImageView
-                android:id="@+id/tab_icon_home"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_task"
-                android:tint="?attr/colorOnSurfaceVariant" />
+            <!-- 日程 -->
+            <LinearLayout
+                android:id="@+id/tab_home"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
 
-            <TextView
-                android:id="@+id/tab_label_home"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="日程"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
+                <ImageView
+                    android:id="@+id/tab_icon_home"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_home"
+                    android:contentDescription="日程" />
+
+                <TextView
+                    android:id="@+id/tab_label_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="日程"
+                    android:textSize="10sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <!-- 日历 -->
+            <LinearLayout
+                android:id="@+id/tab_calendar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/tab_icon_calendar"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_calendar"
+                    android:contentDescription="日历" />
+
+                <TextView
+                    android:id="@+id/tab_label_calendar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="日历"
+                    android:textSize="10sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <!-- 专注 -->
+            <LinearLayout
+                android:id="@+id/tab_focus"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/tab_icon_focus"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_focus"
+                    android:contentDescription="专注" />
+
+                <TextView
+                    android:id="@+id/tab_label_focus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="专注"
+                    android:textSize="10sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <!-- 商店 -->
+            <LinearLayout
+                android:id="@+id/tab_shop"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/tab_icon_shop"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_shop"
+                    android:contentDescription="商店" />
+
+                <TextView
+                    android:id="@+id/tab_label_shop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="商店"
+                    android:textSize="10sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <!-- 我的 -->
+            <LinearLayout
+                android:id="@+id/tab_profile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/tab_icon_profile"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_profile"
+                    android:contentDescription="我的" />
+
+                <TextView
+                    android:id="@+id/tab_label_profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="我的"
+                    android:textSize="10sp"
+                    android:textColor="@color/md_on_surface_variant"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tab_calendar"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/tab_icon_calendar"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_calendar"
-                android:tint="?attr/colorOnSurfaceVariant" />
-
-            <TextView
-                android:id="@+id/tab_label_calendar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="日历"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tab_streak"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/tab_icon_streak"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_streak"
-                android:tint="?attr/colorOnSurfaceVariant" />
-
-            <TextView
-                android:id="@+id/tab_label_streak"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="连续"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tab_reward"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/tab_icon_reward"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_reward"
-                android:tint="?attr/colorOnSurfaceVariant" />
-
-            <TextView
-                android:id="@+id/tab_label_reward"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="奖励"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tab_shop"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/tab_icon_shop"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_shop"
-                android:tint="?attr/colorOnSurfaceVariant" />
-
-            <TextView
-                android:id="@+id/tab_label_shop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="商店"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/tab_profile"
-            style="@style/BottomTabItem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/tab_icon_profile"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_profile"
-                android:tint="?attr/colorOnSurfaceVariant" />
-
-            <TextView
-                android:id="@+id/tab_label_profile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="我的"
-                android:textSize="10sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

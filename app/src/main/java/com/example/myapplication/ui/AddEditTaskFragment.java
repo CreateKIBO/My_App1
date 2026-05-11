@@ -189,6 +189,10 @@ public class AddEditTaskFragment extends Fragment {
                 }
             }
         }
+
+        // Show learning toggle only for Study category
+        binding.layoutLearningToggle.setVisibility(
+                RewardCalculator.CAT_STUDY.equals(selectedCategory) ? View.VISIBLE : View.GONE);
     }
 
     private void updateRewardPreview() {
@@ -225,6 +229,9 @@ public class AddEditTaskFragment extends Fragment {
         int startTime = DateUtils.timeToMinutes(startHour, startMinute);
         int endTime = DateUtils.timeToMinutes(endHour, endMinute);
 
+        boolean isLearningItem = RewardCalculator.CAT_STUDY.equals(selectedCategory)
+                && binding.switchLearningItem.isChecked();
+
         viewModel.saveTask(title, "", selectedDate, startTime, endTime, selectedCategory, taskId);
 
         if (taskId != -1) {
@@ -235,6 +242,17 @@ public class AddEditTaskFragment extends Fragment {
                 HomeViewModel homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
                 homeViewModel.onTaskAddedToday();
             }
+
+            // If learning item, create forgetting curve entry
+            if (isLearningItem) {
+                viewModel.getSavedTaskId().observe(getViewLifecycleOwner(), savedId -> {
+                    if (savedId != null && savedId > 0) {
+                        FocusViewModel focusViewModel = new ViewModelProvider(requireActivity()).get(FocusViewModel.class);
+                        focusViewModel.createForgettingCurveItem(savedId, title);
+                    }
+                });
+            }
+
             showSuccessOverlay(title);
         }
     }

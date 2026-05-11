@@ -58,32 +58,28 @@ public class MainActivity extends AppCompatActivity {
         tabs = new LinearLayout[]{
                 findViewById(R.id.tab_home),
                 findViewById(R.id.tab_calendar),
-                findViewById(R.id.tab_streak),
-                findViewById(R.id.tab_reward),
+                findViewById(R.id.tab_focus),
                 findViewById(R.id.tab_shop),
                 findViewById(R.id.tab_profile)
         };
         tabIcons = new ImageView[]{
                 findViewById(R.id.tab_icon_home),
                 findViewById(R.id.tab_icon_calendar),
-                findViewById(R.id.tab_icon_streak),
-                findViewById(R.id.tab_icon_reward),
+                findViewById(R.id.tab_icon_focus),
                 findViewById(R.id.tab_icon_shop),
                 findViewById(R.id.tab_icon_profile)
         };
         tabLabels = new TextView[]{
                 findViewById(R.id.tab_label_home),
                 findViewById(R.id.tab_label_calendar),
-                findViewById(R.id.tab_label_streak),
-                findViewById(R.id.tab_label_reward),
+                findViewById(R.id.tab_label_focus),
                 findViewById(R.id.tab_label_shop),
                 findViewById(R.id.tab_label_profile)
         };
         tabDestIds = new int[]{
                 R.id.homeFragment,
                 R.id.calendarFragment,
-                R.id.streakFragment,
-                R.id.rewardFragment,
+                R.id.focusFragment,
                 R.id.shopFragment,
                 R.id.profileFragment
         };
@@ -110,8 +106,7 @@ public class MainActivity extends AppCompatActivity {
             int id = destination.getId();
             boolean showBottomNav = id == R.id.homeFragment
                     || id == R.id.calendarFragment
-                    || id == R.id.streakFragment
-                    || id == R.id.rewardFragment
+                    || id == R.id.focusFragment
                     || id == R.id.shopFragment
                     || id == R.id.profileFragment;
             bottomBar.setVisibility(showBottomNav ? View.VISIBLE : View.GONE);
@@ -151,13 +146,13 @@ public class MainActivity extends AppCompatActivity {
             tabLabels[i].setTextColor(selected ? accentColor : mutedColor);
             tabLabels[i].setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
 
-            // Animate icon scale on selection change
             if (selected) {
-                tabIcons[i].animate()
+                ImageView icon = tabIcons[i];
+                icon.animate()
                         .scaleX(1.15f).scaleY(1.15f)
                         .setDuration(150)
                         .setInterpolator(new DecelerateInterpolator())
-                        .withEndAction(() -> tabIcons[i].animate()
+                        .withEndAction(() -> icon.animate()
                                 .scaleX(1f).scaleY(1f)
                                 .setDuration(100)
                                 .setInterpolator(new AccelerateDecelerateInterpolator())
@@ -181,7 +176,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void ensureLocalUser() {
-        if (sessionManager.getLocalUserId() != -1) return;
+        // Wait for database initialization (especially after destructive migration)
+        try {
+            AppDatabase.awaitInitialization();
+        } catch (InterruptedException ignored) {}
+
+        if (sessionManager.getLocalUserId() != -1) {
+            // Verify the user still exists in the database (may have been wiped by migration)
+            try {
+                Thread[] waitThread = new Thread[1];
+                final long[] existingId = {-1};
+                waitThread[0] = new Thread(() -> {
+                    AppDatabase db = AppDatabase.getInstance(this);
+                    UserEntity user = db.userDao().getUserById(sessionManager.getLocalUserId());
+                    if (user != null) existingId[0] = user.getId();
+                });
+                waitThread[0].start();
+                waitThread[0].join(3000);
+                if (existingId[0] != -1) return; // user exists, all good
+                // User was wiped, fall through to recreate
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
         try {
             Thread[] waitThread = new Thread[1];
             waitThread[0] = new Thread(() -> {

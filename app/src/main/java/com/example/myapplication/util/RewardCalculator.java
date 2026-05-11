@@ -29,6 +29,12 @@ public class RewardCalculator {
     private static final int ALL_COMPLETE_BONUS_COINS = 30;
     private static final int ALL_COMPLETE_BONUS_XP = 50;
 
+    public static final int POMODORO_XP = 15;
+    public static final int POMODORO_COINS = 5;
+    public static final int REVIEW_XP = 5;
+    public static final int REVIEW_COINS = 2;
+    public static final int[] REVIEW_INTERVALS = {1, 2, 4, 7, 15, 30};
+
     private static final int XP_PER_LEVEL = 200;
 
     // Level-up bonus: level * 50 coins

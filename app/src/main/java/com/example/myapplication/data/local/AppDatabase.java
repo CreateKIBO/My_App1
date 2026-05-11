@@ -10,6 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.myapplication.util.SessionManager;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,9 +19,12 @@ import java.util.concurrent.Executors;
         TaskEntity.class,
         UserEntity.class,
         RewardTransactionEntity.class,
-        ShopItemEntity.class
+        ShopItemEntity.class,
+        PomodoroSessionEntity.class,
+        ForgettingCurveItemEntity.class,
+        ReviewTaskEntity.class
     },
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -29,10 +33,18 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
     public abstract RewardTransactionDao rewardTransactionDao();
     public abstract ShopItemDao shopItemDao();
+    public abstract PomodoroSessionDao pomodoroSessionDao();
+    public abstract ForgettingCurveItemDao forgettingCurveItemDao();
+    public abstract ReviewTaskDao reviewTaskDao();
 
     private static volatile AppDatabase INSTANCE;
+    private static volatile CountDownLatch initLatch = new CountDownLatch(1);
     public static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(4);
+
+    public static void awaitInitialization() throws InterruptedException {
+        initLatch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+    }
 
     public static AppDatabase getInstance(final Context context) {
         if (INSTANCE == null) {
@@ -66,48 +78,49 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static void initializeData(Context context) {
         databaseWriteExecutor.execute(() -> {
-            AppDatabase db = getInstance(context);
+            try {
+                AppDatabase db = getInstance(context);
 
-            // Insert shop items first to get their IDs
-            ShopItemEntity[] items = ShopItemEntity.getDefaultItems();
-            StringBuilder freeAvatarIds = new StringBuilder();
-            StringBuilder freeThemeIds = new StringBuilder();
-            long firstAvatarId = 0;
-            long firstThemeId = 0;
+                ShopItemEntity[] items = ShopItemEntity.getDefaultItems();
+                StringBuilder freeAvatarIds = new StringBuilder();
+                StringBuilder freeThemeIds = new StringBuilder();
+                long firstAvatarId = 0;
+                long firstThemeId = 0;
 
-            for (ShopItemEntity item : items) {
-                long itemId = db.shopItemDao().insert(item);
-                if (item.getPrice() == 0) {
-                    if ("AVATAR".equals(item.getType())) {
-                        if (firstAvatarId == 0) firstAvatarId = itemId;
-                        if (freeAvatarIds.length() > 0) freeAvatarIds.append(",");
-                        freeAvatarIds.append(itemId);
-                    } else {
-                        if (firstThemeId == 0) firstThemeId = itemId;
-                        if (freeThemeIds.length() > 0) freeThemeIds.append(",");
-                        freeThemeIds.append(itemId);
+                for (ShopItemEntity item : items) {
+                    long itemId = db.shopItemDao().insert(item);
+                    if (item.getPrice() == 0) {
+                        if ("AVATAR".equals(item.getType())) {
+                            if (firstAvatarId == 0) firstAvatarId = itemId;
+                            if (freeAvatarIds.length() > 0) freeAvatarIds.append(",");
+                            freeAvatarIds.append(itemId);
+                        } else {
+                            if (firstThemeId == 0) firstThemeId = itemId;
+                            if (freeThemeIds.length() > 0) freeThemeIds.append(",");
+                            freeThemeIds.append(itemId);
+                        }
                     }
                 }
+
+                UserEntity user = new UserEntity();
+                user.setDisplayName("我");
+                user.setCurrentCoins(0);
+                user.setTotalCoins(0);
+                user.setTotalXp(0);
+                user.setLevel(1);
+                user.setCurrentStreak(0);
+                user.setAvatarId((int) firstAvatarId);
+                user.setThemeId((int) firstThemeId);
+                user.setUnlockedAvatars(freeAvatarIds.length() > 0 ? freeAvatarIds.toString() : "");
+                user.setUnlockedThemes(freeThemeIds.length() > 0 ? freeThemeIds.toString() : "");
+                user.setCreatedAt(System.currentTimeMillis());
+                long userId = db.userDao().insert(user);
+                new SessionManager(context).setLocalUserId(userId);
+
+                addPropItems(db);
+            } finally {
+                initLatch.countDown();
             }
-
-            // Create user with correct default avatar/theme
-            UserEntity user = new UserEntity();
-            user.setDisplayName("我");
-            user.setCurrentCoins(0);
-            user.setTotalCoins(0);
-            user.setTotalXp(0);
-            user.setLevel(1);
-            user.setCurrentStreak(0);
-            user.setAvatarId((int) firstAvatarId);
-            user.setThemeId((int) firstThemeId);
-            user.setUnlockedAvatars(freeAvatarIds.length() > 0 ? freeAvatarIds.toString() : "");
-            user.setUnlockedThemes(freeThemeIds.length() > 0 ? freeThemeIds.toString() : "");
-            user.setCreatedAt(System.currentTimeMillis());
-            long userId = db.userDao().insert(user);
-            new SessionManager(context).setLocalUserId(userId);
-
-            // Insert prop items (freeze card etc.)
-            addPropItems(db);
         });
     }
 
