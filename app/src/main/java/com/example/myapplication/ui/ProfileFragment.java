@@ -61,12 +61,10 @@ public class ProfileFragment extends Fragment {
         setupObservers();
         setupClickListeners();
 
-        // Entrance animations
-        AnimUtils.staggeredSlideUp(new View[]{
-                binding.profileHeader,
-                binding.tvCoins,
-                binding.ivEquippedAvatar
-        });
+        // Professional slide-in animations: from left for header, from right for details
+        AnimUtils.slideInFromLeft(binding.profileHeader, 0L);
+        AnimUtils.slideInFromRight(binding.tvCoins, 100L);
+        AnimUtils.slideInFromLeft(binding.ivEquippedAvatar, 200L);
     }
 
     private void setupObservers() {

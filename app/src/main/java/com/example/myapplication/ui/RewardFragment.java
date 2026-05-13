@@ -24,6 +24,7 @@ import com.example.myapplication.util.RewardCalculator;
 import com.example.myapplication.util.SessionManager;
 import com.example.myapplication.util.UiUtils;
 import com.example.myapplication.util.ThemeManager;
+import com.example.myapplication.util.AnimUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -83,6 +84,10 @@ public class RewardFragment extends Fragment {
         applyThemeColors();
         setupObservers();
         setupCategoryTabs();
+
+        // Celebratory entrance: pop for hero card, slide for list
+        AnimUtils.celebratoryPop(binding.heroCard);
+        AnimUtils.slideUpFadeIn(binding.rvRewards, 200L);
     }
 
     private void applyThemeColors() {

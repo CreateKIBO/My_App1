@@ -34,8 +34,10 @@ public class AddEditTaskFragment extends Fragment {
     private String selectedDate;
     private int startHour = 9, startMinute = 0;
     private int endHour = 10, endMinute = 0;
+    private int selectedPriority = 1; // 0=低, 1=中, 2=高
 
     private LinearLayout[] pillViews;
+    private LinearLayout[] priorityPillViews;
     private final String[] categories = {
             RewardCalculator.CAT_WORK, RewardCalculator.CAT_STUDY,
             RewardCalculator.CAT_EXERCISE, RewardCalculator.CAT_PERSONAL
@@ -64,6 +66,7 @@ public class AddEditTaskFragment extends Fragment {
         }
 
         pillViews = new LinearLayout[]{binding.pillWork, binding.pillStudy, binding.pillExercise, binding.pillPersonal};
+        priorityPillViews = new LinearLayout[]{binding.pillPriorityLow, binding.pillPriorityMedium, binding.pillPriorityHigh};
 
         // Back button
         binding.btnBack.setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
@@ -78,6 +81,15 @@ public class AddEditTaskFragment extends Fragment {
                 selectedCategory = categories[index];
                 updateCategoryPills();
                 updateRewardPreview();
+            });
+        }
+
+        // Priority pills
+        for (int i = 0; i < priorityPillViews.length; i++) {
+            final int index = i;
+            priorityPillViews[i].setOnClickListener(v -> {
+                selectedPriority = index;
+                updatePriorityPills();
             });
         }
 
@@ -97,6 +109,10 @@ public class AddEditTaskFragment extends Fragment {
                 startHour = hour;
                 startMinute = minute;
                 binding.etStartTime.setText(DateUtils.minutesToTime(hour * 60 + minute));
+                // Auto-set end time to 1 hour after start
+                endHour = Math.min(hour + 1, 23);
+                endMinute = minute;
+                binding.etEndTime.setText(DateUtils.minutesToTime(endHour * 60 + endMinute));
             }, startHour, startMinute, true).show();
         });
 
@@ -138,7 +154,9 @@ public class AddEditTaskFragment extends Fragment {
                 binding.etStartTime.setText(DateUtils.minutesToTime(task.getStartTime()));
                 binding.etEndTime.setText(DateUtils.minutesToTime(task.getEndTime()));
                 selectedCategory = task.getCategory();
+                selectedPriority = task.getPriority();
                 updateCategoryPills();
+                updatePriorityPills();
                 updateRewardPreview();
             });
         } else {
@@ -195,6 +213,35 @@ public class AddEditTaskFragment extends Fragment {
                 RewardCalculator.CAT_STUDY.equals(selectedCategory) ? View.VISIBLE : View.GONE);
     }
 
+    private final int[] priorityColors = {0xFF10B981, 0xFFF59E0B, 0xFFEF4444};
+    private final int[] priorityLightBgs = {0xFFF0FDF4, 0xFFFFFBEB, 0xFFFEF2F2};
+    private final String[] priorityLabels = {"低", "中", "高"};
+
+    private void updatePriorityPills() {
+        for (int i = 0; i < priorityPillViews.length; i++) {
+            boolean isSelected = (i == selectedPriority);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setShape(GradientDrawable.RECTANGLE);
+            bg.setCornerRadius(12f);
+            if (isSelected) {
+                bg.setColor(priorityLightBgs[i]);
+                bg.setStroke(2, priorityColors[i]);
+            } else {
+                bg.setColor(0xFFFFFFFF);
+                bg.setStroke(2, 0xFFE5E7EB);
+            }
+            priorityPillViews[i].setBackground(bg);
+
+            int childCount = priorityPillViews[i].getChildCount();
+            for (int c = 0; c < childCount; c++) {
+                View child = priorityPillViews[i].getChildAt(c);
+                if (child instanceof TextView) {
+                    ((TextView) child).setTextColor(isSelected ? priorityColors[i] : 0xFF111827);
+                }
+            }
+        }
+    }
+
     private void updateRewardPreview() {
         int catIndex = 0;
         for (int i = 0; i < categories.length; i++) {
@@ -232,7 +279,7 @@ public class AddEditTaskFragment extends Fragment {
         boolean isLearningItem = RewardCalculator.CAT_STUDY.equals(selectedCategory)
                 && binding.switchLearningItem.isChecked();
 
-        viewModel.saveTask(title, "", selectedDate, startTime, endTime, selectedCategory, taskId);
+        viewModel.saveTask(title, "", selectedDate, startTime, endTime, selectedCategory, selectedPriority, taskId);
 
         if (taskId != -1) {
             Navigation.findNavController(requireView()).navigateUp();

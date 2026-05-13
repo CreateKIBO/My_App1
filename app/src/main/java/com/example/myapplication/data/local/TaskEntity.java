@@ -32,6 +32,9 @@ public class TaskEntity {
     @ColumnInfo(name = "category")
     private String category; // Work, Study, Exercise, Personal, Other
 
+    @ColumnInfo(name = "priority", defaultValue = "1")
+    private int priority; // 0=低, 1=中, 2=高
+
     @ColumnInfo(name = "isCompleted", defaultValue = "0")
     private boolean isCompleted;
 
@@ -75,6 +78,9 @@ public class TaskEntity {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public int getPriority() { return priority; }
+    public void setPriority(int priority) { this.priority = priority; }
 
     public boolean isCompleted() { return isCompleted; }
     public void setCompleted(boolean completed) { isCompleted = completed; }

@@ -17,6 +17,9 @@ public interface ShopItemDao {
     @Query("SELECT * FROM shop_items WHERE type = :type")
     LiveData<List<ShopItemEntity>> getItemsByType(String type);
 
+    @Query("SELECT * FROM shop_items WHERE type = :type AND source = 'shop' ORDER BY price ASC")
+    LiveData<List<ShopItemEntity>> getShopItemsByType(String type);
+
     @Query("SELECT * FROM shop_items WHERE id = :itemId")
     ShopItemEntity getItemById(long itemId);
 }

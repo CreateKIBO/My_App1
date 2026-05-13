@@ -18,10 +18,15 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('../kibo.jks')
-            storePassword 'kibo123'
-            keyAlias 'kibo'
-            keyPassword 'kibo123'
+            def propsFile = rootProject.file("keystore.properties")
+            if (propsFile.exists()) {
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+                storeFile file(props['storeFile'])
+                storePassword props['storePassword']
+                keyAlias props['keyAlias']
+                keyPassword props['keyPassword']
+            }
         }
     }
 

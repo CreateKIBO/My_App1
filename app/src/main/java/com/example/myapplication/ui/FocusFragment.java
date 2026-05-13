@@ -55,12 +55,10 @@ public class FocusFragment extends Fragment {
         setupObservers();
         applyThemeColors();
 
-        // Entrance animations
-        AnimUtils.staggeredSlideUp(new View[]{
-                binding.timerRing,
-                binding.tvTimerDisplay,
-                binding.btnStartPause
-        });
+        // Calm meditative animations: breathe-in for timer, soft fade for controls
+        AnimUtils.breatheIn(binding.timerRing);
+        AnimUtils.softFadeIn(binding.tvTimerDisplay, 200L);
+        AnimUtils.softFadeIn(binding.btnStartPause, 400L);
     }
 
     private void setupTabSwitch() {

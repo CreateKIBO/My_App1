@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.myapplication.util.SessionManager;
@@ -24,7 +25,7 @@ import java.util.concurrent.Executors;
         ForgettingCurveItemEntity.class,
         ReviewTaskEntity.class
     },
-    version = 9,
+    version = 11,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -42,6 +43,20 @@ public abstract class AppDatabase extends RoomDatabase {
     public static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(4);
 
+    static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 1");
+        }
+    };
+
+    static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE shop_items ADD COLUMN source TEXT NOT NULL DEFAULT 'shop'");
+        }
+    };
+
     public static void awaitInitialization() throws InterruptedException {
         initLatch.await(5, java.util.concurrent.TimeUnit.SECONDS);
     }
@@ -55,6 +70,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "schedule_planner_db"
                     )
+                    .addMigrations(MIGRATION_9_10, MIGRATION_10_11)
                     .fallbackToDestructiveMigration()
                     .addCallback(new Callback() {
                         @Override

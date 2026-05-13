@@ -65,12 +65,10 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        // Entrance animations
-        AnimUtils.staggeredSlideUp(new View[]{
-                binding.layoutLevelCard,
-                binding.tvGreeting,
-                binding.rvTasks
-        });
+        // Warm entrance animations: fade+scale for stats, slide for task list
+        AnimUtils.fadeInScale(binding.layoutLevelCard, 0L);
+        AnimUtils.fadeInScale(binding.tvGreeting, 80L);
+        AnimUtils.slideUpFadeIn(binding.rvTasks, 160L);
 
         // Button animations
         AnimUtils.scaleOnClick(binding.fabAdd);

@@ -23,6 +23,7 @@ import com.example.myapplication.data.local.DateCount;
 import com.example.myapplication.databinding.FragmentStreakBinding;
 import com.example.myapplication.util.SessionManager;
 import com.example.myapplication.util.UiUtils;
+import com.example.myapplication.util.AnimUtils;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class StreakFragment extends Fragment {
     private static final int[] MILESTONE_COINS = {50, 150, 400, 1000, 2500};
     private static final int[] MILESTONE_XP = {30, 80, 200, 500, 1200};
     private static final String[] MILESTONE_SPECIAL = {
-            null, null, null, "限定头像：龙人", "限定主题：极光绿"
+            null, null, null, "限定头像：凤凰", "限定主题：星河紫"
     };
 
     // Quotes
@@ -177,6 +178,12 @@ public class StreakFragment extends Fragment {
         // Quote
         int quoteIndex = (int) (System.currentTimeMillis() / 86400000) % QUOTES.length;
         binding.tvQuoteText.setText(QUOTES[quoteIndex]);
+
+        // Achievement entrance animations
+        AnimUtils.flamePulse(binding.tvStreakCount);
+        AnimUtils.progressiveReveal(binding.streakRingView, 100L);
+        AnimUtils.progressiveReveal(binding.gridHeatmap, 250L);
+        AnimUtils.progressiveReveal(binding.layoutMilestones, 400L);
     }
 
     private void updateStreakMessage() {

@@ -40,7 +40,7 @@ public class AddEditTaskViewModel extends BaseViewModel {
     }
 
     public void saveTask(String title, String description, String date,
-                         int startTime, int endTime, String category, long existingTaskId) {
+                         int startTime, int endTime, String category, int priority, long existingTaskId) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             if (existingTaskId == -1) {
                 TaskEntity task = new TaskEntity();
@@ -51,6 +51,7 @@ public class AddEditTaskViewModel extends BaseViewModel {
                 task.setStartTime(startTime);
                 task.setEndTime(endTime);
                 task.setCategory(category);
+                task.setPriority(priority);
                 task.setCompleted(false);
                 task.setCompletedAt(null);
                 RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(category);
@@ -70,6 +71,7 @@ public class AddEditTaskViewModel extends BaseViewModel {
                     task.setStartTime(startTime);
                     task.setEndTime(endTime);
                     task.setCategory(category);
+                    task.setPriority(priority);
                     RewardCalculator.Reward reward = RewardCalculator.calculateTaskReward(category);
                     task.setCoinsEarned(reward.coins);
                     task.setXpEarned(reward.xp);

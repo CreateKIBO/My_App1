@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -16,6 +18,8 @@ import com.example.myapplication.databinding.FragmentSettingsBinding;
 public class SettingsFragment extends Fragment {
 
     private FragmentSettingsBinding binding;
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String KEY_NIGHT_MODE = "night_mode";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,13 +35,15 @@ public class SettingsFragment extends Fragment {
     }
 
     private void setupDarkModeSwitch() {
-        int nightMode = AppCompatDelegate.getDefaultNightMode();
-        binding.switchDarkMode.setChecked(nightMode == AppCompatDelegate.MODE_NIGHT_YES);
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, 0);
+        int savedMode = prefs.getInt(KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        AppCompatDelegate.setDefaultNightMode(savedMode);
+        binding.switchDarkMode.setChecked(savedMode == AppCompatDelegate.MODE_NIGHT_YES);
 
         binding.switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            AppCompatDelegate.setDefaultNightMode(
-                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
-            );
+            int mode = isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
+            AppCompatDelegate.setDefaultNightMode(mode);
+            prefs.edit().putInt(KEY_NIGHT_MODE, mode).apply();
         });
     }
 

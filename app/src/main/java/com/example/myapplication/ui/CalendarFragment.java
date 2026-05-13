@@ -52,9 +52,9 @@ public class CalendarFragment extends Fragment {
         setupClickListeners();
         setupStreakBanner();
 
-        // Entrance animations
-        AnimUtils.slideUpFadeIn(binding.tvMonthYear, 0L);
-        AnimUtils.slideUpFadeIn(binding.rvCalendar, 120L);
+        // Cascade reveal animations: grid expands from center
+        AnimUtils.cascadeReveal(binding.tvMonthYear, 0L);
+        AnimUtils.cascadeReveal(binding.rvCalendar, 150L);
     }
 
     private void setupStreakBanner() {
@@ -256,8 +256,12 @@ public class CalendarFragment extends Fragment {
 
         // Priority
         TextView tvPriority = view.findViewById(R.id.tv_priority);
-        tvPriority.setText(getPriorityLabel(category));
-        tvPriority.setTextColor(getPriorityColor(category));
+        int priority = task.getPriority();
+        String[] priorityLabels = {"低", "中", "高"};
+        int[] priorityColors = {0xFF10B981, 0xFFF59E0B, 0xFFEF4444};
+        int idx = Math.min(priority, 2);
+        tvPriority.setText(priorityLabels[idx]);
+        tvPriority.setTextColor(priorityColors[idx]);
 
         // Reward
         TextView tvCoins = view.findViewById(R.id.tv_coins);
@@ -292,14 +296,14 @@ public class CalendarFragment extends Fragment {
 
         dialog.show();
 
-        // Staggered entrance animation
+        // Cascade entrance animation for detail dialog
         View infoCard = view.findViewById(R.id.card_info);
         View rewardCard = view.findViewById(R.id.card_reward);
-        AnimUtils.slideUpFadeIn(tvTitle, 0L);
-        AnimUtils.slideUpFadeIn(view.findViewById(R.id.layout_status), 60L);
-        AnimUtils.slideUpFadeIn(infoCard, 120L);
-        AnimUtils.slideUpFadeIn(rewardCard, 180L);
-        AnimUtils.slideUpFadeIn(btnEdit, 240L);
+        AnimUtils.cascadeReveal(tvTitle, 0L);
+        AnimUtils.cascadeReveal(view.findViewById(R.id.layout_status), 60L);
+        AnimUtils.cascadeReveal(infoCard, 120L);
+        AnimUtils.cascadeReveal(rewardCard, 180L);
+        AnimUtils.cascadeReveal(btnEdit, 240L);
     }
 
     private String getCategoryLabel(String category) {
@@ -310,28 +314,6 @@ public class CalendarFragment extends Fragment {
             case "Exercise": return "运动";
             case "Personal": return "个人";
             default: return "其他";
-        }
-    }
-
-    private String getPriorityLabel(String category) {
-        if (category == null) return "普通";
-        switch (category) {
-            case "Work": return "高";
-            case "Study": return "中";
-            case "Exercise": return "中";
-            case "Personal": return "低";
-            default: return "普通";
-        }
-    }
-
-    private int getPriorityColor(String category) {
-        if (category == null) return 0xFF6B7280;
-        switch (category) {
-            case "Work": return 0xFFEF4444;
-            case "Study": return 0xFFF59E0B;
-            case "Exercise": return 0xFFF59E0B;
-            case "Personal": return 0xFF10B981;
-            default: return 0xFF6B7280;
         }
     }
 

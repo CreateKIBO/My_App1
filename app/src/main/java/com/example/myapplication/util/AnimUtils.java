@@ -96,4 +96,151 @@ public class AnimUtils {
                 .setInterpolator(new OvershootInterpolator(1.5f))
                 .start();
     }
+
+    /** Warm fade-in with gentle scale — for HomeFragment stats/header */
+    public static void fadeInScale(View view, long delay) {
+        view.setAlpha(0f);
+        view.setScaleX(0.92f);
+        view.setScaleY(0.92f);
+        view.animate()
+                .alpha(1f)
+                .scaleX(1f).scaleY(1f)
+                .setDuration(500)
+                .setStartDelay(delay)
+                .setInterpolator(new DecelerateInterpolator(1.5f))
+                .start();
+    }
+
+    /** Staggered fade-in-scale for arrays — HomeFragment task cards */
+    public static void staggeredFadeInScale(View[] views) {
+        for (int i = 0; i < views.length; i++) {
+            fadeInScale(views[i], i * 100L);
+        }
+    }
+
+    /** Cascade reveal from center — CalendarFragment grid cells */
+    public static void cascadeReveal(View view, long delay) {
+        view.setAlpha(0f);
+        view.setScaleX(0.85f);
+        view.setScaleY(0.85f);
+        view.animate()
+                .alpha(1f)
+                .scaleX(1f).scaleY(1f)
+                .setDuration(350)
+                .setStartDelay(delay)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+    }
+
+    /** Gentle breathe-in — FocusFragment timer ring */
+    public static void breatheIn(View view) {
+        view.setAlpha(0f);
+        view.setScaleX(0.9f);
+        view.setScaleY(0.9f);
+        view.animate()
+                .alpha(1f)
+                .scaleX(1f).scaleY(1f)
+                .setDuration(700)
+                .setInterpolator(new DecelerateInterpolator(2f))
+                .start();
+    }
+
+    /** Soft fade for FocusFragment controls */
+    public static void softFadeIn(View view, long delay) {
+        view.setAlpha(0f);
+        view.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setStartDelay(delay)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+    }
+
+    /** Staggered bounce for ShopFragment item cards */
+    public static void staggeredBounceIn(View[] views) {
+        for (int i = 0; i < views.length; i++) {
+            views[i].setScaleX(0.6f);
+            views[i].setScaleY(0.6f);
+            views[i].setAlpha(0f);
+            views[i].animate()
+                    .alpha(1f)
+                    .scaleX(1f).scaleY(1f)
+                    .setDuration(400)
+                    .setStartDelay(i * 70L)
+                    .setInterpolator(new OvershootInterpolator(1.2f))
+                    .start();
+        }
+    }
+
+    /** Slide in from left — ProfileFragment info sections */
+    public static void slideInFromLeft(View view, long delay) {
+        view.setAlpha(0f);
+        view.setTranslationX(-60f);
+        view.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(450)
+                .setStartDelay(delay)
+                .setInterpolator(new DecelerateInterpolator(1.5f))
+                .start();
+    }
+
+    /** Slide in from right — ProfileFragment paired sections */
+    public static void slideInFromRight(View view, long delay) {
+        view.setAlpha(0f);
+        view.setTranslationX(60f);
+        view.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(450)
+                .setStartDelay(delay)
+                .setInterpolator(new DecelerateInterpolator(1.5f))
+                .start();
+    }
+
+    /** Celebratory pop — RewardFragment hero card */
+    public static void celebratoryPop(View view) {
+        view.setAlpha(0f);
+        view.setScaleX(0.8f);
+        view.setScaleY(0.8f);
+        view.animate()
+                .alpha(1f)
+                .scaleX(1.05f).scaleY(1.05f)
+                .setDuration(400)
+                .setInterpolator(new OvershootInterpolator(2f))
+                .withEndAction(() ->
+                        view.animate().scaleX(1f).scaleY(1f).setDuration(200)
+                                .setInterpolator(new DecelerateInterpolator()).start())
+                .start();
+    }
+
+    /** Progressive reveal — StreakFragment milestones (slide + fade) */
+    public static void progressiveReveal(View view, long delay) {
+        view.setAlpha(0f);
+        view.setTranslationY(30f);
+        view.setScaleX(0.95f);
+        view.setScaleY(0.95f);
+        view.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .scaleX(1f).scaleY(1f)
+                .setDuration(400)
+                .setStartDelay(delay)
+                .setInterpolator(new DecelerateInterpolator(1.2f))
+                .start();
+    }
+
+    /** Flame pulse for streak count number */
+    public static void flamePulse(View view) {
+        view.setScaleX(1f);
+        view.setScaleY(1f);
+        view.animate()
+                .scaleX(1.15f).scaleY(1.15f)
+                .setDuration(300)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() ->
+                        view.animate().scaleX(1f).scaleY(1f).setDuration(300)
+                                .setInterpolator(new OvershootInterpolator(1.5f)).start())
+                .start();
+    }
 }

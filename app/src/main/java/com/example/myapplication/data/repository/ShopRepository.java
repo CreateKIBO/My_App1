@@ -34,7 +34,7 @@ public class ShopRepository {
     }
 
     public androidx.lifecycle.LiveData<java.util.List<ShopItemEntity>> getItemsByType(String type) {
-        return shopItemDao.getItemsByType(type);
+        return shopItemDao.getShopItemsByType(type);
     }
 
     public void purchaseItem(long userId, long itemId, int price, PurchaseCallback callback) {

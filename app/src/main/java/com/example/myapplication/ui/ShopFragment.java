@@ -117,9 +117,9 @@ public class ShopFragment extends Fragment {
             if (msg != null) Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
         });
 
-        // Entrance animations
-        AnimUtils.slideUpFadeIn(binding.tvCoinBalance, 0L);
-        AnimUtils.slideUpFadeIn(binding.rvShopItems, 120L);
+        // Playful bounce entrance for shop
+        AnimUtils.bounceIn(binding.tvCoinBalance);
+        AnimUtils.bounceIn(binding.rvShopItems);
     }
 
     /**
