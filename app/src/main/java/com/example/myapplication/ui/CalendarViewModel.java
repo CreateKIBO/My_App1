@@ -3,7 +3,6 @@ package com.example.myapplication.ui;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -13,7 +12,6 @@ import com.example.myapplication.data.local.TaskEntity;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.TaskRepository;
 import com.example.myapplication.util.DateUtils;
-import com.example.myapplication.util.SessionManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,11 +21,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class CalendarViewModel extends AndroidViewModel {
+public class CalendarViewModel extends BaseViewModel {
 
     private final TaskRepository taskRepository;
-    private final SessionManager sessionManager;
-    private final long userId;
 
     // Current month being displayed [year, month(0-based)]
     private final MutableLiveData<int[]> currentMonth = new MutableLiveData<>();
@@ -51,10 +47,7 @@ public class CalendarViewModel extends AndroidViewModel {
 
     public CalendarViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getInstance(application);
         taskRepository = new TaskRepository(db, AppDatabase.databaseWriteExecutor);
-        sessionManager = new SessionManager(application);
-        userId = sessionManager.getLocalUserId();
 
         Calendar cal = Calendar.getInstance();
         currentMonth.setValue(new int[]{cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)});
@@ -72,10 +65,10 @@ public class CalendarViewModel extends AndroidViewModel {
                 taskRepository.getTotalCount(userId, date));
 
         // Load streak data
-        loadStreakData(db);
+        loadStreakData();
     }
 
-    private void loadStreakData(AppDatabase db) {
+    private void loadStreakData() {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             UserEntity user = db.userDao().getUserById(userId);
             if (user != null) {

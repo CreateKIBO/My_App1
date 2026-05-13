@@ -1,6 +1,9 @@
 package com.example.myapplication;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -11,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -20,6 +24,7 @@ import androidx.navigation.NavOptions;
 import com.example.myapplication.data.local.AppDatabase;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.UserRepository;
+import com.example.myapplication.util.NotificationHelper;
 import com.example.myapplication.util.SessionManager;
 import com.example.myapplication.util.ThemeManager;
 
@@ -114,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ensureLocalUser();
-        observeTheme();
     }
 
     private void animateTabClick(View tab) {
@@ -175,47 +179,52 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void ensureLocalUser() {
-        // Wait for database initialization (especially after destructive migration)
-        try {
-            AppDatabase.awaitInitialization();
-        } catch (InterruptedException ignored) {}
-
-        if (sessionManager.getLocalUserId() != -1) {
-            // Verify the user still exists in the database (may have been wiped by migration)
-            try {
-                Thread[] waitThread = new Thread[1];
-                final long[] existingId = {-1};
-                waitThread[0] = new Thread(() -> {
-                    AppDatabase db = AppDatabase.getInstance(this);
-                    UserEntity user = db.userDao().getUserById(sessionManager.getLocalUserId());
-                    if (user != null) existingId[0] = user.getId();
-                });
-                waitThread[0].start();
-                waitThread[0].join(3000);
-                if (existingId[0] != -1) return; // user exists, all good
-                // User was wiped, fall through to recreate
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
             }
         }
+    }
+
+    private void ensureLocalUser() {
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            long existingId = sessionManager.getLocalUserId();
+            AppDatabase db = AppDatabase.getInstance(this);
+
+            if (existingId != -1) {
+                UserEntity user = db.userDao().getUserById(existingId);
+                if (user != null) {
+                    latch.countDown();
+                    runOnUiThread(this::onUserReady);
+                    return;
+                }
+            }
+
+            UserEntity existing = db.userDao().getFirstUser();
+            if (existing != null) {
+                sessionManager.setLocalUserId(existing.getId());
+            } else {
+                long id = new UserRepository(db, AppDatabase.databaseWriteExecutor).createDefaultUser();
+                sessionManager.setLocalUserId(id);
+            }
+
+            latch.countDown();
+            runOnUiThread(this::onUserReady);
+        });
 
         try {
-            Thread[] waitThread = new Thread[1];
-            waitThread[0] = new Thread(() -> {
-                AppDatabase db = AppDatabase.getInstance(this);
-                UserEntity existing = db.userDao().getFirstUser();
-                if (existing != null) {
-                    sessionManager.setLocalUserId(existing.getId());
-                } else {
-                    long id = new UserRepository(db, AppDatabase.databaseWriteExecutor).createDefaultUser();
-                    sessionManager.setLocalUserId(id);
-                }
-            });
-            waitThread[0].start();
-            waitThread[0].join(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+            latch.await(3, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {}
+    }
+
+    private void onUserReady() {
+        NotificationHelper.ensureChannel(this);
+        requestNotificationPermission();
+        observeTheme();
     }
 }

@@ -4,6 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +22,11 @@ import com.example.myapplication.data.local.TaskEntity;
 import com.example.myapplication.databinding.FragmentCalendarBinding;
 import com.example.myapplication.ui.adapter.CalendarAdapter;
 import com.example.myapplication.ui.adapter.TaskAdapter;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.DateUtils;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 public class CalendarFragment extends Fragment {
 
@@ -44,6 +51,10 @@ public class CalendarFragment extends Fragment {
         setupObservers();
         setupClickListeners();
         setupStreakBanner();
+
+        // Entrance animations
+        AnimUtils.slideUpFadeIn(binding.tvMonthYear, 0L);
+        AnimUtils.slideUpFadeIn(binding.rvCalendar, 120L);
     }
 
     private void setupStreakBanner() {
@@ -108,10 +119,7 @@ public class CalendarFragment extends Fragment {
 
             @Override
             public void onTaskClicked(TaskEntity task) {
-                Bundle args = new Bundle();
-                args.putLong("taskId", task.getId());
-                Navigation.findNavController(requireView())
-                        .navigate(R.id.action_calendarFragment_to_addEditTaskFragment, args);
+                showTaskDetailDialog(task);
             }
         });
 
@@ -202,6 +210,151 @@ public class CalendarFragment extends Fragment {
         binding.btnPrevMonth.setOnClickListener(v -> viewModel.goToPrevMonth());
         binding.btnNextMonth.setOnClickListener(v -> viewModel.goToNextMonth());
         binding.btnToday.setOnClickListener(v -> viewModel.goToToday());
+    }
+
+    private void showTaskDetailDialog(TaskEntity task) {
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_task_detail, null);
+        dialog.setContentView(view);
+
+        // Title
+        TextView tvTitle = view.findViewById(R.id.tv_title);
+        tvTitle.setText(task.getTitle());
+
+        // Status
+        ImageView ivStatus = view.findViewById(R.id.iv_status_icon);
+        TextView tvStatus = view.findViewById(R.id.tv_status);
+        boolean completed = task.isCompleted();
+        ivStatus.setImageResource(completed
+                ? R.drawable.ic_check_circle_outline
+                : R.drawable.ic_radio_button_unchecked);
+        tvStatus.setText(completed ? "已完成" : "进行中");
+        int statusColor = completed ? 0xFF10B981 : 0xFFF59E0B;
+        ivStatus.setColorFilter(statusColor);
+        tvStatus.setTextColor(statusColor);
+
+        // Category badge
+        TextView tvCategory = view.findViewById(R.id.tv_category_badge);
+        String category = task.getCategory();
+        tvCategory.setText(getCategoryLabel(category));
+        tvCategory.setTextColor(getCategoryTextColor(category));
+        tvCategory.setBackgroundColor(getCategoryBgColor(category));
+
+        // Date
+        TextView tvDate = view.findViewById(R.id.tv_date);
+        tvDate.setText(task.getDate());
+
+        // Time
+        TextView tvTime = view.findViewById(R.id.tv_time);
+        int start = task.getStartTime();
+        int end = task.getEndTime();
+        if (start > 0 || end > 0) {
+            tvTime.setText(DateUtils.minutesToTime(start) + " - " + DateUtils.minutesToTime(end));
+        } else {
+            tvTime.setText("未设置");
+        }
+
+        // Priority
+        TextView tvPriority = view.findViewById(R.id.tv_priority);
+        tvPriority.setText(getPriorityLabel(category));
+        tvPriority.setTextColor(getPriorityColor(category));
+
+        // Reward
+        TextView tvCoins = view.findViewById(R.id.tv_coins);
+        TextView tvXp = view.findViewById(R.id.tv_xp);
+        tvCoins.setText("+" + task.getCoinsEarned() + " 金币");
+        tvXp.setText("+" + task.getXpEarned() + " XP");
+
+        // Description
+        String desc = task.getDescription();
+        TextView tvDescLabel = view.findViewById(R.id.tv_description_label);
+        MaterialCardView cardDesc = view.findViewById(R.id.card_description);
+        TextView tvDesc = view.findViewById(R.id.tv_description);
+        if (desc != null && !desc.isEmpty()) {
+            tvDescLabel.setVisibility(View.VISIBLE);
+            cardDesc.setVisibility(View.VISIBLE);
+            tvDesc.setText(desc);
+        }
+
+        // Edit button
+        MaterialButton btnEdit = view.findViewById(R.id.btn_edit);
+        btnEdit.setOnClickListener(v -> {
+            dialog.dismiss();
+            Bundle args = new Bundle();
+            args.putLong("taskId", task.getId());
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_calendarFragment_to_addEditTaskFragment, args);
+        });
+
+        // Close button
+        MaterialButton btnClose = view.findViewById(R.id.btn_close);
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+
+        // Staggered entrance animation
+        View infoCard = view.findViewById(R.id.card_info);
+        View rewardCard = view.findViewById(R.id.card_reward);
+        AnimUtils.slideUpFadeIn(tvTitle, 0L);
+        AnimUtils.slideUpFadeIn(view.findViewById(R.id.layout_status), 60L);
+        AnimUtils.slideUpFadeIn(infoCard, 120L);
+        AnimUtils.slideUpFadeIn(rewardCard, 180L);
+        AnimUtils.slideUpFadeIn(btnEdit, 240L);
+    }
+
+    private String getCategoryLabel(String category) {
+        if (category == null) return "其他";
+        switch (category) {
+            case "Work": return "工作";
+            case "Study": return "学习";
+            case "Exercise": return "运动";
+            case "Personal": return "个人";
+            default: return "其他";
+        }
+    }
+
+    private String getPriorityLabel(String category) {
+        if (category == null) return "普通";
+        switch (category) {
+            case "Work": return "高";
+            case "Study": return "中";
+            case "Exercise": return "中";
+            case "Personal": return "低";
+            default: return "普通";
+        }
+    }
+
+    private int getPriorityColor(String category) {
+        if (category == null) return 0xFF6B7280;
+        switch (category) {
+            case "Work": return 0xFFEF4444;
+            case "Study": return 0xFFF59E0B;
+            case "Exercise": return 0xFFF59E0B;
+            case "Personal": return 0xFF10B981;
+            default: return 0xFF6B7280;
+        }
+    }
+
+    private int getCategoryTextColor(String category) {
+        if (category == null) return 0xFF6B7280;
+        switch (category) {
+            case "Work": return 0xFF3B82F6;
+            case "Study": return 0xFF8B5CF6;
+            case "Exercise": return 0xFF10B981;
+            case "Personal": return 0xFFF59E0B;
+            default: return 0xFF6B7280;
+        }
+    }
+
+    private int getCategoryBgColor(String category) {
+        if (category == null) return 0x1A6B7280;
+        switch (category) {
+            case "Work": return 0x1A3B82F6;
+            case "Study": return 0x1A8B5CF6;
+            case "Exercise": return 0x1A10B981;
+            case "Personal": return 0x1AF59E0B;
+            default: return 0x1A6B7280;
+        }
     }
 
     @Override

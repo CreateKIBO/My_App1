@@ -8,25 +8,23 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.myapplication.data.local.AppDatabase;
 import com.example.myapplication.data.local.ForgettingCurveItemEntity;
 import com.example.myapplication.data.local.PomodoroSessionEntity;
 import com.example.myapplication.data.local.ReviewTaskEntity;
+import com.example.myapplication.data.local.TaskEntity;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.RewardRepository;
 import com.example.myapplication.util.DateUtils;
+import com.example.myapplication.util.NotificationHelper;
 import com.example.myapplication.util.RewardCalculator;
-import com.example.myapplication.util.SessionManager;
 
 import java.util.Calendar;
 import java.util.List;
 
-public class FocusViewModel extends AndroidViewModel {
-
-    private final AppDatabase db;
-    private final SessionManager sessionManager;
-    private final long userId;
+public class FocusViewModel extends BaseViewModel {
 
     // Pomodoro state
     public enum TimerState { IDLE, RUNNING, PAUSED, BREAK }
@@ -39,7 +37,7 @@ public class FocusViewModel extends AndroidViewModel {
     private final MutableLiveData<String> message = new MutableLiveData<>();
 
     private CountDownTimer countDownTimer;
-    private boolean isPaused = false;
+    private TimerState pausedState = null; // state before pause (RUNNING or BREAK)
     private int workDurationMinutes = 25;
     private int breakDurationMinutes = 5;
     private int consecutivePomodoros = 0;
@@ -52,15 +50,16 @@ public class FocusViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> activeCount = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> dueTodayCount = new MutableLiveData<>(0);
 
+    // Observer references for cleanup
+    private Observer<List<ForgettingCurveItemEntity>> curveObserver;
+    private Observer<List<ReviewTaskEntity>> reviewObserver;
+
     private static final String PREFS_NAME = "pomodoro_prefs";
     private static final String KEY_WORK_DURATION = "work_duration";
     private static final String KEY_BREAK_DURATION = "break_duration";
 
     public FocusViewModel(@NonNull Application application) {
         super(application);
-        db = AppDatabase.getInstance(application);
-        sessionManager = new SessionManager(application);
-        userId = sessionManager.getLocalUserId();
 
         loadPomodoroSettings();
         loadPomodoroStats();
@@ -75,6 +74,7 @@ public class FocusViewModel extends AndroidViewModel {
     public LiveData<Integer> getCompletedTodayCount() { return completedTodayCount; }
     public LiveData<Integer> getTodayFocusMinutes() { return todayFocusMinutes; }
     public LiveData<String> getMessage() { return message; }
+    public void clearMessage() { message.setValue(null); }
 
     public int getWorkDurationMinutes() { return workDurationMinutes; }
     public int getBreakDurationMinutes() { return breakDurationMinutes; }
@@ -98,7 +98,11 @@ public class FocusViewModel extends AndroidViewModel {
             resumeTimer();
             return;
         }
-        isPaused = false;
+        // Cancel any existing timer before starting a new one
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
 
         int durationSec;
         if (timerState.getValue() == TimerState.IDLE) {
@@ -129,7 +133,7 @@ public class FocusViewModel extends AndroidViewModel {
 
     public void pauseTimer() {
         if (countDownTimer != null) {
-            isPaused = true;
+            pausedState = timerState.getValue(); // save state before pausing
             countDownTimer.cancel();
             countDownTimer = null;
         }
@@ -154,12 +158,9 @@ public class FocusViewModel extends AndroidViewModel {
         };
         countDownTimer.start();
 
-        // Restore correct state (RUNNING or BREAK)
-        if (totalSeconds.getValue() != null && totalSeconds.getValue() == workDurationMinutes * 60) {
-            timerState.setValue(TimerState.RUNNING);
-        } else {
-            timerState.setValue(TimerState.BREAK);
-        }
+        // Restore correct state from saved pausedState
+        timerState.setValue(pausedState != null ? pausedState : TimerState.RUNNING);
+        pausedState = null;
     }
 
     public void resetTimer() {
@@ -285,9 +286,17 @@ public class FocusViewModel extends AndroidViewModel {
     public LiveData<Integer> getDueTodayCount() { return dueTodayCount; }
 
     private void loadForgettingCurveData() {
+        // Remove old observers before registering new ones to prevent leaks on repeated calls
+        if (curveObserver != null) {
+            db.forgettingCurveItemDao().getByUserId(userId).removeObserver(curveObserver);
+        }
+        if (reviewObserver != null) {
+            db.reviewTaskDao().getPendingByDate(userId, DateUtils.getTodayString()).removeObserver(reviewObserver);
+        }
+
         String today = DateUtils.getTodayString();
 
-        db.forgettingCurveItemDao().getByUserId(userId).observeForever(items -> {
+        curveObserver = items -> {
             if (items != null) {
                 List<ForgettingCurveItemEntity> active = new java.util.ArrayList<>();
                 int mastered = 0;
@@ -307,11 +316,11 @@ public class FocusViewModel extends AndroidViewModel {
                 activeCount.postValue(active.size());
                 dueTodayCount.postValue(dueToday);
             }
-        });
+        };
+        db.forgettingCurveItemDao().getByUserId(userId).observeForever(curveObserver);
 
-        db.reviewTaskDao().getPendingByDate(userId, today).observeForever(reviews -> {
-            todayReviews.postValue(reviews);
-        });
+        reviewObserver = reviews -> todayReviews.postValue(reviews);
+        db.reviewTaskDao().getPendingByDate(userId, today).observeForever(reviewObserver);
     }
 
     public void completeReview(long curveItemId) {
@@ -348,9 +357,21 @@ public class FocusViewModel extends AndroidViewModel {
                 reviewTask.setStep(nextStep + 1);
                 reviewTask.setCompleted(false);
                 db.reviewTaskDao().insert(reviewTask);
+
+                // Also create a schedule task for the next review date
+                createReviewScheduleTask(item.getTitle(), item.getNextReviewDate());
             }
 
             db.forgettingCurveItemDao().update(item);
+
+            // Mark the corresponding schedule task as completed
+            TaskEntity scheduleTask = db.taskDao().getReviewTaskByDateAndTitle(
+                    userId, DateUtils.getTodayString(), "复习: " + item.getTitle());
+            if (scheduleTask != null && !scheduleTask.isCompleted()) {
+                scheduleTask.setCompleted(true);
+                scheduleTask.setCompletedAt(System.currentTimeMillis());
+                db.taskDao().update(scheduleTask);
+            }
 
             // Award review reward
             RewardRepository rewardRepo = new RewardRepository(db);
@@ -392,7 +413,25 @@ public class FocusViewModel extends AndroidViewModel {
             reviewTask.setStep(1);
             reviewTask.setCompleted(false);
             db.reviewTaskDao().insert(reviewTask);
+
+            // Create a schedule task for the first review date
+            createReviewScheduleTask(title, item.getNextReviewDate());
         });
+    }
+
+    private void createReviewScheduleTask(String itemTitle, String reviewDate) {
+        TaskEntity task = new TaskEntity();
+        task.setUserId(userId);
+        task.setTitle("复习: " + itemTitle);
+        task.setDate(reviewDate);
+        task.setCategory("Review");
+        task.setStartTime(540); // 9:00 AM
+        task.setEndTime(600);   // 10:00 AM
+        task.setCompleted(false);
+        task.setCreatedAt(System.currentTimeMillis());
+        task.setUpdatedAt(System.currentTimeMillis());
+        db.taskDao().insert(task);
+        NotificationHelper.scheduleReminder(getApplication(), "复习: " + itemTitle, reviewDate, 540);
     }
 
     @Override
@@ -400,6 +439,12 @@ public class FocusViewModel extends AndroidViewModel {
         super.onCleared();
         if (countDownTimer != null) {
             countDownTimer.cancel();
+        }
+        if (curveObserver != null) {
+            db.forgettingCurveItemDao().getByUserId(userId).removeObserver(curveObserver);
+        }
+        if (reviewObserver != null) {
+            db.reviewTaskDao().getPendingByDate(userId, DateUtils.getTodayString()).removeObserver(reviewObserver);
         }
     }
 }

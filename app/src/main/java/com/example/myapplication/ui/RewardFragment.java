@@ -22,6 +22,7 @@ import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.databinding.FragmentRewardBinding;
 import com.example.myapplication.util.RewardCalculator;
 import com.example.myapplication.util.SessionManager;
+import com.example.myapplication.util.UiUtils;
 import com.example.myapplication.util.ThemeManager;
 
 import java.text.SimpleDateFormat;
@@ -94,14 +95,14 @@ public class RewardFragment extends Fragment {
                 GradientDrawable.Orientation.TL_BR,
                 new int[]{primaryDark, darkenColor(primaryDark, 0.85f)}
         );
-        heroGradient.setCornerRadius(dpToPx(20));
+        heroGradient.setCornerRadius(UiUtils.dpToPx(requireContext(), 20));
         binding.heroCard.setBackground(heroGradient);
 
         // Level badge: accent color circle
         GradientDrawable badgeDrawable = new GradientDrawable();
         badgeDrawable.setShape(GradientDrawable.OVAL);
         badgeDrawable.setColor(primary);
-        badgeDrawable.setSize((int) dpToPx(52), (int) dpToPx(52));
+        badgeDrawable.setSize(UiUtils.dpToPxInt(requireContext(), 52), UiUtils.dpToPxInt(requireContext(), 52));
         binding.tvHeroLevel.setBackground(badgeDrawable);
     }
 

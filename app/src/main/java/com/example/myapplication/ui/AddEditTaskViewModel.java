@@ -3,27 +3,23 @@ package com.example.myapplication.ui;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.myapplication.data.local.AppDatabase;
 import com.example.myapplication.data.local.TaskEntity;
 import com.example.myapplication.data.repository.TaskRepository;
 import com.example.myapplication.util.DateUtils;
+import com.example.myapplication.util.NotificationHelper;
 import com.example.myapplication.util.RewardCalculator;
-import com.example.myapplication.util.SessionManager;
 
-public class AddEditTaskViewModel extends AndroidViewModel {
+public class AddEditTaskViewModel extends BaseViewModel {
 
     private final TaskRepository taskRepository;
-    private final SessionManager sessionManager;
     private final MutableLiveData<TaskEntity> taskLiveData = new MutableLiveData<>();
 
     public AddEditTaskViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getInstance(application);
         taskRepository = new TaskRepository(db, AppDatabase.databaseWriteExecutor);
-        sessionManager = new SessionManager(application);
     }
 
     public MutableLiveData<TaskEntity> getTaskLiveData() {
@@ -48,7 +44,7 @@ public class AddEditTaskViewModel extends AndroidViewModel {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             if (existingTaskId == -1) {
                 TaskEntity task = new TaskEntity();
-                task.setUserId(sessionManager.getLocalUserId());
+                task.setUserId(userId);
                 task.setTitle(title);
                 task.setDescription(description);
                 task.setDate(date);
@@ -64,6 +60,7 @@ public class AddEditTaskViewModel extends AndroidViewModel {
                 task.setUpdatedAt(System.currentTimeMillis());
                 long id = taskRepository.insertTaskSync(task);
                 savedTaskId.postValue(id);
+                NotificationHelper.scheduleReminder(getApplication(), title, date, startTime);
             } else {
                 TaskEntity task = taskRepository.getTaskByIdSync(existingTaskId);
                 if (task != null) {
@@ -77,6 +74,7 @@ public class AddEditTaskViewModel extends AndroidViewModel {
                     task.setCoinsEarned(reward.coins);
                     task.setXpEarned(reward.xp);
                     taskRepository.updateTask(task);
+                    NotificationHelper.scheduleReminder(getApplication(), title, date, startTime);
                 }
             }
         });

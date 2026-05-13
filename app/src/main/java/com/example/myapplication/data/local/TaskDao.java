@@ -47,4 +47,10 @@ public interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM tasks WHERE userId = :userId AND isCompleted = 1")
     LiveData<Integer> getTotalCompletedCount(long userId);
+
+    @Query("SELECT * FROM tasks WHERE userId = :userId AND date = :date AND category = 'Review' AND title = :title LIMIT 1")
+    TaskEntity getReviewTaskByDateAndTitle(long userId, String date, String title);
+
+    @Query("SELECT date, COUNT(*) as count FROM tasks WHERE userId = :userId AND isCompleted = 1 AND date >= :monthStart AND date <= :monthEnd GROUP BY date")
+    List<DateCount> getCompletedCountsForMonth(long userId, String monthStart, String monthEnd);
 }

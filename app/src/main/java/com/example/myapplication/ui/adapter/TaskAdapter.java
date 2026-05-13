@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.data.local.TaskEntity;
+import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.DateUtils;
 import com.example.myapplication.util.RewardCalculator;
 
@@ -107,6 +108,7 @@ public class TaskAdapter extends ListAdapter<TaskEntity, TaskAdapter.TaskViewHol
             ivCheck.setOnClickListener(v -> {
                 if (!done && listener != null) {
                     ivCheck.setEnabled(false);
+                    AnimUtils.pulse(ivCheck);
                     listener.onTaskComplete(task);
                     ivCheck.postDelayed(() -> ivCheck.setEnabled(true), 500);
                 }

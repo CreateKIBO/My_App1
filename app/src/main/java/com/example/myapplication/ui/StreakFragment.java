@@ -19,12 +19,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 import com.example.myapplication.data.local.AppDatabase;
+import com.example.myapplication.data.local.DateCount;
 import com.example.myapplication.databinding.FragmentStreakBinding;
 import com.example.myapplication.util.SessionManager;
+import com.example.myapplication.util.UiUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class StreakFragment extends Fragment {
 
@@ -37,6 +41,7 @@ public class StreakFragment extends Fragment {
     private int longestStreak = 0;
     private int monthlyCompleted = 0;
     private int freezeCount = 0;
+    private Map<String, Integer> monthlyCountMap = new HashMap<>();
 
     // Milestone definitions (matching HTML: 3, 7, 14, 30, 60)
     private static final int[] MILESTONE_TARGETS = {3, 7, 14, 30, 60};
@@ -106,20 +111,29 @@ public class StreakFragment extends Fragment {
                     freezeCount = user.getFreezeCount();
                 }
 
-                // Calculate monthly completions: count days with at least 1 completed task this month
+                // Calculate monthly completions: batch query instead of 31 individual queries
                 Calendar cal = Calendar.getInstance();
-                int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
                 int thisMonth = cal.get(Calendar.MONTH);
                 int thisYear = cal.get(Calendar.YEAR);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
+                String monthStart = String.format(Locale.getDefault(), "%04d-%02d-01", thisYear, thisMonth + 1);
+                cal.set(thisYear, thisMonth, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+                String monthEnd = String.format(Locale.getDefault(), "%04d-%02d-%02d", thisYear, thisMonth + 1, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
                 var taskDao = db.taskDao();
+                List<DateCount> counts = taskDao.getCompletedCountsForMonth(userId, monthStart, monthEnd);
+
+                Map<String, Integer> countMap = new HashMap<>();
+                for (DateCount dc : counts) {
+                    countMap.put(dc.date, dc.count);
+                }
+                monthlyCountMap = countMap;
+
+                int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
                 int completedDays = 0;
                 for (int d = 1; d <= daysInMonth; d++) {
-                    cal.set(thisYear, thisMonth, d);
-                    String dateStr = dateFormat.format(cal.getTime());
-                    int count = taskDao.getCompletedCountForDateSync(userId, dateStr);
-                    if (count > 0) completedDays++;
+                    String dateStr = String.format(Locale.getDefault(), "%04d-%02d-%02d", thisYear, thisMonth + 1, d);
+                    Integer c = countMap.get(dateStr);
+                    if (c != null && c > 0) completedDays++;
                 }
                 monthlyCompleted = completedDays;
 
@@ -264,15 +278,13 @@ public class StreakFragment extends Fragment {
         // Convert Calendar.DAY_OF_WEEK (Sun=1, Mon=2, ..., Sat=7) to Mon=0 index
         int startOffset = (firstDayDow + 5) % 7;
 
-        // Load activity data for the month
+        // Load activity data for the month (already fetched in loadStreakData)
         long userId = sessionManager.getLocalUserId();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        var taskDao = db.taskDao();
 
         // Calculate cell size: (grid width - 6*gap) / 7
         // We'll use fixed dp sizes
-        int cellSize = dpToPx(40);
-        int gap = dpToPx(6);
+        int cellSize = UiUtils.dpToPxInt(requireContext(),40);
+        int gap = UiUtils.dpToPxInt(requireContext(),6);
 
         grid.setColumnCount(7);
         grid.setUseDefaultMargins(false);
@@ -291,15 +303,10 @@ public class StreakFragment extends Fragment {
 
         // Day cells
         for (int d = 1; d <= daysInMonth; d++) {
-            // Get completed count for this day
-            firstDayCal.set(year, month, d);
-            String dateStr = dateFormat.format(firstDayCal.getTime());
+            String dateStr = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, d);
             int completedCount = 0;
-            try {
-                completedCount = taskDao.getCompletedCountForDateSync(userId, dateStr);
-            } catch (Exception e) {
-                // use 0
-            }
+            Integer c = monthlyCountMap.get(dateStr);
+            if (c != null) completedCount = c;
 
             // Determine level
             int level = 0;
@@ -328,7 +335,7 @@ public class StreakFragment extends Fragment {
         // Background
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.RECTANGLE);
-        bg.setCornerRadius(dpToPx(8));
+        bg.setCornerRadius(UiUtils.dpToPxInt(requireContext(),8));
 
         int bgColor;
         int textColor;
@@ -360,7 +367,7 @@ public class StreakFragment extends Fragment {
         // Today: accent inset border
         if (isToday) {
             int accentColor = getColor(R.color.md_primary);
-            bg.setStroke(dpToPx(2), accentColor);
+            bg.setStroke(UiUtils.dpToPxInt(requireContext(),2), accentColor);
         }
 
         if (isFuture) {
@@ -397,7 +404,7 @@ public class StreakFragment extends Fragment {
             LinearLayout.LayoutParams countLp = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-            countLp.topMargin = dpToPx(1);
+            countLp.topMargin = UiUtils.dpToPxInt(requireContext(),1);
             countTv.setLayoutParams(countLp);
             inner.addView(countTv);
         }
@@ -435,18 +442,18 @@ public class StreakFragment extends Fragment {
     private View createMilestoneItem(int index, int target, boolean achieved, boolean isCurrent, boolean locked) {
         // Outer layout: dot on left, card on right
         FrameLayout item = new FrameLayout(requireContext());
-        item.setPadding(0, 0, 0, index < MILESTONE_TARGETS.length - 1 ? dpToPx(24) : 0);
+        item.setPadding(0, 0, 0, index < MILESTONE_TARGETS.length - 1 ? UiUtils.dpToPxInt(requireContext(),24) : 0);
 
         // ── Dot (positioned to align with timeline line) ──
         // The timeline line is at x=9dp (from layout). The dot is centered on that line.
         // Dot is 16dp wide, so left = 9dp - 8dp = 1dp from the container start,
         // but container has paddingStart=28dp, so dot is at 9dp from the FrameLayout left edge.
-        int dotSize = dpToPx(16);
+        int dotSize = UiUtils.dpToPxInt(requireContext(),16);
         View dot = new View(requireContext());
         FrameLayout.LayoutParams dotLp = new FrameLayout.LayoutParams(dotSize, dotSize);
         // Center dot on the timeline line at x=9dp
-        dotLp.leftMargin = dpToPx(9) - dotSize / 2;
-        dotLp.topMargin = dpToPx(4);
+        dotLp.leftMargin = UiUtils.dpToPxInt(requireContext(),9) - dotSize / 2;
+        dotLp.topMargin = UiUtils.dpToPxInt(requireContext(),4);
         dot.setLayoutParams(dotLp);
 
         GradientDrawable dotDrawable = new GradientDrawable();
@@ -455,10 +462,10 @@ public class StreakFragment extends Fragment {
         if (achieved) {
             dotDrawable.setColor(getColor(R.color.streak_orange));
             // Outer glow ring
-            dotDrawable.setStroke(dpToPx(3), getColor(R.color.streak_light));
+            dotDrawable.setStroke(UiUtils.dpToPxInt(requireContext(),3), getColor(R.color.streak_light));
         } else if (isCurrent) {
             dotDrawable.setColor(getColor(R.color.md_primary));
-            dotDrawable.setStroke(dpToPx(3), getColor(R.color.stat_blue_light));
+            dotDrawable.setStroke(UiUtils.dpToPxInt(requireContext(),3), getColor(R.color.stat_blue_light));
         } else {
             dotDrawable.setColor(getColor(R.color.md_outline_variant));
         }
@@ -471,20 +478,20 @@ public class StreakFragment extends Fragment {
         FrameLayout.LayoutParams cardLp = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
-        cardLp.leftMargin = dpToPx(28); // after the dot area
+        cardLp.leftMargin = UiUtils.dpToPxInt(requireContext(),28); // after the dot area
         card.setLayoutParams(cardLp);
 
         // Card background
         GradientDrawable cardBg = new GradientDrawable();
         cardBg.setShape(GradientDrawable.RECTANGLE);
-        cardBg.setCornerRadius(dpToPx(16));
+        cardBg.setCornerRadius(UiUtils.dpToPxInt(requireContext(),16));
         cardBg.setColor(getColor(R.color.card_surface));
 
         // Left border (3dp)
         if (achieved) {
-            cardBg.setStroke(dpToPx(3), getColor(R.color.streak_orange));
+            cardBg.setStroke(UiUtils.dpToPxInt(requireContext(),3), getColor(R.color.streak_orange));
         } else if (isCurrent) {
-            cardBg.setStroke(dpToPx(3), getColor(R.color.md_primary));
+            cardBg.setStroke(UiUtils.dpToPxInt(requireContext(),3), getColor(R.color.md_primary));
             cardBg.setColor(getColor(R.color.milestone_current_bg));
         }
 
@@ -493,7 +500,7 @@ public class StreakFragment extends Fragment {
         }
 
         card.setBackground(cardBg);
-        card.setPadding(dpToPx(14), dpToPx(14), dpToPx(16), dpToPx(14));
+        card.setPadding(UiUtils.dpToPxInt(requireContext(),14), UiUtils.dpToPxInt(requireContext(),14), UiUtils.dpToPxInt(requireContext(),16), UiUtils.dpToPxInt(requireContext(),14));
 
         // ── Top row: name + tag ──
         LinearLayout topRow = new LinearLayout(requireContext());
@@ -523,13 +530,13 @@ public class StreakFragment extends Fragment {
         tagTv.setTextSize(10);
         tagTv.setTypeface(tagTv.getTypeface(), android.graphics.Typeface.BOLD);
         tagTv.setGravity(Gravity.CENTER);
-        int tagPadH = dpToPx(8);
-        int tagPadV = dpToPx(3);
+        int tagPadH = UiUtils.dpToPxInt(requireContext(),8);
+        int tagPadV = UiUtils.dpToPxInt(requireContext(),3);
         tagTv.setPadding(tagPadH, tagPadV, tagPadH, tagPadV);
 
         GradientDrawable tagBg = new GradientDrawable();
         tagBg.setShape(GradientDrawable.RECTANGLE);
-        tagBg.setCornerRadius(dpToPx(9999));
+        tagBg.setCornerRadius(UiUtils.dpToPxInt(requireContext(),9999));
 
         if (achieved) {
             tagTv.setText("已达成");
@@ -558,8 +565,8 @@ public class StreakFragment extends Fragment {
         LinearLayout.LayoutParams descLp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        descLp.topMargin = dpToPx(4);
-        descLp.bottomMargin = dpToPx(6);
+        descLp.topMargin = UiUtils.dpToPxInt(requireContext(),4);
+        descLp.bottomMargin = UiUtils.dpToPxInt(requireContext(),6);
         descTv.setLayoutParams(descLp);
         card.addView(descTv);
 
@@ -579,7 +586,7 @@ public class StreakFragment extends Fragment {
                 "⚡", MILESTONE_XP[index] + " XP",
                 getColor(R.color.xp_green), 0);
         LinearLayout.LayoutParams xpLp = (LinearLayout.LayoutParams) xpReward.getLayoutParams();
-        xpLp.leftMargin = dpToPx(8);
+        xpLp.leftMargin = UiUtils.dpToPxInt(requireContext(),8);
         xpReward.setLayoutParams(xpLp);
         rewardRow.addView(xpReward);
 
@@ -589,7 +596,7 @@ public class StreakFragment extends Fragment {
                     "🎁", MILESTONE_SPECIAL[index],
                     getColor(R.color.md_primary), 0);
             LinearLayout.LayoutParams specialLp = (LinearLayout.LayoutParams) specialReward.getLayoutParams();
-            specialLp.leftMargin = dpToPx(8);
+            specialLp.leftMargin = UiUtils.dpToPxInt(requireContext(),8);
             specialReward.setLayoutParams(specialLp);
             rewardRow.addView(specialReward);
         }
@@ -637,11 +644,6 @@ public class StreakFragment extends Fragment {
             msg = "太厉害了！你已经连续 " + streak + " 天了！";
         }
         binding.tvStreakMsg.setText(msg);
-    }
-
-    private int dpToPx(int dp) {
-        float density = requireContext().getResources().getDisplayMetrics().density;
-        return (int) (dp * density + 0.5f);
     }
 
     @Override

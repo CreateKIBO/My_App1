@@ -66,4 +66,10 @@ public interface UserDao {
 
     @Query("UPDATE users SET displayName = :name WHERE id = :userId")
     void setDisplayName(long userId, String name);
+
+    @Query("SELECT id FROM shop_items WHERE type = 'avatar' AND price = 0 ORDER BY id ASC LIMIT 1")
+    Long getFirstFreeAvatarId();
+
+    @Query("SELECT id FROM shop_items WHERE type = 'theme' AND price = 0 ORDER BY id ASC LIMIT 1")
+    Long getFirstFreeThemeId();
 }

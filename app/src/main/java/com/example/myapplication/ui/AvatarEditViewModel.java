@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -15,7 +14,6 @@ import com.example.myapplication.data.local.UserDao;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.ShopRepository;
 import com.example.myapplication.util.RewardCalculator;
-import com.example.myapplication.util.SessionManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,11 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-public class AvatarEditViewModel extends AndroidViewModel {
+public class AvatarEditViewModel extends BaseViewModel {
 
-    private final AppDatabase db;
-    private final SessionManager sessionManager;
-    private final long userId;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private final LiveData<UserEntity> currentUser;
@@ -40,9 +35,6 @@ public class AvatarEditViewModel extends AndroidViewModel {
 
     public AvatarEditViewModel(@NonNull Application application) {
         super(application);
-        db = AppDatabase.getInstance(application);
-        sessionManager = new SessionManager(application);
-        userId = sessionManager.getLocalUserId();
 
         shopRepository = new ShopRepository(db, AppDatabase.databaseWriteExecutor);
 

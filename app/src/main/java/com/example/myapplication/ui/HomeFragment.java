@@ -51,12 +51,6 @@ public class HomeFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         setupRecyclerView();
-                // Entrance animations
-        AnimUtils.slideUpFadeIn(binding.layoutLevelCard, 40f);
-
-        // Button animations
-        AnimUtils.scaleOnClick(binding.fabAdd);
-        AnimUtils.scaleOnClick(binding.btnNotification);
 
         setupObservers();
         setupClickListeners();
@@ -70,6 +64,17 @@ public class HomeFragment extends Fragment {
                 viewModel.setSelectedDate(selectedDate);
             }
         }
+
+        // Entrance animations
+        AnimUtils.staggeredSlideUp(new View[]{
+                binding.layoutLevelCard,
+                binding.tvGreeting,
+                binding.rvTasks
+        });
+
+        // Button animations
+        AnimUtils.scaleOnClick(binding.fabAdd);
+        AnimUtils.scaleOnClick(binding.btnNotification);
     }
 
     private void applyThemeColors() {

@@ -18,6 +18,11 @@ public class UserRepository {
     }
 
     public long createDefaultUser() {
+        Long firstAvatarId = userDao.getFirstFreeAvatarId();
+        Long firstThemeId = userDao.getFirstFreeThemeId();
+        int avatarId = (firstAvatarId != null) ? firstAvatarId.intValue() : 0;
+        int themeId = (firstThemeId != null) ? firstThemeId.intValue() : 0;
+
         UserEntity user = new UserEntity();
         user.setDisplayName("我");
         user.setCurrentCoins(0);
@@ -25,10 +30,10 @@ public class UserRepository {
         user.setTotalXp(0);
         user.setLevel(1);
         user.setCurrentStreak(0);
-        user.setAvatarId(1);
-        user.setThemeId(9);
-        user.setUnlockedAvatars("1");
-        user.setUnlockedThemes("9");
+        user.setAvatarId(avatarId);
+        user.setThemeId(themeId);
+        user.setUnlockedAvatars(avatarId > 0 ? String.valueOf(avatarId) : "");
+        user.setUnlockedThemes(themeId > 0 ? String.valueOf(themeId) : "");
         user.setLastActiveDate(DateUtils.getTodayString());
         user.setCreatedAt(System.currentTimeMillis());
         return userDao.insert(user);

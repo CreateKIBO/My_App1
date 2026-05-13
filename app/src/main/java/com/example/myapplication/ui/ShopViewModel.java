@@ -3,27 +3,23 @@ package com.example.myapplication.ui;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
-import com.example.myapplication.data.local.AppDatabase;
 import com.example.myapplication.data.local.RewardTransactionEntity;
+import com.example.myapplication.data.local.AppDatabase;
 import com.example.myapplication.data.local.ShopItemEntity;
 import com.example.myapplication.data.local.UserEntity;
 import com.example.myapplication.data.repository.ShopRepository;
 import com.example.myapplication.util.RewardCalculator;
-import com.example.myapplication.util.SessionManager;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class ShopViewModel extends AndroidViewModel {
+public class ShopViewModel extends BaseViewModel {
 
     private final ShopRepository shopRepository;
-    private final SessionManager sessionManager;
-    private final long userId;
 
     private final MutableLiveData<String> selectedType = new MutableLiveData<>();
     private final LiveData<java.util.List<ShopItemEntity>> shopItems;
@@ -39,10 +35,7 @@ public class ShopViewModel extends AndroidViewModel {
 
     public ShopViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getInstance(application);
         shopRepository = new ShopRepository(db, AppDatabase.databaseWriteExecutor);
-        sessionManager = new SessionManager(application);
-        userId = sessionManager.getLocalUserId();
 
         selectedType.setValue(RewardCalculator.TYPE_AVATAR);
         shopItems = Transformations.switchMap(selectedType, type ->
@@ -123,7 +116,6 @@ public class ShopViewModel extends AndroidViewModel {
     }
 
     public void purchaseProp(long itemId, int price) {
-        AppDatabase db = AppDatabase.getInstance(getApplication());
         AppDatabase.databaseWriteExecutor.execute(() -> {
             UserEntity user = db.userDao().getUserById(userId);
             if (user == null || user.getCurrentCoins() < price) {

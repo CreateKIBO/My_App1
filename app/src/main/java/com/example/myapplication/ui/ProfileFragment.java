@@ -31,6 +31,7 @@ import com.example.myapplication.util.NotificationHelper;
 import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.RewardCalculator;
 import com.example.myapplication.util.ThemeManager;
+import com.example.myapplication.util.UiUtils;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -59,6 +60,13 @@ public class ProfileFragment extends Fragment {
         applyThemeColors();
         setupObservers();
         setupClickListeners();
+
+        // Entrance animations
+        AnimUtils.staggeredSlideUp(new View[]{
+                binding.profileHeader,
+                binding.tvCoins,
+                binding.ivEquippedAvatar
+        });
     }
 
     private void setupObservers() {
@@ -155,7 +163,7 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(requireContext(), "敬请期待", Toast.LENGTH_SHORT).show());
 
         binding.itemSettingsAbout.setOnClickListener(v ->
-                Toast.makeText(requireContext(), "日迹 v1.0 — 你的每日任务伙伴", Toast.LENGTH_LONG).show());
+                Toast.makeText(requireContext(), "日迹 v1.1 — 你的每日任务伙伴", Toast.LENGTH_LONG).show());
     }
 
     private void applyThemeColors() {
@@ -168,7 +176,7 @@ public class ProfileFragment extends Fragment {
                 GradientDrawable.Orientation.TL_BR,
                 new int[]{primaryDark, primaryDark}
         );
-        gradient.setCornerRadius(dpToPx(20));
+        gradient.setCornerRadius(UiUtils.dpToPx(requireContext(), 20));
         binding.profileHeader.setBackground(gradient);
 
         // Level dot accent color
@@ -188,7 +196,7 @@ public class ProfileFragment extends Fragment {
                         ContextCompat.getColor(requireContext(), R.color.xp_green_light)
                 }
         );
-        xpFill.setCornerRadius(dpToPx(9999));
+        xpFill.setCornerRadius(UiUtils.dpToPx(requireContext(), 9999));
         binding.viewXpFill.setBackground(xpFill);
 
         // Update XP bar width after layout
@@ -224,7 +232,7 @@ public class ProfileFragment extends Fragment {
         ImageView ivEquipped = binding.ivEquippedAvatar;
         if (avatarId > 0) {
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                ShopItemEntity avatarItem = viewModel.getEquippedAvatarItem(avatarId);
+                ShopItemEntity avatarItem = viewModel.getShopItemById(avatarId);
                 if (avatarItem != null && avatarItem.getIconResName() != null && isAdded()) {
                     int resId = getResources().getIdentifier(
                             avatarItem.getIconResName(), "drawable", requireContext().getPackageName());
@@ -247,7 +255,7 @@ public class ProfileFragment extends Fragment {
         // Update equipped theme description
         if (themeId > 0) {
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                ShopItemEntity themeItem = viewModel.getEquippedThemeItem(themeId);
+                ShopItemEntity themeItem = viewModel.getShopItemById(themeId);
                 if (themeItem != null && isAdded()) {
                     requireActivity().runOnUiThread(() ->
                             binding.tvEquippedDesc.setText(themeItem.getName()));
@@ -256,10 +264,6 @@ public class ProfileFragment extends Fragment {
         } else {
             binding.tvEquippedDesc.setText("默认蓝主题");
         }
-    }
-
-    private float dpToPx(float dp) {
-        return dp * getResources().getDisplayMetrics().density;
     }
 
     @Override

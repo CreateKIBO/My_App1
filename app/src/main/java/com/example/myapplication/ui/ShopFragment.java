@@ -116,6 +116,10 @@ public class ShopFragment extends Fragment {
         viewModel.getMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null) Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
         });
+
+        // Entrance animations
+        AnimUtils.slideUpFadeIn(binding.tvCoinBalance, 0L);
+        AnimUtils.slideUpFadeIn(binding.rvShopItems, 120L);
     }
 
     /**

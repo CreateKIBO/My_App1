@@ -30,6 +30,8 @@ import com.example.myapplication.util.AvatarHelper;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.text.NumberFormat;
@@ -280,28 +282,34 @@ public class AvatarEditFragment extends Fragment {
             return;
         }
 
-        // Validate size (5MB max)
-        try (InputStream sizeStream = resolver.openInputStream(uri)) {
-            if (sizeStream != null) {
-                long size = 0;
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = sizeStream.read(buffer)) != -1) {
-                    size += bytesRead;
-                }
-                if (size > 5 * 1024 * 1024) {
-                    Toast.makeText(requireContext(), "图片大小不能超过 5MB", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // Read stream once and cache to ByteArrayOutputStream
+        byte[] imageData;
+        try (InputStream inputStream = resolver.openInputStream(uri)) {
+            if (inputStream == null) {
+                Toast.makeText(requireContext(), "无法读取图片", Toast.LENGTH_SHORT).show();
+                return;
             }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+            imageData = baos.toByteArray();
         } catch (Exception e) {
             Toast.makeText(requireContext(), "无法读取图片", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Copy to internal storage via stream
-        try (InputStream inputStream = resolver.openInputStream(uri)) {
-            String savedPath = viewModel.saveCustomAvatarFromStream(inputStream);
+        // Validate size (5MB max)
+        if (imageData.length > 5 * 1024 * 1024) {
+            Toast.makeText(requireContext(), "图片大小不能超过 5MB", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Copy to internal storage from cached bytes
+        try (InputStream savedStream = new ByteArrayInputStream(imageData)) {
+            String savedPath = viewModel.saveCustomAvatarFromStream(savedStream);
             if (savedPath != null) {
                 customAvatarPath = savedPath;
                 // Cleanup old avatars

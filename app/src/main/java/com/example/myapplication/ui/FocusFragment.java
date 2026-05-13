@@ -23,6 +23,7 @@ import com.example.myapplication.ui.adapter.CurveItemAdapter;
 import com.example.myapplication.ui.adapter.ReviewTaskAdapter;
 import com.example.myapplication.util.AnimUtils;
 import com.example.myapplication.util.ThemeManager;
+import com.example.myapplication.util.UiUtils;
 
 import java.util.Locale;
 
@@ -35,6 +36,7 @@ public class FocusFragment extends Fragment {
     private ReviewTaskAdapter reviewTaskAdapter;
 
     private boolean isPomodoroTab = true;
+    private boolean isFirstLoad = true;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +54,13 @@ public class FocusFragment extends Fragment {
         setupForgettingCurve();
         setupObservers();
         applyThemeColors();
+
+        // Entrance animations
+        AnimUtils.staggeredSlideUp(new View[]{
+                binding.timerRing,
+                binding.tvTimerDisplay,
+                binding.btnStartPause
+        });
     }
 
     private void setupTabSwitch() {
@@ -77,15 +86,25 @@ public class FocusFragment extends Fragment {
             binding.btnTabPomodoro.setBackgroundResource(R.drawable.bg_tab_selected);
             binding.btnTabCurve.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_on_surface_variant));
             binding.btnTabCurve.setBackgroundResource(R.drawable.bg_tab_unselected);
-            binding.layoutPomodoro.setVisibility(View.VISIBLE);
-            binding.layoutCurve.setVisibility(View.GONE);
+            if (isFirstLoad) {
+                binding.layoutPomodoro.setVisibility(View.VISIBLE);
+                binding.layoutCurve.setVisibility(View.GONE);
+                isFirstLoad = false;
+            } else {
+                AnimUtils.crossFade(binding.layoutCurve, binding.layoutPomodoro);
+            }
         } else {
             binding.btnTabCurve.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
             binding.btnTabCurve.setBackgroundResource(R.drawable.bg_tab_selected);
             binding.btnTabPomodoro.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_on_surface_variant));
             binding.btnTabPomodoro.setBackgroundResource(R.drawable.bg_tab_unselected);
-            binding.layoutPomodoro.setVisibility(View.GONE);
-            binding.layoutCurve.setVisibility(View.VISIBLE);
+            if (isFirstLoad) {
+                binding.layoutPomodoro.setVisibility(View.GONE);
+                binding.layoutCurve.setVisibility(View.VISIBLE);
+                isFirstLoad = false;
+            } else {
+                AnimUtils.crossFade(binding.layoutPomodoro, binding.layoutCurve);
+            }
         }
     }
 
@@ -175,6 +194,7 @@ public class FocusFragment extends Fragment {
             switch (state) {
                 case IDLE:
                     binding.btnStartPause.setText("开始专注");
+                    binding.btnStartPause.setEnabled(true);
                     binding.btnReset.setVisibility(View.GONE);
                     binding.btnSkip.setVisibility(View.GONE);
                     binding.tvTimerLabel.setText("专注时间");
@@ -184,6 +204,7 @@ public class FocusFragment extends Fragment {
                     break;
                 case RUNNING:
                     binding.btnStartPause.setText("暂停");
+                    binding.btnStartPause.setEnabled(true);
                     binding.btnReset.setVisibility(View.VISIBLE);
                     binding.btnSkip.setVisibility(View.VISIBLE);
                     binding.tvTimerLabel.setText("专注中...");
@@ -191,6 +212,8 @@ public class FocusFragment extends Fragment {
                     break;
                 case PAUSED:
                     binding.btnStartPause.setText("继续");
+                    binding.btnStartPause.setEnabled(true);
+                    binding.btnReset.setVisibility(View.VISIBLE);
                     binding.tvTimerLabel.setText("已暂停");
                     break;
                 case BREAK:
@@ -235,6 +258,8 @@ public class FocusFragment extends Fragment {
         viewModel.getMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
                 android.widget.Toast.makeText(requireContext(), msg, android.widget.Toast.LENGTH_SHORT).show();
+                // Clear message so it doesn't re-trigger on re-subscription
+                viewModel.clearMessage();
             }
         });
 
@@ -250,7 +275,10 @@ public class FocusFragment extends Fragment {
             boolean empty = items == null || items.isEmpty();
             binding.rvCurveItems.setVisibility(empty ? View.GONE : View.VISIBLE);
             binding.tvNoItems.setVisibility(empty ? View.VISIBLE : View.GONE);
-            if (!empty) curveItemAdapter.submitList(items);
+            if (!empty) {
+                curveItemAdapter.submitList(items);
+                binding.curveView.setCreatedDate(items.get(0).getCreatedAt());
+            }
         });
 
         viewModel.getActiveCount().observe(getViewLifecycleOwner(), count ->
@@ -270,7 +298,7 @@ public class FocusFragment extends Fragment {
         // Tab selected background
         GradientDrawable selectedBg = new GradientDrawable();
         selectedBg.setShape(GradientDrawable.RECTANGLE);
-        selectedBg.setCornerRadius(dpToPx(20));
+        selectedBg.setCornerRadius(UiUtils.dpToPx(requireContext(), 20));
         selectedBg.setColor(primary);
         binding.btnTabPomodoro.setBackground(selectedBg);
 
@@ -279,10 +307,6 @@ public class FocusFragment extends Fragment {
 
         // Start button
         binding.btnStartPause.setBackgroundColor(primary);
-    }
-
-    private float dpToPx(float dp) {
-        return dp * getResources().getDisplayMetrics().density;
     }
 
     @Override
