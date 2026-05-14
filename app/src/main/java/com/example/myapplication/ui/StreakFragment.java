@@ -61,6 +61,15 @@ public class StreakFragment extends Fragment {
     private static final String[] MILESTONE_SPECIAL = {
             null, null, null, "限定头像：凤凰", "限定主题：星河紫"
     };
+    private static final String[] MILESTONE_SPECIAL_EMOJI = {
+            null, null, null, "🔥", "✨"
+    };
+    private static final String[] MILESTONE_SPECIAL_COLOR = {
+            null, null, null, "#EF4444", "#6D28D9"
+    };
+    private static final String[] MILESTONE_SPECIAL_TYPE = {
+            null, null, null, "限定头像", "限定主题"
+    };
 
     // Quotes
     private static final String[] QUOTES = {
@@ -184,6 +193,9 @@ public class StreakFragment extends Fragment {
         AnimUtils.progressiveReveal(binding.streakRingView, 100L);
         AnimUtils.progressiveReveal(binding.gridHeatmap, 250L);
         AnimUtils.progressiveReveal(binding.layoutMilestones, 400L);
+
+        // Show acquire animation if streak exactly matches a milestone
+        checkMilestoneAcquired();
     }
 
     private void updateStreakMessage() {
@@ -635,22 +647,28 @@ public class StreakFragment extends Fragment {
         return requireContext().getColor(colorResId);
     }
 
-    private void updateMotivationalMessage(int streak) {
-        String msg;
-        if (streak == 0) {
-            msg = "完成今天的任务，开始你的连续打卡之旅！";
-        } else if (streak < 3) {
-            msg = "再坚持 " + (3 - streak) + " 天即可解锁第一个里程碑！";
-        } else if (streak < 7) {
-            msg = "再坚持 " + (7 - streak) + " 天即可解锁下一个里程碑！";
-        } else if (streak < 14) {
-            msg = "再坚持 " + (14 - streak) + " 天即可解锁下一个里程碑！";
-        } else if (streak < 30) {
-            msg = "再坚持 " + (30 - streak) + " 天即可解锁下一个里程碑！";
-        } else {
-            msg = "太厉害了！你已经连续 " + streak + " 天了！";
+    private void checkMilestoneAcquired() {
+        for (int i = 0; i < MILESTONE_TARGETS.length; i++) {
+            if (currentStreak == MILESTONE_TARGETS[i]) {
+                // Show acquire animation for milestone reward
+                String emoji = "🔥";
+                String name = MILESTONE_NAMES[i];
+                String desc = MILESTONE_DESCS[i];
+                String colorHex = "#F97316";
+
+                if (MILESTONE_SPECIAL[i] != null) {
+                    emoji = MILESTONE_SPECIAL_EMOJI[i];
+                    name = MILESTONE_SPECIAL[i];
+                    desc = MILESTONE_SPECIAL_TYPE[i] + "已解锁";
+                    colorHex = MILESTONE_SPECIAL_COLOR[i];
+                } else {
+                    desc = "获得 " + MILESTONE_COINS[i] + " 金币 + " + MILESTONE_XP[i] + " XP";
+                }
+
+                AnimUtils.showItemAcquired(requireActivity(), emoji, name, desc, colorHex);
+                break; // Only show one animation per visit
+            }
         }
-        binding.tvStreakMsg.setText(msg);
     }
 
     @Override

@@ -13,14 +13,7 @@
     <color name="md_on_secondary">#FFFFFF</color>
     <color name="md_secondary_container">#E0E1F6</color>
     <color name="md_on_secondary_container">#181B2C</color>
-    <color name="md_tertiary">#76546E</color>
-    <color name="md_on_tertiary">#FFFFFF</color>
-    <color name="md_tertiary_container">#FFD7F4</color>
-    <color name="md_on_tertiary_container">#2D1228</color>
     <color name="md_error">#BA1A1A</color>
-    <color name="md_on_error">#FFFFFF</color>
-    <color name="md_error_container">#FFDAD6</color>
-    <color name="md_on_error_container">#410002</color>
     <color name="md_background">#FEFBFF</color>
     <color name="md_on_background">#1B1B1F</color>
     <color name="md_surface">#FEFBFF</color>
@@ -29,16 +22,6 @@
     <color name="md_on_surface_variant">#45464F</color>
     <color name="md_outline">#767680</color>
     <color name="md_outline_variant">#C6C5D0</color>
-    <color name="md_inverse_surface">#303034</color>
-    <color name="md_inverse_on_surface">#F3F0F5</color>
-    <color name="md_inverse_primary">#B5C4FF</color>
-    <color name="md_surface_dim">#DBD9DD</color>
-    <color name="md_surface_bright">#FAF8FD</color>
-    <color name="md_surface_container_lowest">#FFFFFF</color>
-    <color name="md_surface_container_low">#F5F3F7</color>
-    <color name="md_surface_container">#EFEDF2</color>
-    <color name="md_surface_container_high">#E9E7EC</color>
-    <color name="md_surface_container_highest">#E3E1E6</color>
 
     <!-- Category colors -->
     <color name="category_work">#3F51B5</color>
@@ -46,23 +29,16 @@
     <color name="category_exercise">#16A34A</color>
     <color name="category_personal">#EA580C</color>
     <color name="category_other">#90A4AE</color>
-    <color name="category_badge_bg">#E8EDFF</color>
 
     <!-- Reward colors -->
     <color name="coin_gold">#F59E0B</color>
-    <color name="coin_gold_light">#FDE68A</color>
     <color name="coin_gold_dark">#B45309</color>
     <color name="xp_green">#16A34A</color>
     <color name="xp_green_light">#DCFCE7</color>
-    <color name="xp_green_dark">#00E676</color>
 
     <!-- Streak colors -->
     <color name="streak_orange">#EA580C</color>
-    <color name="streak_mid">#FB923C</color>
     <color name="streak_light">#FED7AA</color>
-    <color name="streak_bg_light">#FFF7ED</color>
-    <color name="streak_hero_bg">#1E1B2E</color>
-    <color name="streak_hero_bg_end">#16132A</color>
 
     <!-- Gradient colors -->
     <color name="gradient_start">#3F51B5</color>
@@ -71,33 +47,23 @@
     <!-- Card & tag backgrounds -->
     <color name="background_light">#FAFAFA</color>
     <color name="card_background">#FFFFFF</color>
-    <color name="tag_equipped_bg">#E8EDFF</color>
     <color name="tag_equipped_text">#3F51B5</color>
-    <color name="tag_owned_bg">#E8F5E9</color>
     <color name="tag_owned_text">#16A34A</color>
-    <color name="price_badge_bg">#FFF8E1</color>
 
     <!-- Misc -->
     <color name="divider">#1F1B1B1F</color>
-    <color name="card_shadow">#0A000000</color>
     <color name="text_secondary">#6B7280</color>
     <color name="text_hint">#9CA3AF</color>
-    <color name="bg_gray">#F9FAFB</color>
     <color name="hero_dark_start">#1E1A2E</color>
     <color name="hero_dark_end">#16122A</color>
     <color name="stat_blue">#5B8DEF</color>
     <color name="stat_blue_light">#EBF1FF</color>
-    <color name="stat_blue_bg">#F0F4FF</color>
     <color name="reward_xp_bg">#E8F5E9</color>
     <color name="reward_coin_bg">#FFF8E1</color>
     <color name="reward_streak_bg">#FFF3E0</color>
     <color name="reward_task_bg">#E3F2FD</color>
-    <color name="settings_icon_bg">#F5F5F5</color>
     <color name="card_surface">#FFFFFF</color>
-    <color name="xp_bar_bg">#2AFFFFFF</color>
-    <color name="xp_bar_track">#1AFFFFFF</color>
     <color name="profile_bg">#F5F5FA</color>
-    <color name="text_secondary_60">#99FFFFFF</color>
     <color name="divider_light">#F0F0F5</color>
     <color name="equipped_accent_border">#7C6BFF</color>
     <color name="change_btn_bg">#F0EDFF</color>
@@ -110,15 +76,10 @@
     <color name="chip_filter_unchecked_text">@color/md_on_surface_variant</color>
     <color name="chip_filter_checked_stroke">@color/md_on_surface</color>
     <color name="chip_filter_unchecked_stroke">@color/md_outline_variant</color>
-    <color name="reward_bonus_orange">#EA580C</color>
     <color name="reward_level_blue">#3B82F6</color>
     <color name="milestone_current_bg">#EBF1FF</color>
 
-    <!-- Reward icon backgrounds (lighter tints for 40dp icon squares) -->
-    <color name="reward_icon_xp_bg">#DCFCE7</color>
-    <color name="reward_icon_coin_bg">#FEF3C7</color>
-    <color name="reward_icon_streak_bg">#FFF3E0</color>
-    <color name="reward_icon_level_bg">#DBEAFE</color>
+    <!-- Reward icon backgrounds -->
     <color name="reward_bonus_bg">#FFF7ED</color>
 
     <!-- Source dot category colors -->
@@ -146,37 +107,6 @@
     <color name="heatmap_lv2">#F9B76B</color>
     <color name="heatmap_lv3">#E8832E</color>
     <color name="heatmap_lv4">#EA580C</color>
-
-    <!-- Tip card gradient -->
-    <color name="tip_gradient_start">#FFF3E0</color>
-    <color name="tip_gradient_end">#FFF8ED</color>
-    <color name="tip_border">#FDDCB0</color>
-
-    <!-- AddEditTask redesign colors -->
-    <color name="accent_blue">#3B82F6</color>
-    <color name="border_default">#E5E7EB</color>
-    <color name="text_muted">#6B7280</color>
-    <color name="text_primary">#111111</color>
-    <color name="cat_work_blue">#3B82F6</color>
-    <color name="cat_study_purple">#7C3AED</color>
-    <color name="cat_exercise_green">#16A34A</color>
-    <color name="cat_personal_amber">#D97706</color>
-    <color name="cat_work_bg">#EFF6FF</color>
-    <color name="cat_study_bg">#F5F3FF</color>
-    <color name="cat_exercise_bg">#F0FDF4</color>
-    <color name="cat_personal_bg">#FFFBEB</color>
-    <color name="gold_dark">#D4A017</color>
-    <color name="success_overlay_bg">#4D000000</color>
-    <color name="tip_green_bg">#F0FDF4</color>
-    <color name="tip_green_border">#BBF7D0</color>
-    <color name="tip_yellow_bg">#FFFBE8</color>
-    <color name="tip_yellow_border">#FDE68A</color>
-    <color name="btn_disabled_bg">#E5E7EB</color>
-    <color name="btn_disabled_text">#6B7280</color>
-
-    <!-- XP Progress -->
-    <color name="xp_progress_bg">#E2E1EC</color>
-    <color name="xp_progress_fg">#3F51B5</color>
 
     <!-- Milestone tag colors -->
     <color name="tag_done_bg">#FDDCB0</color>

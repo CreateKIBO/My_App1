@@ -31,6 +31,7 @@ public class ShopViewModel extends BaseViewModel {
     private final LiveData<Long> currentEquippedId;
 
     private final MutableLiveData<String> message = new MutableLiveData<>();
+    private final MutableLiveData<ShopItemEntity> purchaseSuccess = new MutableLiveData<>();
     private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
 
     public ShopViewModel(@NonNull Application application) {
@@ -93,13 +94,18 @@ public class ShopViewModel extends BaseViewModel {
     public LiveData<Set<Long>> getCurrentOwnedIds() { return currentOwnedIds; }
     public LiveData<Long> getCurrentEquippedId() { return currentEquippedId; }
     public LiveData<String> getMessage() { return message; }
+    public LiveData<ShopItemEntity> getPurchaseSuccess() { return purchaseSuccess; }
 
-    public void purchaseItem(long itemId, int price) {
+    public void purchaseItem(long itemId, int price, ShopItemEntity item) {
         shopRepository.purchaseItem(userId, itemId, price, resultCode -> {
             String msg;
             switch (resultCode) {
                 case ShopRepository.RESULT_SUCCESS:
                     msg = "购买成功！";
+                    mainHandler.post(() -> {
+                        message.setValue(msg);
+                        purchaseSuccess.setValue(item);
+                    });
                     break;
                 case ShopRepository.RESULT_INSUFFICIENT_COINS:
                     msg = "金币不足！";
@@ -111,7 +117,9 @@ public class ShopViewModel extends BaseViewModel {
                     msg = "购买失败";
                     break;
             }
-            mainHandler.post(() -> message.setValue(msg));
+            if (resultCode != ShopRepository.RESULT_SUCCESS) {
+                mainHandler.post(() -> message.setValue(msg));
+            }
         });
     }
 
@@ -136,7 +144,16 @@ public class ShopViewModel extends BaseViewModel {
             tx.setTimestamp(System.currentTimeMillis());
             db.rewardTransactionDao().insert(tx);
 
-            mainHandler.post(() -> message.setValue("购买成功！获得 1 张冻结卡"));
+            mainHandler.post(() -> {
+                message.setValue("购买成功！获得 1 张冻结卡");
+                // Create a synthetic ShopItemEntity for the acquire animation
+                ShopItemEntity propItem = new ShopItemEntity();
+                propItem.setType("PROP");
+                propItem.setName("冻结卡");
+                propItem.setEmoji("❄️");
+                propItem.setColorHex("#3B82F6");
+                purchaseSuccess.setValue(propItem);
+            });
         });
     }
 

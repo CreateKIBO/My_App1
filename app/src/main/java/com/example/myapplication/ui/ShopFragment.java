@@ -49,7 +49,7 @@ public class ShopFragment extends Fragment {
                 if (RewardCalculator.TYPE_PROP.equals(item.getType())) {
                     viewModel.purchaseProp(item.getId(), item.getPrice());
                 } else {
-                    viewModel.purchaseItem(item.getId(), item.getPrice());
+                    viewModel.purchaseItem(item.getId(), item.getPrice(), item);
                 }
             }
 
@@ -115,6 +115,23 @@ public class ShopFragment extends Fragment {
         viewModel.getCurrentEquippedId().observe(getViewLifecycleOwner(), id -> adapter.setEquippedId(id));
         viewModel.getMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null) Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+        });
+        viewModel.getPurchaseSuccess().observe(getViewLifecycleOwner(), item -> {
+            if (item == null) return;
+            String typeLabel;
+            switch (item.getType()) {
+                case "AVATAR": typeLabel = "头像已解锁"; break;
+                case "THEME": typeLabel = "主题已解锁"; break;
+                case "PROP": typeLabel = "道具已获得"; break;
+                default: typeLabel = "已获得"; break;
+            }
+            AnimUtils.showItemAcquired(
+                    requireActivity(),
+                    item.getEmoji() != null ? item.getEmoji() : "🎁",
+                    item.getName(),
+                    typeLabel,
+                    item.getColorHex() != null ? item.getColorHex() : "#3B82F6"
+            );
         });
 
         // Playful bounce entrance for shop

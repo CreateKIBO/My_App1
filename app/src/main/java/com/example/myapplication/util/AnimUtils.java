@@ -1,11 +1,18 @@
 package com.example.myapplication.util;
 
+import com.example.myapplication.R;
 import android.animation.ValueAnimator;
+import android.app.Activity;
+import android.graphics.drawable.GradientDrawable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.TextView;
 
 public class AnimUtils {
 
@@ -111,14 +118,7 @@ public class AnimUtils {
                 .start();
     }
 
-    /** Staggered fade-in-scale for arrays — HomeFragment task cards */
-    public static void staggeredFadeInScale(View[] views) {
-        for (int i = 0; i < views.length; i++) {
-            fadeInScale(views[i], i * 100L);
-        }
-    }
-
-    /** Cascade reveal from center — CalendarFragment grid cells */
+    /** Warm fade-in with gentle scale — for HomeFragment stats/header */
     public static void cascadeReveal(View view, long delay) {
         view.setAlpha(0f);
         view.setScaleX(0.85f);
@@ -156,23 +156,7 @@ public class AnimUtils {
                 .start();
     }
 
-    /** Staggered bounce for ShopFragment item cards */
-    public static void staggeredBounceIn(View[] views) {
-        for (int i = 0; i < views.length; i++) {
-            views[i].setScaleX(0.6f);
-            views[i].setScaleY(0.6f);
-            views[i].setAlpha(0f);
-            views[i].animate()
-                    .alpha(1f)
-                    .scaleX(1f).scaleY(1f)
-                    .setDuration(400)
-                    .setStartDelay(i * 70L)
-                    .setInterpolator(new OvershootInterpolator(1.2f))
-                    .start();
-        }
-    }
-
-    /** Slide in from left — ProfileFragment info sections */
+    /** Cascade reveal from center — CalendarFragment grid cells */
     public static void slideInFromLeft(View view, long delay) {
         view.setAlpha(0f);
         view.setTranslationX(-60f);
@@ -242,5 +226,100 @@ public class AnimUtils {
                         view.animate().scaleX(1f).scaleY(1f).setDuration(300)
                                 .setInterpolator(new OvershootInterpolator(1.5f)).start())
                 .start();
+    }
+
+    /**
+     * Show a full-screen "item acquired" animation overlay.
+     * Sequence: overlay fades in → card pops up with overshoot → pause → card shrinks & fades out.
+     *
+     * @param activity  The hosting activity
+     * @param emoji     Item emoji (e.g. "🔥")
+     * @param name      Item name (e.g. "凤凰")
+     * @param desc      One-line description (e.g. "限定头像已解锁")
+     * @param colorHex  Accent color hex (e.g. "#DC2626") for the glow ring
+     */
+    public static void showItemAcquired(Activity activity, String emoji, String name,
+                                         String desc, String colorHex) {
+        ViewGroup root = activity.findViewById(android.R.id.content);
+        FrameLayout overlay = (FrameLayout) LayoutInflater.from(activity)
+                .inflate(R.layout.overlay_item_acquire, root, false);
+
+        TextView tvEmoji = overlay.findViewById(R.id.acquire_emoji);
+        TextView tvName = overlay.findViewById(R.id.acquire_name);
+        TextView tvDesc = overlay.findViewById(R.id.acquire_desc);
+        View glow = overlay.findViewById(R.id.acquire_glow);
+        View card = overlay.findViewById(R.id.acquire_card);
+
+        tvEmoji.setText(emoji);
+        tvName.setText(name);
+        tvDesc.setText(desc);
+
+        // Tint glow ring with accent color
+        try {
+            int color = android.graphics.Color.parseColor(colorHex);
+            GradientDrawable gd = new GradientDrawable();
+            gd.setShape(GradientDrawable.OVAL);
+            gd.setColor(color);
+            gd.setAlpha(51); // 20% opacity
+            glow.setBackground(gd);
+        } catch (Exception ignored) {}
+
+        // Initial state: overlay transparent, card scaled down
+        overlay.setAlpha(0f);
+        card.setScaleX(0.4f);
+        card.setScaleY(0.4f);
+        card.setAlpha(0f);
+
+        root.addView(overlay);
+
+        // Phase 1: Fade in overlay (200ms)
+        overlay.animate()
+                .alpha(1f)
+                .setDuration(200)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> {
+                    // Phase 2: Card pops in with overshoot (400ms)
+                    card.animate()
+                            .alpha(1f)
+                            .scaleX(1f).scaleY(1f)
+                            .setDuration(400)
+                            .setInterpolator(new OvershootInterpolator(1.8f))
+                            .withEndAction(() -> {
+                                // Phase 3: Glow pulse while card is visible
+                                glow.animate()
+                                        .scaleX(1.4f).scaleY(1.4f)
+                                        .alpha(0f)
+                                        .setDuration(600)
+                                        .setInterpolator(new AccelerateInterpolator())
+                                        .start();
+
+                                // Phase 4: After pause, shrink & fade out card (500ms)
+                                card.animate()
+                                        .scaleX(0.3f).scaleY(0.3f)
+                                        .alpha(0f)
+                                        .setDuration(500)
+                                        .setStartDelay(800)
+                                        .setInterpolator(new AccelerateInterpolator())
+                                        .withEndAction(() -> {
+                                            // Phase 5: Fade out overlay & remove
+                                            overlay.animate()
+                                                    .alpha(0f)
+                                                    .setDuration(200)
+                                                    .withEndAction(() -> root.removeView(overlay))
+                                                    .start();
+                                        })
+                                        .start();
+                            })
+                            .start();
+                })
+                .start();
+
+        // Allow tap to dismiss early
+        overlay.setOnClickListener(v -> {
+            overlay.animate().cancel();
+            card.animate().cancel();
+            overlay.animate().alpha(0f).setDuration(150)
+                    .withEndAction(() -> root.removeView(overlay)).start();
+        });
     }
 }

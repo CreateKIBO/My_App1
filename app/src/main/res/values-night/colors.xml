@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- M3 Dark Blue-Indigo Primary Palette -->
-    <color name="md_primary">#B6C1FF</color>
-    <color name="md_on_primary">#08218A</color>
-    <color name="md_primary_container">#2537A0</color>
+    <!-- Dark mode overrides -->
+    <color name="md_primary">#BFC2FF</color>
+    <color name="md_on_primary">#08228A</color>
+    <color name="md_primary_container">#27349B</color>
     <color name="md_on_primary_container">#DBE1FF</color>
-
     <color name="md_secondary">#C4C5DB</color>
-    <color name="md_on_secondary">#2D3042</color>
-    <color name="md_secondary_container">#434659</color>
+    <color name="md_on_secondary">#2D2F42</color>
+    <color name="md_secondary_container">#434559</color>
     <color name="md_on_secondary_container">#E0E1F6</color>
-
-    <color name="md_tertiary">#E5BAD8</color>
-    <color name="md_on_tertiary">#45263E</color>
-    <color name="md_tertiary_container">#5D3C56</color>
-    <color name="md_on_tertiary_container">#FFD7F2</color>
-
     <color name="md_error">#FFB4AB</color>
-    <color name="md_on_error">#690005</color>
-    <color name="md_error_container">#93000A</color>
-    <color name="md_on_error_container">#FFDAD6</color>
-
     <color name="md_background">#1B1B1F</color>
     <color name="md_on_background">#E4E1E6</color>
     <color name="md_surface">#1B1B1F</color>
@@ -30,29 +19,96 @@
     <color name="md_outline">#908F9A</color>
     <color name="md_outline_variant">#45464F</color>
 
-    <!-- App-specific -->
-    <color name="background_light">#121212</color>
-    <color name="card_background">#2C2C2C</color>
-
-    <!-- Category colors (dark mode - lighter for contrast) -->
+    <!-- Category colors (dark mode) -->
     <color name="category_work">#7986CB</color>
-    <color name="category_study">#4DB6AC</color>
-    <color name="category_exercise">#FFB74D</color>
-    <color name="category_personal">#F48FB1</color>
-    <color name="category_other">#90A4AE</color>
+    <color name="category_study">#B39DDB</color>
+    <color name="category_exercise">#66BB6A</color>
+    <color name="category_personal">#FF8A65</color>
+    <color name="category_other">#B0BEC5</color>
 
     <!-- Reward colors -->
-    <color name="coin_gold">#FFD54F</color>
-    <color name="coin_gold_dark">#FFB300</color>
-    <color name="xp_green">#69F0AE</color>
-    <color name="xp_green_dark">#00E676</color>
-    <color name="streak_orange">#FFAB40</color>
+    <color name="coin_gold">#FBBF24</color>
+    <color name="coin_gold_dark">#F59E0B</color>
+    <color name="xp_green">#4ADE80</color>
+    <color name="xp_green_light">#1A2E1A</color>
 
-    <!-- Gradient -->
+    <!-- Streak colors -->
+    <color name="streak_orange">#FB923C</color>
+    <color name="streak_light">#3D2510</color>
+
+    <!-- Gradient colors -->
     <color name="gradient_start">#5C6BC0</color>
     <color name="gradient_end">#283593</color>
 
-    <!-- XP Progress -->
-    <color name="xp_progress_bg">#45464F</color>
-    <color name="xp_progress_fg">#B6C1FF</color>
+    <!-- Card & tag backgrounds -->
+    <color name="background_light">#121212</color>
+    <color name="card_background">#1E1E2E</color>
+    <color name="tag_equipped_text">#BFC2FF</color>
+    <color name="tag_owned_text">#4ADE80</color>
+
+    <!-- Misc -->
+    <color name="divider">#1FE4E1E6</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="text_hint">#6B7280</color>
+    <color name="hero_dark_start">#1E1A2E</color>
+    <color name="hero_dark_end">#16122A</color>
+    <color name="stat_blue">#7EA8F5</color>
+    <color name="stat_blue_light">#1A2340</color>
+    <color name="reward_xp_bg">#1A2E1A</color>
+    <color name="reward_coin_bg">#2E2A1A</color>
+    <color name="reward_streak_bg">#2E231A</color>
+    <color name="reward_task_bg">#1A2330</color>
+    <color name="card_surface">#1E1E2E</color>
+    <color name="profile_bg">#121218</color>
+    <color name="divider_light">#2A2A35</color>
+    <color name="equipped_accent_border">#9D8FFF</color>
+    <color name="change_btn_bg">#1E1A3A</color>
+    <color name="change_btn_text">#9D8FFF</color>
+
+    <!-- Chip filter -->
+    <color name="chip_filter_checked_bg">@color/md_primary</color>
+    <color name="chip_filter_unchecked_bg">@color/md_surface_variant</color>
+    <color name="chip_filter_checked_text">@color/md_on_primary</color>
+    <color name="chip_filter_unchecked_text">@color/md_on_surface_variant</color>
+    <color name="chip_filter_checked_stroke">@color/md_primary</color>
+    <color name="chip_filter_unchecked_stroke">@color/md_outline</color>
+    <color name="reward_level_blue">#7EA8F5</color>
+    <color name="milestone_current_bg">#1A2340</color>
+
+    <!-- Reward icon backgrounds -->
+    <color name="reward_bonus_bg">#2E231A</color>
+
+    <!-- Source dot category colors -->
+    <color name="source_work">#7986CB</color>
+    <color name="source_study">#B39DDB</color>
+    <color name="source_exercise">#66BB6A</color>
+    <color name="source_personal">#FF8A65</color>
+
+    <!-- Stat change indicator -->
+    <color name="stat_change_up">#4ADE80</color>
+    <color name="stat_change_flat">#6B7280</color>
+
+    <!-- Milestone reached accent border -->
+    <color name="milestone_accent_border">#7EA8F5</color>
+
+    <!-- Pill tab colors -->
+    <color name="pill_active_bg">#E4E1E6</color>
+    <color name="pill_inactive_bg">#1E1E2E</color>
+    <color name="pill_inactive_border">#45464F</color>
+
+    <!-- Heatmap level colors (orange shades, dark mode) -->
+    <color name="heatmap_lv0">#2A2A35</color>
+    <color name="heatmap_lv1">#3D2510</color>
+    <color name="heatmap_lv1_text">#FDDCB0</color>
+    <color name="heatmap_lv2">#5A3A18</color>
+    <color name="heatmap_lv3">#7A4E20</color>
+    <color name="heatmap_lv4">#FB923C</color>
+
+    <!-- Milestone tag colors -->
+    <color name="tag_done_bg">#3D2510</color>
+    <color name="tag_done_text">#FB923C</color>
+    <color name="tag_active_bg">#1A2340</color>
+    <color name="tag_active_text">#7EA8F5</color>
+    <color name="tag_locked_bg">#2A2A35</color>
+    <color name="tag_locked_text">#6B7280</color>
 </resources>
